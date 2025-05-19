@@ -17,4 +17,5 @@ public partial class Business
     public List<Review> Reviews { get; set; } = new List<Review>();
     public User User { get; set; } = null!;
     public User? VerifiedByUser { get; set; }
+    public bool IsDeleted { get; set; } = false;
 }
