@@ -38,7 +38,8 @@ namespace Taqyim.Api.Controllers
                 Category = dto.Category,
                 Description = dto.Description,
                 CreatedAt = DateTime.UtcNow,
-                IsDeleted = false
+                IsDeleted = false,
+                Logo =dto.Logo
             };
 
             _context.Businesses.Add(business);
@@ -73,6 +74,7 @@ namespace Taqyim.Api.Controllers
                     b.Category,
                     b.Location,
                     b.Description,
+                    b.Logo,
                     AvgRating = b.Reviews.Any() ? b.Reviews.Average(r => r.Rating) : 0,
                     ReviewsCount = b.Reviews.Count
                 })
@@ -99,6 +101,7 @@ namespace Taqyim.Api.Controllers
                 business.Category,
                 business.Location,
                 business.Description,
+                business.Logo,
                 AvgRating = business.Reviews.Any() ? business.Reviews.Average(r => r.Rating) : 0,
                 ReviewsCount = business.Reviews.Count
             });
@@ -122,7 +125,7 @@ namespace Taqyim.Api.Controllers
             business.Name = dto.Name ?? business.Name;
             business.Category = dto.Category ?? business.Category;
             business.Description = dto.Description ?? business.Description;
-
+            business.Logo = dto.Logo ?? business.Logo;
             await _context.SaveChangesAsync();
             return Ok(new { message = "Business updated." });
         }

@@ -6,6 +6,7 @@ namespace Taqyim.Api.DTOs
         public string? Location { get; set; }
         public string? Category { get; set; }
         public string? Description { get; set; }
+        public string? Logo { get; set; }
     }
 
     public class BusinessUpdateDto
@@ -13,5 +14,6 @@ namespace Taqyim.Api.DTOs
         public string? Name { get; set; }
         public string? Category { get; set; }
         public string? Description { get; set; }
+        public string? Logo { get; set; }
     }
 }

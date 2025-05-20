@@ -12,7 +12,7 @@ using Taqyim.Api.Data;
 namespace Taqyim.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250519222449_InitialSoftDeleteBusiness")]
+    [Migration("20250520083040_InitialSoftDeleteBusiness")]
     partial class InitialSoftDeleteBusiness
     {
         /// <inheritdoc />

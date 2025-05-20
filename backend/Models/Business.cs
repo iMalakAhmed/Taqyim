@@ -18,4 +18,5 @@ public partial class Business
     public User User { get; set; } = null!;
     public User? VerifiedByUser { get; set; }
     public bool IsDeleted { get; set; } = false;
+    public string? Logo { get; set; }
 }
