@@ -10,6 +10,6 @@ public partial class Conversation
     public DateTime? LastMessageAt { get; set; }
     public string? Name { get; set; }
     public bool IsGroup { get; set; }
-    public List<Message> Messages { get; set; } = new List<Message>();
-    public List<User> Users { get; set; } = new List<User>();
+    public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
+    public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

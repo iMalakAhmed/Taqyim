@@ -9,5 +9,5 @@ public partial class Badge
     public string Name { get; set; } = null!;
     public string? Description { get; set; }
     public string? Img { get; set; }
-    public virtual List<UserBadge> UserBadges { get; set; } = new List<UserBadge>();
+    public virtual ICollection<UserBadge> UserBadges { get; set; } = new List<UserBadge>();
 }

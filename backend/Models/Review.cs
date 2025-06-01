@@ -13,9 +13,9 @@ public partial class Review
     public string? Media { get; set; }
     public int Rating { get; set; }
     public DateTime? CreatedAt { get; set; }
-    public Business Business { get; set; } = null!;
-    public List<Comment> Comments { get; set; } = new List<Comment>();
-    public List<Reaction> Reactions { get; set; } = new List<Reaction>();
-    public User Reviewer { get; set; } = null!;
-    public List<Tag> Tags { get; set; } = new List<Tag>();
+    public virtual Business Business { get; set; } = null!;
+    public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
+    public virtual ICollection<Reaction> Reactions { get; set; } = new List<Reaction>();
+    public virtual User Reviewer { get; set; } = null!;
+    public virtual ICollection<Tag> Tags { get; set; } = new List<Tag>();
 }
