@@ -8,7 +8,8 @@ public class UserBadgeDTO
     public int UserId { get; set; }
     public int BadgeId { get; set; }
     public DateTime AwardedAt { get; set; }
-    public BadgeDTO Badge { get; set; } = null!;
+    public required BadgeDTO Badge { get; set; }
+    public required UserDTO User { get; set; }
 }
 
 public class AwardBadgeDTO

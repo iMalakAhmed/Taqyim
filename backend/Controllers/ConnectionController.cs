@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using Taqyim.Api.Data;
 using Taqyim.Api.DTOs;
 using Taqyim.Api.Models;
@@ -8,7 +9,7 @@ using Taqyim.Api.Models;
 namespace Taqyim.Api.Controllers;
 
 [ApiController]
-[Route("api/users")]
+[Route("api/[controller]")]
 public class ConnectionController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
@@ -19,149 +20,136 @@ public class ConnectionController : ControllerBase
     }
 
     [Authorize]
-    [HttpPost("{userId}/follow")]
-    public async Task<ActionResult<ConnectionDTO>> FollowUser(int userId, CreateConnectionDTO createConnectionDTO)
+    [HttpPost("follow/{userId}")]
+    public async Task<IActionResult> FollowUser(int userId)
     {
-        // Get the current user's ID from the token
-        var currentUserId = int.Parse(User.FindFirst("sub")?.Value ?? "0");
-        if (currentUserId == 0)
-        {
-            return Unauthorized();
-        }
+        var followerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        
+        if (followerId == userId)
+            return BadRequest("You cannot follow yourself");
 
-        // Check if trying to follow self
-        if (currentUserId == createConnectionDTO.FollowingId)
-        {
-            return BadRequest("Cannot follow yourself");
-        }
-
-        // Check if user exists
-        var followingUser = await _context.Users.FindAsync(createConnectionDTO.FollowingId);
-        if (followingUser == null)
-        {
-            return NotFound("User to follow not found");
-        }
-
-        // Check if already following
         var existingConnection = await _context.Connections
-            .FirstOrDefaultAsync(c => c.FollowerId == currentUserId && c.FollowingId == createConnectionDTO.FollowingId);
+            .FirstOrDefaultAsync(c => c.FollowerId == followerId && c.FollowingId == userId);
 
         if (existingConnection != null)
-        {
-            return BadRequest("Already following this user");
-        }
+            return BadRequest("You are already following this user");
 
         var connection = new Connection
         {
-            FollowerId = currentUserId,
-            FollowingId = createConnectionDTO.FollowingId,
+            FollowerId = followerId,
+            FollowingId = userId,
             CreatedAt = DateTime.UtcNow
         };
 
         _context.Connections.Add(connection);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetFollowers), new { userId = currentUserId }, new ConnectionDTO
-        {
-            ConnectionId = connection.ConnectionId,
-            FollowerId = connection.FollowerId,
-            FollowingId = connection.FollowingId,
-            CreatedAt = connection.CreatedAt,
-            Follower = new UserDTO
-            {
-                Id = connection.Follower.Id,
-                Email = connection.Follower.Email,
-                FirstName = connection.Follower.FirstName,
-                LastName = connection.Follower.LastName,
-                Type = connection.Follower.Type,
-                ProfilePic = connection.Follower.ProfilePic,
-                Bio = connection.Follower.Bio,
-                CreatedAt = connection.Follower.CreatedAt,
-                ReputationPoints = connection.Follower.ReputationPoints
-            },
-            Following = new UserDTO
-            {
-                Id = connection.Following.Id,
-                Email = connection.Following.Email,
-                FirstName = connection.Following.FirstName,
-                LastName = connection.Following.LastName,
-                Type = connection.Following.Type,
-                ProfilePic = connection.Following.ProfilePic,
-                Bio = connection.Following.Bio,
-                CreatedAt = connection.Following.CreatedAt,
-                ReputationPoints = connection.Following.ReputationPoints
-            }
-        });
+        return Ok(new { message = "User followed successfully" });
     }
 
     [Authorize]
-    [HttpDelete("{userId}/unfollow")]
-    public async Task<IActionResult> UnfollowUser(int userId, [FromQuery] int followingId)
+    [HttpDelete("unfollow/{userId}")]
+    public async Task<IActionResult> UnfollowUser(int userId)
     {
-        // Get the current user's ID from the token
-        var currentUserId = int.Parse(User.FindFirst("sub")?.Value ?? "0");
-        if (currentUserId == 0)
-        {
-            return Unauthorized();
-        }
-
+        var followerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        
         var connection = await _context.Connections
-            .FirstOrDefaultAsync(c => c.FollowerId == currentUserId && c.FollowingId == followingId);
+            .FirstOrDefaultAsync(c => c.FollowerId == followerId && c.FollowingId == userId);
 
         if (connection == null)
-        {
             return NotFound("Connection not found");
-        }
 
         _context.Connections.Remove(connection);
         await _context.SaveChangesAsync();
 
-        return NoContent();
+        return Ok(new { message = "User unfollowed successfully" });
     }
 
-    [HttpGet("{userId}/followers")]
-    public async Task<ActionResult<IEnumerable<UserDTO>>> GetFollowers(int userId)
+    [HttpGet("followers/{userId}")]
+    public async Task<ActionResult<IEnumerable<ConnectionDTO>>> GetFollowers(int userId)
     {
         var followers = await _context.Connections
-            .Where(c => c.FollowingId == userId)
             .Include(c => c.Follower)
-            .Select(c => new UserDTO
+            .Where(c => c.FollowingId == userId)
+            .Select(c => new ConnectionDTO
             {
-                Id = c.Follower.Id,
-                Email = c.Follower.Email,
-                FirstName = c.Follower.FirstName,
-                LastName = c.Follower.LastName,
-                Type = c.Follower.Type,
-                ProfilePic = c.Follower.ProfilePic,
-                Bio = c.Follower.Bio,
-                CreatedAt = c.Follower.CreatedAt,
-                ReputationPoints = c.Follower.ReputationPoints
+                ConnectionId = c.ConnectionId,
+                FollowerId = c.FollowerId,
+                FollowingId = c.FollowingId,
+                CreatedAt = c.CreatedAt,
+                Follower = new UserDTO
+                {
+                    Id = c.Follower.Id,
+                    Email = c.Follower.Email,
+                    FirstName = c.Follower.FirstName,
+                    LastName = c.Follower.LastName,
+                    Type = c.Follower.Type,
+                    IsVerified = c.Follower.IsVerified,
+                    ProfilePic = c.Follower.ProfilePic,
+                    Bio = c.Follower.Bio,
+                    CreatedAt = c.Follower.CreatedAt,
+                    ReputationPoints = c.Follower.ReputationPoints
+                },
+                Following = new UserDTO
+                {
+                    Id = c.Following.Id,
+                    Email = c.Following.Email,
+                    FirstName = c.Following.FirstName,
+                    LastName = c.Following.LastName,
+                    Type = c.Following.Type,
+                    IsVerified = c.Following.IsVerified,
+                    ProfilePic = c.Following.ProfilePic,
+                    Bio = c.Following.Bio,
+                    CreatedAt = c.Following.CreatedAt,
+                    ReputationPoints = c.Following.ReputationPoints
+                }
             })
             .ToListAsync();
 
-        return Ok(followers);
+        return followers;
     }
 
-    [HttpGet("{userId}/following")]
-    public async Task<ActionResult<IEnumerable<UserDTO>>> GetFollowing(int userId)
+    [HttpGet("following/{userId}")]
+    public async Task<ActionResult<IEnumerable<ConnectionDTO>>> GetFollowing(int userId)
     {
         var following = await _context.Connections
-            .Where(c => c.FollowerId == userId)
             .Include(c => c.Following)
-            .Select(c => new UserDTO
+            .Where(c => c.FollowerId == userId)
+            .Select(c => new ConnectionDTO
             {
-                Id = c.Following.Id,
-                Email = c.Following.Email,
-                FirstName = c.Following.FirstName,
-                LastName = c.Following.LastName,
-                Type = c.Following.Type,
-                ProfilePic = c.Following.ProfilePic,
-                Bio = c.Following.Bio,
-                CreatedAt = c.Following.CreatedAt,
-                ReputationPoints = c.Following.ReputationPoints
+                ConnectionId = c.ConnectionId,
+                FollowerId = c.FollowerId,
+                FollowingId = c.FollowingId,
+                CreatedAt = c.CreatedAt,
+                Follower = new UserDTO
+                {
+                    Id = c.Follower.Id,
+                    Email = c.Follower.Email,
+                    FirstName = c.Follower.FirstName,
+                    LastName = c.Follower.LastName,
+                    Type = c.Follower.Type,
+                    IsVerified = c.Follower.IsVerified,
+                    ProfilePic = c.Follower.ProfilePic,
+                    Bio = c.Follower.Bio,
+                    CreatedAt = c.Follower.CreatedAt,
+                    ReputationPoints = c.Follower.ReputationPoints
+                },
+                Following = new UserDTO
+                {
+                    Id = c.Following.Id,
+                    Email = c.Following.Email,
+                    FirstName = c.Following.FirstName,
+                    LastName = c.Following.LastName,
+                    Type = c.Following.Type,
+                    IsVerified = c.Following.IsVerified,
+                    ProfilePic = c.Following.ProfilePic,
+                    Bio = c.Following.Bio,
+                    CreatedAt = c.Following.CreatedAt,
+                    ReputationPoints = c.Following.ReputationPoints
+                }
             })
             .ToListAsync();
 
-        return Ok(following);
+        return following;
     }
 } 

@@ -2,9 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Taqyim.Api.Data;
-using Taqyim.Api.DTOs;
 using Taqyim.Api.Models;
-using Taqyim.Api.Models.DTOs;
+using Taqyim.Api.DTOs;
 
 namespace Taqyim.Api.Controllers;
 
@@ -22,12 +21,11 @@ public class UserBadgeController : ControllerBase
     [HttpGet("user/{userId}")]
     public async Task<ActionResult<IEnumerable<UserBadgeDTO>>> GetUserBadges(int userId)
     {
-        var userBadges = await _context.UserBadges
+        return await _context.UserBadges
             .Where(ub => ub.UserId == userId)
-            .Include(ub => ub.Badge)
             .Select(ub => new UserBadgeDTO
             {
-                Id = ub.Id,
+                UserBadgeId = ub.UserBadgeId,
                 UserId = ub.UserId,
                 BadgeId = ub.BadgeId,
                 AwardedAt = ub.AwardedAt,
@@ -36,37 +34,46 @@ public class UserBadgeController : ControllerBase
                     BadgeId = ub.Badge.BadgeId,
                     Name = ub.Badge.Name,
                     Description = ub.Badge.Description,
-                    Img = ub.Badge.Img
+                    Icon = ub.Badge.Icon,
+                    CreatedAt = ub.Badge.CreatedAt
+                },
+                User = new UserDTO
+                {
+                    Id = ub.User.Id,
+                    Email = ub.User.Email,
+                    FirstName = ub.User.FirstName,
+                    LastName = ub.User.LastName,
+                    Type = ub.User.Type,
+                    IsVerified = ub.User.IsVerified,
+                    ProfilePic = ub.User.ProfilePic,
+                    Bio = ub.User.Bio,
+                    CreatedAt = ub.User.CreatedAt,
+                    ReputationPoints = ub.User.ReputationPoints
                 }
             })
             .ToListAsync();
-
-        return Ok(userBadges);
     }
 
     [Authorize]
-    [HttpPost("award")]
+    [HttpPost]
     public async Task<ActionResult<UserBadgeDTO>> AwardBadge(AwardBadgeDTO awardBadgeDTO)
     {
-        // Check if user exists
         var user = await _context.Users.FindAsync(awardBadgeDTO.UserId);
         if (user == null)
         {
             return NotFound("User not found");
         }
 
-        // Check if badge exists
         var badge = await _context.Badges.FindAsync(awardBadgeDTO.BadgeId);
         if (badge == null)
         {
             return NotFound("Badge not found");
         }
 
-        // Check if user already has this badge
-        var existingBadge = await _context.UserBadges
+        var existingUserBadge = await _context.UserBadges
             .FirstOrDefaultAsync(ub => ub.UserId == awardBadgeDTO.UserId && ub.BadgeId == awardBadgeDTO.BadgeId);
 
-        if (existingBadge != null)
+        if (existingUserBadge != null)
         {
             return BadRequest("User already has this badge");
         }
@@ -83,7 +90,7 @@ public class UserBadgeController : ControllerBase
 
         return CreatedAtAction(nameof(GetUserBadges), new { userId = userBadge.UserId }, new UserBadgeDTO
         {
-            Id = userBadge.Id,
+            UserBadgeId = userBadge.UserBadgeId,
             UserId = userBadge.UserId,
             BadgeId = userBadge.BadgeId,
             AwardedAt = userBadge.AwardedAt,
@@ -92,7 +99,21 @@ public class UserBadgeController : ControllerBase
                 BadgeId = badge.BadgeId,
                 Name = badge.Name,
                 Description = badge.Description,
-                Img = badge.Img
+                Icon = badge.Icon,
+                CreatedAt = badge.CreatedAt
+            },
+            User = new UserDTO
+            {
+                Id = user.Id,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Type = user.Type,
+                IsVerified = user.IsVerified,
+                ProfilePic = user.ProfilePic,
+                Bio = user.Bio,
+                CreatedAt = user.CreatedAt,
+                ReputationPoints = user.ReputationPoints
             }
         });
     }
@@ -109,7 +130,6 @@ public class UserBadgeController : ControllerBase
 
         _context.UserBadges.Remove(userBadge);
         await _context.SaveChangesAsync();
-
         return NoContent();
     }
 } 

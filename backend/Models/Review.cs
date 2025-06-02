@@ -11,7 +11,9 @@ public partial class Review
     public int Rating { get; set; }
     public string Comment { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
-    public virtual Business Business { get; set; } = null!;
-    public virtual ICollection<ReviewImage> ReviewImages { get; set; } = new List<ReviewImage>();
+
     public virtual User User { get; set; } = null!;
+    public virtual Business Business { get; set; } = null!;
+    // Temporarily commented out ReviewImage reference
+    //public virtual ICollection<ReviewImage> ReviewImages { get; set; } = new List<ReviewImage>();
 }

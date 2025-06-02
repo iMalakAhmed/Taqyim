@@ -1,0 +1,166 @@
+### Variables
+@baseUrl = https://localhost:7298
+@token = your_jwt_token_here
+
+### Authentication Tests
+
+# Register new user
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+    "email": "test@example.com",
+    "password": "Test123!",
+    "firstName": "Test",
+    "lastName": "User"
+}
+
+### Login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "test@example.com",
+    "password": "Test123!"
+}
+
+### Get current user
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{token}}
+
+### User Management Tests
+
+# Get all users (Admin only)
+GET {{baseUrl}}/api/users
+Authorization: Bearer {{token}}
+
+# Get user by ID
+GET {{baseUrl}}/api/users/1
+Authorization: Bearer {{token}}
+
+# Update user
+PUT {{baseUrl}}/api/users/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "firstName": "Updated",
+    "lastName": "User",
+    "bio": "Updated bio"
+}
+
+### Business Management Tests
+
+# Create business
+POST {{baseUrl}}/api/businesses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "name": "Test Business",
+    "category": "Restaurant",
+    "description": "A test business",
+    "location": "Test Location"
+}
+
+# Get all businesses
+GET {{baseUrl}}/api/businesses
+
+# Get business by ID
+GET {{baseUrl}}/api/businesses/1
+
+# Update business
+PUT {{baseUrl}}/api/businesses/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "name": "Updated Business",
+    "category": "Updated Category",
+    "description": "Updated description",
+    "location": "Updated location"
+}
+
+### Business Location Tests
+
+# Create business location
+POST {{baseUrl}}/api/businesslocations
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "businessId": 1,
+    "address": "123 Test St",
+    "latitude": 40.7128,
+    "longitude": -74.0060,
+    "label": "Main Location"
+}
+
+# Get all business locations
+GET {{baseUrl}}/api/businesslocations
+
+### Badge Tests
+
+# Create badge
+POST {{baseUrl}}/api/badges
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "name": "Test Badge",
+    "description": "A test badge",
+    "icon": "test-icon.png"
+}
+
+# Get all badges
+GET {{baseUrl}}/api/badges
+
+# Get badge by ID
+GET {{baseUrl}}/api/badges/1
+
+### User Badge Tests
+
+# Award badge to user
+POST {{baseUrl}}/api/userbadge/award
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "userId": 1,
+    "badgeId": 1
+}
+
+# Get user badges
+GET {{baseUrl}}/api/userbadge/user/1
+
+### Connection Tests
+
+# Follow user
+POST {{baseUrl}}/api/users/2/follow
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "followingId": 2
+}
+
+# Get followers
+GET {{baseUrl}}/api/users/1/followers
+
+# Get following
+GET {{baseUrl}}/api/users/1/following
+
+# Unfollow user
+DELETE {{baseUrl}}/api/users/1/unfollow?followingId=2
+Authorization: Bearer {{token}}
+
+### Search Tests
+
+# Search businesses
+GET {{baseUrl}}/api/search/businesses?query=test&category=Restaurant
+
+# Search users
+GET {{baseUrl}}/api/search/users?query=test&type=User
+
+# Search reviews
+GET {{baseUrl}}/api/search/reviews?query=test&minRating=4&maxRating=5 

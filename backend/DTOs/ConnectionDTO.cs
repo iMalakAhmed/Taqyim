@@ -8,8 +8,8 @@ public class ConnectionDTO
     public int FollowerId { get; set; }
     public int FollowingId { get; set; }
     public DateTime CreatedAt { get; set; }
-    public UserDTO Follower { get; set; } = null!;
-    public UserDTO Following { get; set; } = null!;
+    public required UserDTO Follower { get; set; }
+    public required UserDTO Following { get; set; }
 }
 
 public class CreateConnectionDTO

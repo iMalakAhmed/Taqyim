@@ -61,20 +61,20 @@ namespace Taqyim.Api.Data
                     .HasForeignKey(d => d.BusinessId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
-            modelBuilder.Entity<Review>(entity =>
-            {
-                entity.HasKey(e => e.ReviewId);
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.User)
+                .WithMany(u => u.Reviews)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne(d => d.Reviewer)
-                    .WithMany(p => p.Reviews)
-                    .HasForeignKey(d => d.ReviewerId)
-                    .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Business)
+                .WithMany(b => b.Reviews)
+                .HasForeignKey(r => r.BusinessId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasOne(d => d.Business)
-                    .WithMany(p => p.Reviews)
-                    .HasForeignKey(d => d.BusinessId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
+            // Temporarily commented out all review-related configurations
+            /*
             modelBuilder.Entity<Comment>(entity =>
             {
                 entity.HasKey(e => e.CommentId);
@@ -89,6 +89,33 @@ namespace Taqyim.Api.Data
                     .HasForeignKey(d => d.ReviewId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+
+            modelBuilder.Entity<Reaction>(entity =>
+            {
+                entity.HasKey(e => e.ReactionId);
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Reactions)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(d => d.Review)
+                    .WithMany(p => p.Reactions)
+                    .HasForeignKey(d => d.ReviewId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Tag>(entity =>
+            {
+                entity.HasKey(e => e.TagId);
+                entity.Property(e => e.TagType).IsRequired();
+
+                entity.HasOne(d => d.Review)
+                    .WithMany(p => p.Tags)
+                    .HasForeignKey(d => d.ReviewId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+            */
             modelBuilder.Entity<Connection>(entity =>
             {
                 entity.HasKey(e => e.ConnectionId);
@@ -116,20 +143,6 @@ namespace Taqyim.Api.Data
                     .WithMany(p => p.NotificationSenders)
                     .HasForeignKey(d => d.SenderId)
                     .OnDelete(DeleteBehavior.SetNull);
-            });
-            modelBuilder.Entity<Reaction>(entity =>
-            {
-                entity.HasKey(e => e.ReactionId);
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.Reactions)
-                    .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.Restrict);
-
-                entity.HasOne(d => d.Review)
-                    .WithMany(p => p.Reactions)
-                    .HasForeignKey(d => d.ReviewId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
             modelBuilder.Entity<Conversation>(entity =>
             {
@@ -169,16 +182,6 @@ namespace Taqyim.Api.Data
                 entity.HasOne(d => d.Badge)
                     .WithMany(p => p.UserBadges)
                     .HasForeignKey(d => d.BadgeId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
-            modelBuilder.Entity<Tag>(entity =>
-            {
-                entity.HasKey(e => e.TagId);
-                entity.Property(e => e.TagType).IsRequired();
-
-                entity.HasOne(d => d.Review)
-                    .WithMany(p => p.Tags)
-                    .HasForeignKey(d => d.ReviewId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
         }

@@ -30,6 +30,7 @@ public class User
     public string? Bio { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public int ReputationPoints { get; set; }
+    public bool IsDeleted { get; set; }
     public virtual User? VerifiedByUser { get; set; }
     public virtual ICollection<User> VerifiedBusinesses { get; set; } = new List<User>();
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
@@ -42,4 +43,8 @@ public class User
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
     public virtual ICollection<UserBadge> UserBadges { get; set; } = new List<UserBadge>();
     public virtual ICollection<Conversation> Conversations { get; set; } = new List<Conversation>();
+    public virtual ICollection<Business> BusinessUsers { get; set; } = new List<Business>();
+    public virtual ICollection<Business> BusinessVerifiedByUsers { get; set; } = new List<Business>();
+    public virtual ICollection<Connection> Connections { get; set; } = new List<Connection>();
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 }

@@ -5,6 +5,7 @@ namespace Taqyim.Api.Models;
 
 public partial class UserBadge
 {
+    public int Id { get; set; }
     public int UserBadgeId { get; set; }
     public int UserId { get; set; }
     public int BadgeId { get; set; }

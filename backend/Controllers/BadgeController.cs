@@ -2,9 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Taqyim.Api.Data;
-using Taqyim.Api.DTOs;
 using Taqyim.Api.Models;
-using Taqyim.Api.Models.DTOs;
+using Taqyim.Api.DTOs;
 
 namespace Taqyim.Api.Controllers;
 
