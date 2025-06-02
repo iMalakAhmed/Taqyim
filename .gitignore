@@ -482,3 +482,25 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+
+# Node modules
+/frontend/node_modules/
+
+# Environment files
+/frontend/.env
+/frontend/.env.local
+/frontend/.env.*.local
+
+# Logs
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+
+# Ignore Next.js build output in frontend
+/frontend/.next/
+/frontend/out/
+
+
+
+
