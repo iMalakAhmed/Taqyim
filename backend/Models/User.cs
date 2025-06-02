@@ -15,8 +15,8 @@ public class User
     [Required]
     public string PasswordHash { get; set; } = null!;
 
-    public string FirstName { get; set; } = null!;
-    public string LastName { get; set; } = null!;
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
     public string Type { get; set; } = "User";
     public string? BusinessName { get; set; }
     public string? BusinessCategory { get; set; }
@@ -27,7 +27,7 @@ public class User
     public bool IsVerified { get; set; }
     public int? VerifiedByUserId { get; set; }
     public string? ProfilePic { get; set; }
-    public string? Bio { get; set; }
+    public string? Bio { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public int ReputationPoints { get; set; }
     public virtual User? VerifiedByUser { get; set; }
