@@ -31,6 +31,7 @@ namespace Taqyim.Api.Services
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.GivenName, user.FirstName),
                 new Claim(ClaimTypes.Surname, user.LastName),
+                new Claim(ClaimTypes.Role, user.Type),
                 new Claim("UserType", user.Type)
             };
 
