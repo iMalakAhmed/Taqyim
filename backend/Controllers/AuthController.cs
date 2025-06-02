@@ -48,8 +48,8 @@ namespace Taqyim.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var user=await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
-            if (user==null||!VerifyPassword(request.Password, user.PasswordHash))
+            var user=await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email && u.Type != "Deleted");
+            if (user == null || !VerifyPassword(request.Password, user.PasswordHash))
             {
                 return Unauthorized("Invalid email or password");
             }
