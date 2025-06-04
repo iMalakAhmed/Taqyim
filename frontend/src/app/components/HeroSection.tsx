@@ -95,7 +95,7 @@ export default function HeroSection() {
           <br />
           No subscription required — just your voice.
         </p>
-        <Button size="xl" className="w-full">
+        <Button size="xl" className="w-full" onClick={() => router.push('/auth/signup')}>
           SIGN UP
         </Button>
       </motion.section>

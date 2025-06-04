@@ -23,7 +23,8 @@ builder.Services.AddCors(options =>
     {
         builder.WithOrigins(
             "http://localhost:3000",  // Development
-            "https://your-production-domain.com"  // Production - Update this with your actual domain
+            "http://localhost:3001",  // Allow frontend running on http://localhost:3001
+            "https://localhost:3001"  // Production - Update this with your actual domain
         )
         .AllowAnyMethod()
         .AllowAnyHeader()
