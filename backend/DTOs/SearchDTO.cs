@@ -13,9 +13,7 @@ public class SearchBusinessDTO
     public double? Rating { get; set; }
     public double? PriceRange { get; set; }
     public DateTime CreatedAt { get; set; }
-    // Temporarily commented out review-related properties
-    //public double Rating { get; set; }
-    //public int ReviewCount { get; set; }
+    public int ReviewCount { get; set; }
 }
 
 public class SearchUserDTO
@@ -28,18 +26,22 @@ public class SearchUserDTO
     public string? ProfilePic { get; set; }
 }
 
-// Temporarily commented out review-related DTO
-/*
 public class SearchReviewDTO
 {
     public int ReviewId { get; set; }
     public string Comment { get; set; } = string.Empty;
     public int Rating { get; set; }
     public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
     public string BusinessName { get; set; } = string.Empty;
+    public int BusinessId { get; set; }
     public string UserName { get; set; } = string.Empty;
+    public int UserId { get; set; }
+    public string? UserProfilePic { get; set; }
+    public int CommentsCount { get; set; }
+    public int ReactionsCount { get; set; }
+    public List<string> Tags { get; set; } = new();
 }
-*/
 
 public class SearchResultDTO
 {

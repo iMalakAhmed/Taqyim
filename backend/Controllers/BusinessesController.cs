@@ -54,7 +54,8 @@ namespace Taqyim.Api.Controllers
         public async Task<IActionResult> GetBusinesses([FromQuery] string? name, [FromQuery] string? category, [FromQuery] bool includeDeleted = false)
         {
             var query = _context.Businesses
-                //.Include(b => b.Reviews) // Temporarily commented out review functionality
+                .Include(b => b.Reviews)
+                    .ThenInclude(r => r.User)
                 .Include(b => b.BusinessLocations)
                 .AsQueryable();
 
@@ -76,9 +77,22 @@ namespace Taqyim.Api.Controllers
                     b.Location,
                     b.Description,
                     b.Logo,
-                    // Temporarily commented out review-related properties
-                    //AvgRating = b.Reviews.Any() ? b.Reviews.Average(r => r.Rating) : 0,
-                    //ReviewsCount = b.Reviews.Count
+                    AvgRating = b.Reviews.Any() ? b.Reviews.Average(r => r.Rating) : 0,
+                    ReviewsCount = b.Reviews.Count,
+                    Reviews = b.Reviews.Select(r => new
+                    {
+                        r.ReviewId,
+                        r.Rating,
+                        r.Comment,
+                        r.CreatedAt,
+                        User = new
+                        {
+                            r.User.UserId,
+                            r.User.FirstName,
+                            r.User.LastName,
+                            r.User.ProfilePic
+                        }
+                    }).ToList()
                 })
                 .ToListAsync();
 
@@ -90,7 +104,9 @@ namespace Taqyim.Api.Controllers
         public async Task<IActionResult> GetBusinessById(int id)
         {
             var business = await _context.Businesses
-                //.Include(b => b.Reviews) // Temporarily commented out review functionality
+                .Include(b => b.Reviews)
+                    .ThenInclude(r => r.User)
+                .Include(b => b.BusinessLocations)
                 .FirstOrDefaultAsync(b => b.BusinessId == id && !b.IsDeleted);
 
             if (business == null)
@@ -104,9 +120,22 @@ namespace Taqyim.Api.Controllers
                 business.Location,
                 business.Description,
                 business.Logo,
-                // Temporarily commented out review-related properties
-                //AvgRating = business.Reviews.Any() ? business.Reviews.Average(r => r.Rating) : 0,
-                //ReviewsCount = business.Reviews.Count
+                AvgRating = business.Reviews.Any() ? business.Reviews.Average(r => r.Rating) : 0,
+                ReviewsCount = business.Reviews.Count,
+                Reviews = business.Reviews.Select(r => new
+                {
+                    r.ReviewId,
+                    r.Rating,
+                    r.Comment,
+                    r.CreatedAt,
+                    User = new
+                    {
+                        r.User.UserId,
+                        r.User.FirstName,
+                        r.User.LastName,
+                        r.User.ProfilePic
+                    }
+                }).ToList()
             });
         }
 

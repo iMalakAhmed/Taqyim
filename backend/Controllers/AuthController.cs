@@ -62,14 +62,15 @@ namespace Taqyim.Api.Controllers
         public async Task<IActionResult> GetCurrentUser()
         {
             var userId=int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-            var user=await _context.Users.FindAsync(userId);
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.UserId == userId);
             
             if (user==null)
                 return NotFound();
 
             return Ok(new
             {
-                user.Id,
+                user.UserId,
                 user.Email,
                 user.FirstName,
                 user.LastName,

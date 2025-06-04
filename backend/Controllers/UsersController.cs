@@ -27,7 +27,7 @@ namespace Taqyim.Api.Controllers
                 .Where(u => u.Type != "Deleted") 
                 .Select(u => new
                 {
-                    u.Id,
+                    u.UserId,
                     u.Email,
                     u.FirstName,
                     u.LastName,
@@ -45,49 +45,50 @@ namespace Taqyim.Api.Controllers
         // GET: /api/users/{id}
         [Authorize]
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUser(int id)
+        public async Task<ActionResult<UserDTO>> GetUser(int id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null || user.Type == "Deleted")
-                return NotFound();
+            var user = await _context.Users
+                .Include(u => u.BusinessUsers)
+                .FirstOrDefaultAsync(u => u.UserId == id);
 
-            return Ok(new
+            if (user == null)
             {
-                user.Id,
-                user.Email,
-                user.FirstName,
-                user.LastName,
-                user.Type,
-                user.ProfilePic,
-                user.Bio,
-                user.ReputationPoints,
-                user.CreatedAt
-            });
+                return NotFound();
+            }
+
+            return new UserDTO
+            {
+                UserId = user.UserId,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Type = user.Type,
+                IsVerified = user.IsVerified,
+                ProfilePic = user.ProfilePic,
+                Bio = user.Bio,
+                CreatedAt = user.CreatedAt,
+                ReputationPoints = user.ReputationPoints
+            };
         }
 
         // PUT: /api/users/{id}
         [Authorize]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserDto dto)
+        public async Task<IActionResult> UpdateUser(int id, UpdateUserDTO updateUserDto)
         {
             var user = await _context.Users.FindAsync(id);
-            if (user == null || user.Type == "Deleted")
+            if (user == null)
+            {
                 return NotFound();
+            }
 
-            var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var isAdmin = User.IsInRole("Admin");
-
-            if (user.Id != currentUserId && !isAdmin)
-                return Forbid();
-
-            user.FirstName = dto.FirstName ?? user.FirstName;
-            user.LastName = dto.LastName ?? user.LastName;
-            user.Bio = dto.Bio ?? user.Bio;
-            user.ProfilePic = dto.ProfilePic ?? user.ProfilePic;
+            user.FirstName = updateUserDto.FirstName;
+            user.LastName = updateUserDto.LastName;
+            user.Bio = updateUserDto.Bio;
+            user.ProfilePic = updateUserDto.ProfilePic;
 
             await _context.SaveChangesAsync();
-
-            return Ok(new { message = "User updated successfully." });
+            return NoContent();
         }
 
         // DELETE: /api/users/{id}
@@ -96,13 +97,15 @@ namespace Taqyim.Api.Controllers
         public async Task<IActionResult> DeleteUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
-            if (user == null || user.Type == "Deleted")
+            if (user == null)
+            {
                 return NotFound();
+            }
 
             var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var isAdmin = User.IsInRole("Admin");
 
-            if (user.Id != currentUserId && !isAdmin)
+            if (user.UserId != currentUserId && !isAdmin)
                 return Forbid();
 
             user.Type = "Deleted"; // Mark as deleted

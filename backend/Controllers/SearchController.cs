@@ -49,7 +49,7 @@ public class SearchController : ControllerBase
                 CreatedAt = b.CreatedAt,
                 User = new UserDTO
                 {
-                    Id = b.User.Id,
+                    UserId = b.UserId,
                     Email = b.User.Email,
                     FirstName = b.User.FirstName,
                     LastName = b.User.LastName,
@@ -62,7 +62,7 @@ public class SearchController : ControllerBase
                 },
                 VerifiedByUser = b.VerifiedByUser != null ? new UserDTO
                 {
-                    Id = b.VerifiedByUser.Id,
+                    UserId = b.VerifiedByUser.UserId,
                     Email = b.VerifiedByUser.Email,
                     FirstName = b.VerifiedByUser.FirstName,
                     LastName = b.VerifiedByUser.LastName,
@@ -94,11 +94,16 @@ public class SearchController : ControllerBase
             ))
             .Select(u => new UserDTO
             {
-                Id = u.Id,
+                UserId = u.UserId,
                 Email = u.Email,
                 FirstName = u.FirstName,
                 LastName = u.LastName,
-                Type = u.Type
+                Type = u.Type,
+                IsVerified = u.IsVerified,
+                ProfilePic = u.ProfilePic,
+                Bio = u.Bio,
+                CreatedAt = u.CreatedAt,
+                ReputationPoints = u.ReputationPoints
             })
             .ToListAsync();
 
@@ -182,7 +187,7 @@ public class SearchController : ControllerBase
         var results = await users
             .Select(u => new SearchUserDTO
             {
-                UserId = u.Id,
+                UserId = u.UserId,
                 FirstName = u.FirstName,
                 LastName = u.LastName,
                 Email = u.Email,
@@ -194,23 +199,29 @@ public class SearchController : ControllerBase
         return Ok(results);
     }
 
-    // Temporarily commented out review search endpoint
-    /*
     [HttpGet("reviews")]
     public async Task<ActionResult<IEnumerable<SearchReviewDTO>>> SearchReviews(
         [FromQuery] string? query,
         [FromQuery] int? minRating,
-        [FromQuery] int? maxRating)
+        [FromQuery] int? maxRating,
+        [FromQuery] string? businessName,
+        [FromQuery] string? userName,
+        [FromQuery] DateTime? fromDate,
+        [FromQuery] DateTime? toDate)
     {
         var reviews = _context.Reviews
             .Include(r => r.Business)
             .Include(r => r.User)
+            .Include(r => r.Comments)
+            .Include(r => r.Reactions)
+            .Include(r => r.Tags)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(query))
         {
             reviews = reviews.Where(r => 
-                r.Comment.Contains(query));
+                r.Comment.Contains(query) ||
+                r.Tags.Any(t => t.TagType.Contains(query)));
         }
 
         if (minRating.HasValue)
@@ -223,6 +234,28 @@ public class SearchController : ControllerBase
             reviews = reviews.Where(r => r.Rating <= maxRating.Value);
         }
 
+        if (!string.IsNullOrWhiteSpace(businessName))
+        {
+            reviews = reviews.Where(r => r.Business.Name.Contains(businessName));
+        }
+
+        if (!string.IsNullOrWhiteSpace(userName))
+        {
+            reviews = reviews.Where(r => 
+                r.User.FirstName.Contains(userName) || 
+                r.User.LastName.Contains(userName));
+        }
+
+        if (fromDate.HasValue)
+        {
+            reviews = reviews.Where(r => r.CreatedAt >= fromDate.Value);
+        }
+
+        if (toDate.HasValue)
+        {
+            reviews = reviews.Where(r => r.CreatedAt <= toDate.Value);
+        }
+
         var results = await reviews
             .Select(r => new SearchReviewDTO
             {
@@ -230,14 +263,20 @@ public class SearchController : ControllerBase
                 Comment = r.Comment,
                 Rating = r.Rating,
                 CreatedAt = r.CreatedAt,
+                UpdatedAt = r.UpdatedAt,
                 BusinessName = r.Business.Name,
-                UserName = $"{r.User.FirstName} {r.User.LastName}"
+                BusinessId = r.BusinessId,
+                UserName = $"{r.User.FirstName} {r.User.LastName}",
+                UserId = r.UserId,
+                UserProfilePic = r.User.ProfilePic,
+                CommentsCount = r.Comments.Count,
+                ReactionsCount = r.Reactions.Count,
+                Tags = r.Tags.Select(t => t.TagType).ToList()
             })
             .ToListAsync();
 
         return Ok(results);
     }
-    */
 
     private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
     {

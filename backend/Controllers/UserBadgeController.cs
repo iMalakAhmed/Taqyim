@@ -39,7 +39,7 @@ public class UserBadgeController : ControllerBase
                 },
                 User = new UserDTO
                 {
-                    Id = ub.User.Id,
+                    UserId = ub.User.UserId,
                     Email = ub.User.Email,
                     FirstName = ub.User.FirstName,
                     LastName = ub.User.LastName,
@@ -104,7 +104,7 @@ public class UserBadgeController : ControllerBase
             },
             User = new UserDTO
             {
-                Id = user.Id,
+                UserId = user.UserId,
                 Email = user.Email,
                 FirstName = user.FirstName,
                 LastName = user.LastName,

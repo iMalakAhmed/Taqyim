@@ -68,18 +68,18 @@ public class ConnectionController : ControllerBase
     [HttpGet("followers/{userId}")]
     public async Task<ActionResult<IEnumerable<ConnectionDTO>>> GetFollowers(int userId)
     {
-        var followers = await _context.Connections
-            .Include(c => c.Follower)
+        var connections = await _context.Connections
             .Where(c => c.FollowingId == userId)
+            .Include(c => c.Follower)
             .Select(c => new ConnectionDTO
             {
                 ConnectionId = c.ConnectionId,
-                FollowerId = c.FollowerId,
-                FollowingId = c.FollowingId,
+                UserId = c.FollowerId,
+                ConnectedUserId = c.FollowingId,
                 CreatedAt = c.CreatedAt,
-                Follower = new UserDTO
+                User = new UserDTO
                 {
-                    Id = c.Follower.Id,
+                    UserId = c.Follower.UserId,
                     Email = c.Follower.Email,
                     FirstName = c.Follower.FirstName,
                     LastName = c.Follower.LastName,
@@ -90,53 +90,37 @@ public class ConnectionController : ControllerBase
                     CreatedAt = c.Follower.CreatedAt,
                     ReputationPoints = c.Follower.ReputationPoints
                 },
-                Following = new UserDTO
+                ConnectedUser = new UserDTO
                 {
-                    Id = c.Following.Id,
-                    Email = c.Following.Email,
-                    FirstName = c.Following.FirstName,
-                    LastName = c.Following.LastName,
-                    Type = c.Following.Type,
-                    IsVerified = c.Following.IsVerified,
-                    ProfilePic = c.Following.ProfilePic,
-                    Bio = c.Following.Bio,
-                    CreatedAt = c.Following.CreatedAt,
-                    ReputationPoints = c.Following.ReputationPoints
+                    UserId = c.FollowingId,
+                    // Only ID is set for following, as navigation property is not needed here
                 }
             })
             .ToListAsync();
 
-        return followers;
+        return connections;
     }
 
     [HttpGet("following/{userId}")]
     public async Task<ActionResult<IEnumerable<ConnectionDTO>>> GetFollowing(int userId)
     {
-        var following = await _context.Connections
-            .Include(c => c.Following)
+        var connections = await _context.Connections
             .Where(c => c.FollowerId == userId)
+            .Include(c => c.Following)
             .Select(c => new ConnectionDTO
             {
                 ConnectionId = c.ConnectionId,
-                FollowerId = c.FollowerId,
-                FollowingId = c.FollowingId,
+                UserId = c.FollowerId,
+                ConnectedUserId = c.FollowingId,
                 CreatedAt = c.CreatedAt,
-                Follower = new UserDTO
+                User = new UserDTO
                 {
-                    Id = c.Follower.Id,
-                    Email = c.Follower.Email,
-                    FirstName = c.Follower.FirstName,
-                    LastName = c.Follower.LastName,
-                    Type = c.Follower.Type,
-                    IsVerified = c.Follower.IsVerified,
-                    ProfilePic = c.Follower.ProfilePic,
-                    Bio = c.Follower.Bio,
-                    CreatedAt = c.Follower.CreatedAt,
-                    ReputationPoints = c.Follower.ReputationPoints
+                    UserId = c.FollowerId,
+                    // Only ID is set for follower, as navigation property is not needed here
                 },
-                Following = new UserDTO
+                ConnectedUser = new UserDTO
                 {
-                    Id = c.Following.Id,
+                    UserId = c.Following.UserId,
                     Email = c.Following.Email,
                     FirstName = c.Following.FirstName,
                     LastName = c.Following.LastName,
@@ -150,6 +134,6 @@ public class ConnectionController : ControllerBase
             })
             .ToListAsync();
 
-        return following;
+        return connections;
     }
 } 

@@ -21,12 +21,16 @@ namespace Taqyim.Api.Data
         public DbSet<Message> Messages { get; set; }
         public DbSet<Badge> Badges { get; set; }
         public DbSet<UserBadge> UserBadges { get; set; }
+        public DbSet<Media> Media { get; set; }
+        public DbSet<SavedReview> SavedReviews { get; set; }
+        public DbSet<ReviewImage> ReviewImages { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<User>()
+                .HasKey(u => u.UserId);
             modelBuilder.Entity<User>(entity =>
             {
-                entity.HasKey(e => e.Id);
                 entity.Property(e => e.Email).IsRequired();
                 entity.Property(e => e.PasswordHash).IsRequired();
                 entity.Property(e => e.Type).IsRequired();
@@ -73,8 +77,6 @@ namespace Taqyim.Api.Data
                 .HasForeignKey(r => r.BusinessId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Temporarily commented out all review-related configurations
-            /*
             modelBuilder.Entity<Comment>(entity =>
             {
                 entity.HasKey(e => e.CommentId);
@@ -115,7 +117,7 @@ namespace Taqyim.Api.Data
                     .HasForeignKey(d => d.ReviewId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
-            */
+
             modelBuilder.Entity<Connection>(entity =>
             {
                 entity.HasKey(e => e.ConnectionId);
@@ -172,16 +174,51 @@ namespace Taqyim.Api.Data
             });
             modelBuilder.Entity<UserBadge>(entity =>
             {
-                entity.HasKey(e => e.Id);
-
+                entity.HasKey(e => e.UserBadgeId);
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.UserBadges)
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
-
                 entity.HasOne(d => d.Badge)
                     .WithMany(p => p.UserBadges)
                     .HasForeignKey(d => d.BadgeId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<Media>(entity =>
+            {
+                entity.HasKey(e => e.MediaId);
+                entity.Property(e => e.FileName).IsRequired();
+                entity.Property(e => e.FilePath).IsRequired();
+                entity.Property(e => e.FileType).IsRequired();
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Media)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<SavedReview>(entity =>
+            {
+                entity.HasKey(e => e.SavedReviewId);
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.SavedReviews)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.Review)
+                    .WithMany(p => p.SavedByUsers)
+                    .HasForeignKey(d => d.ReviewId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<ReviewImage>(entity =>
+            {
+                entity.HasKey(e => e.ReviewImageId);
+                entity.Property(e => e.ImageUrl).IsRequired();
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+
+                entity.HasOne(d => d.Review)
+                    .WithMany(p => p.ReviewImages)
+                    .HasForeignKey(d => d.ReviewId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
         }
