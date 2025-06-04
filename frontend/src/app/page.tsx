@@ -1,5 +1,6 @@
 import CategoriesSection from "./components/CategoriesSection";
 import FeaturesSection from "./components/FeaturesSection";
+import Footer from "./components/Footer";
 import HeroSection from "./components/HeroSection";
 import HorizontalLine from "./components/ui/HorizontalLine";
 import NavBar from "./components/ui/NavBar";
@@ -13,7 +14,7 @@ export default function Home() {
       {/* Header Section */}
       <section className="w-full flex flex-col items-center">
         <HorizontalLine />
-        <h1 className="text-5xl text-text font-heading pt-5">TAQYIM</h1>
+
         <TypingHeader />
         <HorizontalLine />
       </section>
@@ -32,6 +33,8 @@ export default function Home() {
         <CategoriesSection />
         <HorizontalLine />
       </div>
+
+      <Footer />
     </div>
   );
 }
