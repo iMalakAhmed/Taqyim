@@ -25,7 +25,7 @@ const variants = {
 const sizes = {
   sm: "text-sm font-medium  px-3 py-1.5 gap-1.5",
   md: "text-base font-medium  px-4 py-2 gap-2",
-  lg: "text-lg font-medium  px-10 py-3 gap-2.5",
+  lg: "text-xl font-bold  px-10 py-3 gap-2.5",
   xl: "text-2xl font-bold px-12 py-5 gap-2.5",
 };
 

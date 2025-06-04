@@ -1,5 +1,5 @@
-// app/home/layout.tsx
-import React from "react";
+import HorizontalLine from "../components/ui/HorizontalLine";
+import SideNav from "../components/ui/SideNav";
 
 export default function HomeLayout({
   children,
@@ -8,7 +8,11 @@ export default function HomeLayout({
 }) {
   return (
     <div className="min-h-screen bg-background text-text">
-      <main className="p-8">{children}</main>
+      <main className="">
+        <HorizontalLine className="fixed top-24 left-0 w-64 z-50" />
+        <SideNav />
+        {children}
+      </main>
     </div>
   );
 }
