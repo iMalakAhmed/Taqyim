@@ -42,7 +42,7 @@ export default function SideNav() {
   ];
 
   return (
-    <nav className="fixed top-24 left-0 h-full w-80 bg-background flex flex-col font-heading text-2xl">
+    <nav className="fixed top-24 left-0 h-full w-96 bg-background flex flex-col font-heading text-2xl">
       <VerticalLine className="absolute top-0 right-0 h-full" />
 
       <ul className="space-y-4 mt-8 ml-20 flex-grow overflow-auto">
@@ -128,8 +128,8 @@ export default function SideNav() {
         )}
       </ul>
 
-      <div className="mb-32 ml-16 py-4 ">
-        <Button className="px-16 font-heading" size="lg">
+      <div className="mb-32 ml-20 py-4 ">
+        <Button className="px-18 font-heading" size="lg">
           <IconPencilPlus />
           POST
         </Button>

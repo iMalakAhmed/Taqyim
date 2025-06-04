@@ -26,11 +26,11 @@ export default function HeroSection() {
       >
         <h2 className="text-xl font-body font-bold p-2">JOIN OUR COMMUNITY</h2>
         <Image
-          src="/review-typewriter-image.png"
+          src="/reviewer-hero-section.jpg"
           alt="Review typewriter"
           width={600}
           height={400}
-          className=""
+          className="filter grayscale hover:grayscale-0 transition duration-500 ease-in-out"
         />
       </motion.section>
 
