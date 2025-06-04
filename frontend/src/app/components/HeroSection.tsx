@@ -3,6 +3,7 @@ import VerticalLine from "./ui/VerticalLine";
 import Image from "next/image";
 import Button from "./ui/Button";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 
 const slideInLeft = {
   hidden: { x: -100, opacity: 0 },
@@ -15,6 +16,15 @@ const slideInRight = {
 };
 
 export default function HeroSection() {
+  const [date, setDate] = useState("");
+
+  useEffect(() => {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, "0");
+    const month = now.toLocaleString("en-US", { month: "short" }).toUpperCase();
+    const year = now.getFullYear();
+    setDate(`${day} ${month} ${year}`);
+  }, []);
   return (
     <div className="w-full max-h-[500px] flex flex-row justify-center items-center text-text">
       {/* IMAGE SECTION */}
@@ -43,7 +53,7 @@ export default function HeroSection() {
         initial="hidden"
         animate="visible"
       >
-        <p className="font-body text-lg text-right">XX JUN XX</p>
+        <p className="font-body text-lg text-right">{date}</p>
         <h2 className="text-3xl font-heading py-3">
           Make Headlines —{" "}
           <span className="text-accent">Start Writing Reviews Today. </span>
