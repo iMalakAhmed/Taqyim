@@ -27,7 +27,6 @@ export default function LandingPage() {
 
       <div className="w-full flex flex-col items-center">
         <CategoriesSection />
-        <HorizontalLine />
       </div>
 
       <Footer />

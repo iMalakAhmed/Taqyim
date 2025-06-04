@@ -3,12 +3,62 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-rgb: 243, 244, 246;
+  --background: #fbfbfe;
+  --foreground: #010104;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+}
+
+@media (prefers-color-scheme: dark) {
+  .dark {
+    --color-text: #eae9fc;
+    --color-text-inverse: #040316;
+    --color-background: #010104;
+    --color-inverse: #fbfbfe;
+    --color-primary: #52bdff;
+    --color-secondary: #1a71a8;
+    --color-accent: #dc3532;
+  }
 }
 
 body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-rgb));
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@theme {
+  --color-text: #040316;
+  --color-text-inverse: #eae9fc;
+  --color-background: #fbfbfe;
+  --color-inverse: #010104;
+  --color-primary: #006bad;
+  --color-secondary: #57afe5;
+  --color-accent: #cd2623;
+
+  --font-heading: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
+}
+
+p.underline-hover {
+  position: relative;
+  cursor: pointer;
+}
+
+p.underline-hover::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 0;
+  background-color: red;
+  transition: width 0.3s ease;
+}
+
+p.underline-hover:hover::after {
+  width: 100%;
 }
