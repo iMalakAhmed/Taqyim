@@ -1,3 +1,13 @@
 export default function FeaturesSection() {
-  return <div>FeaturesSection</div>;
+  return (
+    <div>
+      <div>Features</div>
+      <div>Features</div>
+      <div>Features</div>
+      <div>Features</div>
+      <div>Features</div>
+      <div>Features</div>
+      <div>Features</div>
+    </div>
+  );
 }
