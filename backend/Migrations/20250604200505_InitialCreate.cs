@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Taqyim.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialSoftDeleteBusiness : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,8 +18,9 @@ namespace Taqyim.Api.Migrations
                     BadgeId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Img = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Icon = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -32,7 +33,7 @@ namespace Taqyim.Api.Migrations
                 {
                     ConversationId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastMessageAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsGroup = table.Column<bool>(type: "bit", nullable: false)
@@ -46,21 +47,41 @@ namespace Taqyim.Api.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    UserId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    BusinessName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    BusinessCategory = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    BusinessDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    BusinessAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    BusinessLatitude = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    BusinessLongitude = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    IsVerified = table.Column<bool>(type: "bit", nullable: false),
+                    VerifiedByUserId = table.Column<int>(type: "int", nullable: true),
                     ProfilePic = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Bio = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    ReputationPoints = table.Column<int>(type: "int", nullable: false)
+                    ReputationPoints = table.Column<int>(type: "int", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    BadgeId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_Users", x => x.UserId);
+                    table.ForeignKey(
+                        name: "FK_Users_Badges_BadgeId",
+                        column: x => x.BadgeId,
+                        principalTable: "Badges",
+                        principalColumn: "BadgeId");
+                    table.ForeignKey(
+                        name: "FK_Users_Users_VerifiedByUserId",
+                        column: x => x.VerifiedByUserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId");
                 });
 
             migrationBuilder.CreateTable(
@@ -70,13 +91,15 @@ namespace Taqyim.Api.Migrations
                     BusinessId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(type: "int", nullable: false),
-                    Location = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Location = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Category = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Category = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     VerifiedByUserId = table.Column<int>(type: "int", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    Logo = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserId1 = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -85,13 +108,18 @@ namespace Taqyim.Api.Migrations
                         name: "FK_Businesses_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Businesses_Users_UserId1",
+                        column: x => x.UserId1,
+                        principalTable: "Users",
+                        principalColumn: "UserId");
                     table.ForeignKey(
                         name: "FK_Businesses_Users_VerifiedByUserId",
                         column: x => x.VerifiedByUserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.SetNull);
                 });
 
@@ -103,7 +131,8 @@ namespace Taqyim.Api.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FollowerId = table.Column<int>(type: "int", nullable: false),
                     FollowingId = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -112,14 +141,19 @@ namespace Taqyim.Api.Migrations
                         name: "FK_Connections_Users_FollowerId",
                         column: x => x.FollowerId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Connections_Users_FollowingId",
                         column: x => x.FollowingId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Connections_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId");
                 });
 
             migrationBuilder.CreateTable(
@@ -127,11 +161,11 @@ namespace Taqyim.Api.Migrations
                 columns: table => new
                 {
                     ConversationsConversationId = table.Column<int>(type: "int", nullable: false),
-                    UsersId = table.Column<int>(type: "int", nullable: false)
+                    UsersUserId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ConversationUser", x => new { x.ConversationsConversationId, x.UsersId });
+                    table.PrimaryKey("PK_ConversationUser", x => new { x.ConversationsConversationId, x.UsersUserId });
                     table.ForeignKey(
                         name: "FK_ConversationUser_Conversations_ConversationsConversationId",
                         column: x => x.ConversationsConversationId,
@@ -139,10 +173,34 @@ namespace Taqyim.Api.Migrations
                         principalColumn: "ConversationId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ConversationUser_Users_UsersId",
-                        column: x => x.UsersId,
+                        name: "FK_ConversationUser_Users_UsersUserId",
+                        column: x => x.UsersUserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Media",
+                columns: table => new
+                {
+                    MediaId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FileType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FileSize = table.Column<long>(type: "bigint", nullable: false),
+                    UploadedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Media", x => x.MediaId);
+                    table.ForeignKey(
+                        name: "FK_Media_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -152,11 +210,10 @@ namespace Taqyim.Api.Migrations
                 {
                     MessageId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Body = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Seen = table.Column<bool>(type: "bit", nullable: false),
                     ConversationId = table.Column<int>(type: "int", nullable: false),
-                    SenderId = table.Column<int>(type: "int", nullable: false)
+                    SenderId = table.Column<int>(type: "int", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -171,7 +228,7 @@ namespace Taqyim.Api.Migrations
                         name: "FK_Messages_Users_SenderId",
                         column: x => x.SenderId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -184,7 +241,8 @@ namespace Taqyim.Api.Migrations
                     UserId = table.Column<int>(type: "int", nullable: false),
                     NotificationType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SenderId = table.Column<int>(type: "int", nullable: true),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UserId1 = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -193,29 +251,35 @@ namespace Taqyim.Api.Migrations
                         name: "FK_Notifications_Users_SenderId",
                         column: x => x.SenderId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_Notifications_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Notifications_Users_UserId1",
+                        column: x => x.UserId1,
+                        principalTable: "Users",
+                        principalColumn: "UserId");
                 });
 
             migrationBuilder.CreateTable(
                 name: "UserBadges",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    UserBadgeId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: false),
                     BadgeId = table.Column<int>(type: "int", nullable: false),
-                    AwardedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    AwardedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserBadges", x => x.Id);
+                    table.PrimaryKey("PK_UserBadges", x => x.UserBadgeId);
                     table.ForeignKey(
                         name: "FK_UserBadges_Badges_BadgeId",
                         column: x => x.BadgeId,
@@ -226,7 +290,7 @@ namespace Taqyim.Api.Migrations
                         name: "FK_UserBadges_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -260,13 +324,12 @@ namespace Taqyim.Api.Migrations
                 {
                     ReviewId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ReviewerId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false),
                     BusinessId = table.Column<int>(type: "int", nullable: false),
-                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Media = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Rating = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    Comment = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -278,10 +341,10 @@ namespace Taqyim.Api.Migrations
                         principalColumn: "BusinessId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Reviews_Users_ReviewerId",
-                        column: x => x.ReviewerId,
+                        name: "FK_Reviews_Users_UserId",
+                        column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -309,7 +372,7 @@ namespace Taqyim.Api.Migrations
                         name: "FK_Comments_Users_CommenterId",
                         column: x => x.CommenterId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -337,8 +400,58 @@ namespace Taqyim.Api.Migrations
                         name: "FK_Reactions_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ReviewImages",
+                columns: table => new
+                {
+                    ReviewImageId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ReviewId = table.Column<int>(type: "int", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Caption = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
+                    Order = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ReviewImages", x => x.ReviewImageId);
+                    table.ForeignKey(
+                        name: "FK_ReviewImages_Reviews_ReviewId",
+                        column: x => x.ReviewId,
+                        principalTable: "Reviews",
+                        principalColumn: "ReviewId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SavedReviews",
+                columns: table => new
+                {
+                    SavedReviewId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    ReviewId = table.Column<int>(type: "int", nullable: false),
+                    SavedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SavedReviews", x => x.SavedReviewId);
+                    table.ForeignKey(
+                        name: "FK_SavedReviews_Reviews_ReviewId",
+                        column: x => x.ReviewId,
+                        principalTable: "Reviews",
+                        principalColumn: "ReviewId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SavedReviews_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -365,6 +478,11 @@ namespace Taqyim.Api.Migrations
                 name: "IX_Businesses_UserId",
                 table: "Businesses",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Businesses_UserId1",
+                table: "Businesses",
+                column: "UserId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Businesses_VerifiedByUserId",
@@ -397,9 +515,19 @@ namespace Taqyim.Api.Migrations
                 column: "FollowingId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ConversationUser_UsersId",
+                name: "IX_Connections_UserId",
+                table: "Connections",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ConversationUser_UsersUserId",
                 table: "ConversationUser",
-                column: "UsersId");
+                column: "UsersUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Media_UserId",
+                table: "Media",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Messages_ConversationId",
@@ -422,6 +550,11 @@ namespace Taqyim.Api.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Notifications_UserId1",
+                table: "Notifications",
+                column: "UserId1");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Reactions_ReviewId",
                 table: "Reactions",
                 column: "ReviewId");
@@ -432,14 +565,29 @@ namespace Taqyim.Api.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ReviewImages_ReviewId",
+                table: "ReviewImages",
+                column: "ReviewId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Reviews_BusinessId",
                 table: "Reviews",
                 column: "BusinessId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Reviews_ReviewerId",
+                name: "IX_Reviews_UserId",
                 table: "Reviews",
-                column: "ReviewerId");
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SavedReviews_ReviewId",
+                table: "SavedReviews",
+                column: "ReviewId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SavedReviews_UserId",
+                table: "SavedReviews",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tags_ReviewId",
@@ -455,6 +603,16 @@ namespace Taqyim.Api.Migrations
                 name: "IX_UserBadges_UserId",
                 table: "UserBadges",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_BadgeId",
+                table: "Users",
+                column: "BadgeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_VerifiedByUserId",
+                table: "Users",
+                column: "VerifiedByUserId");
         }
 
         /// <inheritdoc />
@@ -473,6 +631,9 @@ namespace Taqyim.Api.Migrations
                 name: "ConversationUser");
 
             migrationBuilder.DropTable(
+                name: "Media");
+
+            migrationBuilder.DropTable(
                 name: "Messages");
 
             migrationBuilder.DropTable(
@@ -480,6 +641,12 @@ namespace Taqyim.Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "Reactions");
+
+            migrationBuilder.DropTable(
+                name: "ReviewImages");
+
+            migrationBuilder.DropTable(
+                name: "SavedReviews");
 
             migrationBuilder.DropTable(
                 name: "Tags");
@@ -494,13 +661,13 @@ namespace Taqyim.Api.Migrations
                 name: "Reviews");
 
             migrationBuilder.DropTable(
-                name: "Badges");
-
-            migrationBuilder.DropTable(
                 name: "Businesses");
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Badges");
         }
     }
 }

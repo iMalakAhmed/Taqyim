@@ -45,10 +45,12 @@ namespace Taqyim.Api.Data
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne(d => d.VerifiedByUser)
-                    .WithMany(p => p.BusinessVerifiedByUsers)
-                    .HasForeignKey(d => d.VerifiedByUserId)
-                    .OnDelete(DeleteBehavior.SetNull);
+                modelBuilder.Entity<Business>()
+                .HasOne(b => b.VerifiedByUser)
+                .WithMany()
+                .HasForeignKey(b => b.VerifiedByUserId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             });
             modelBuilder.Entity<BusinessLocation>(entity =>
             {

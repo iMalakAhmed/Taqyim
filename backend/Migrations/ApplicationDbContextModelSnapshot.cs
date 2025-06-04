@@ -17,7 +17,7 @@ namespace Taqyim.Api.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "9.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -27,12 +27,12 @@ namespace Taqyim.Api.Migrations
                     b.Property<int>("ConversationsConversationId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UsersId")
+                    b.Property<int>("UsersUserId")
                         .HasColumnType("int");
 
-                    b.HasKey("ConversationsConversationId", "UsersId");
+                    b.HasKey("ConversationsConversationId", "UsersUserId");
 
-                    b.HasIndex("UsersId");
+                    b.HasIndex("UsersUserId");
 
                     b.ToTable("ConversationUser");
                 });
@@ -45,10 +45,15 @@ namespace Taqyim.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BadgeId"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Img")
+                    b.Property<string>("Icon")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -69,18 +74,21 @@ namespace Taqyim.Api.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BusinessId"));
 
                     b.Property<string>("Category")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("Location")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Logo")
@@ -93,12 +101,17 @@ namespace Taqyim.Api.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("UserId1")
+                        .HasColumnType("int");
+
                     b.Property<int?>("VerifiedByUserId")
                         .HasColumnType("int");
 
                     b.HasKey("BusinessId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.HasIndex("VerifiedByUserId");
 
@@ -178,7 +191,7 @@ namespace Taqyim.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ConnectionId"));
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("FollowerId")
@@ -187,11 +200,16 @@ namespace Taqyim.Api.Migrations
                     b.Property<int>("FollowingId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("ConnectionId");
 
                     b.HasIndex("FollowerId");
 
                     b.HasIndex("FollowingId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Connections");
                 });
@@ -204,7 +222,7 @@ namespace Taqyim.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ConversationId"));
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsGroup")
@@ -221,6 +239,42 @@ namespace Taqyim.Api.Migrations
                     b.ToTable("Conversations");
                 });
 
+            modelBuilder.Entity("Taqyim.Api.Models.Media", b =>
+                {
+                    b.Property<int>("MediaId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MediaId"));
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("FileType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("MediaId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Media");
+                });
+
             modelBuilder.Entity("Taqyim.Api.Models.Message", b =>
                 {
                     b.Property<int>("MessageId")
@@ -229,18 +283,15 @@ namespace Taqyim.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MessageId"));
 
-                    b.Property<string>("Body")
+                    b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ConversationId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<bool>("Seen")
-                        .HasColumnType("bit");
 
                     b.Property<int>("SenderId")
                         .HasColumnType("int");
@@ -274,11 +325,16 @@ namespace Taqyim.Api.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("UserId1")
+                        .HasColumnType("int");
+
                     b.HasKey("NotificationId");
 
                     b.HasIndex("SenderId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("Notifications");
                 });
@@ -323,32 +379,88 @@ namespace Taqyim.Api.Migrations
                     b.Property<int>("BusinessId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Content")
+                    b.Property<string>("Comment")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("Media")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Rating")
                         .HasColumnType("int");
 
-                    b.Property<int>("ReviewerId")
-                        .HasColumnType("int");
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("ReviewId");
 
                     b.HasIndex("BusinessId");
 
-                    b.HasIndex("ReviewerId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Reviews");
+                });
+
+            modelBuilder.Entity("Taqyim.Api.Models.ReviewImage", b =>
+                {
+                    b.Property<int>("ReviewImageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReviewImageId"));
+
+                    b.Property<string>("Caption")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReviewId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ReviewImageId");
+
+                    b.HasIndex("ReviewId");
+
+                    b.ToTable("ReviewImages");
+                });
+
+            modelBuilder.Entity("Taqyim.Api.Models.SavedReview", b =>
+                {
+                    b.Property<int>("SavedReviewId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SavedReviewId"));
+
+                    b.Property<int>("ReviewId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("SavedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("SavedReviewId");
+
+                    b.HasIndex("ReviewId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("SavedReviews");
                 });
 
             modelBuilder.Entity("Taqyim.Api.Models.Tag", b =>
@@ -375,13 +487,34 @@ namespace Taqyim.Api.Migrations
 
             modelBuilder.Entity("Taqyim.Api.Models.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("UserId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
+
+                    b.Property<int?>("BadgeId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Bio")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BusinessAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BusinessCategory")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BusinessDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("BusinessLatitude")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("BusinessLongitude")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("BusinessName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -396,6 +529,12 @@ namespace Taqyim.Api.Migrations
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("bit");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -415,29 +554,39 @@ namespace Taqyim.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.Property<int?>("VerifiedByUserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId");
+
+                    b.HasIndex("BadgeId");
+
+                    b.HasIndex("VerifiedByUserId");
 
                     b.ToTable("Users");
                 });
 
             modelBuilder.Entity("Taqyim.Api.Models.UserBadge", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("UserBadgeId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserBadgeId"));
 
-                    b.Property<DateTime?>("AwardedAt")
+                    b.Property<DateTime>("AwardedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("BadgeId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("UserBadgeId");
 
                     b.HasIndex("BadgeId");
 
@@ -456,7 +605,7 @@ namespace Taqyim.Api.Migrations
 
                     b.HasOne("Taqyim.Api.Models.User", null)
                         .WithMany()
-                        .HasForeignKey("UsersId")
+                        .HasForeignKey("UsersUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -469,8 +618,12 @@ namespace Taqyim.Api.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Taqyim.Api.Models.User", "VerifiedByUser")
+                    b.HasOne("Taqyim.Api.Models.User", null)
                         .WithMany("BusinessVerifiedByUsers")
+                        .HasForeignKey("UserId1");
+
+                    b.HasOne("Taqyim.Api.Models.User", "VerifiedByUser")
+                        .WithMany()
                         .HasForeignKey("VerifiedByUserId")
                         .OnDelete(DeleteBehavior.SetNull);
 
@@ -523,9 +676,24 @@ namespace Taqyim.Api.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Taqyim.Api.Models.User", null)
+                        .WithMany("Connections")
+                        .HasForeignKey("UserId");
+
                     b.Navigation("Follower");
 
                     b.Navigation("Following");
+                });
+
+            modelBuilder.Entity("Taqyim.Api.Models.Media", b =>
+                {
+                    b.HasOne("Taqyim.Api.Models.User", "User")
+                        .WithMany("Media")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Taqyim.Api.Models.Message", b =>
@@ -560,6 +728,10 @@ namespace Taqyim.Api.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Taqyim.Api.Models.User", null)
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId1");
+
                     b.Navigation("Sender");
 
                     b.Navigation("User");
@@ -592,15 +764,45 @@ namespace Taqyim.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Taqyim.Api.Models.User", "Reviewer")
+                    b.HasOne("Taqyim.Api.Models.User", "User")
                         .WithMany("Reviews")
-                        .HasForeignKey("ReviewerId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Business");
 
-                    b.Navigation("Reviewer");
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Taqyim.Api.Models.ReviewImage", b =>
+                {
+                    b.HasOne("Taqyim.Api.Models.Review", "Review")
+                        .WithMany("ReviewImages")
+                        .HasForeignKey("ReviewId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Review");
+                });
+
+            modelBuilder.Entity("Taqyim.Api.Models.SavedReview", b =>
+                {
+                    b.HasOne("Taqyim.Api.Models.Review", "Review")
+                        .WithMany("SavedByUsers")
+                        .HasForeignKey("ReviewId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Taqyim.Api.Models.User", "User")
+                        .WithMany("SavedReviews")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Review");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Taqyim.Api.Models.Tag", b =>
@@ -612,6 +814,19 @@ namespace Taqyim.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Review");
+                });
+
+            modelBuilder.Entity("Taqyim.Api.Models.User", b =>
+                {
+                    b.HasOne("Taqyim.Api.Models.Badge", null)
+                        .WithMany("Users")
+                        .HasForeignKey("BadgeId");
+
+                    b.HasOne("Taqyim.Api.Models.User", "VerifiedByUser")
+                        .WithMany("VerifiedBusinesses")
+                        .HasForeignKey("VerifiedByUserId");
+
+                    b.Navigation("VerifiedByUser");
                 });
 
             modelBuilder.Entity("Taqyim.Api.Models.UserBadge", b =>
@@ -636,6 +851,8 @@ namespace Taqyim.Api.Migrations
             modelBuilder.Entity("Taqyim.Api.Models.Badge", b =>
                 {
                     b.Navigation("UserBadges");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Taqyim.Api.Models.Business", b =>
@@ -656,6 +873,10 @@ namespace Taqyim.Api.Migrations
 
                     b.Navigation("Reactions");
 
+                    b.Navigation("ReviewImages");
+
+                    b.Navigation("SavedByUsers");
+
                     b.Navigation("Tags");
                 });
 
@@ -671,17 +892,27 @@ namespace Taqyim.Api.Migrations
 
                     b.Navigation("ConnectionFollowings");
 
+                    b.Navigation("Connections");
+
+                    b.Navigation("Media");
+
                     b.Navigation("Messages");
 
                     b.Navigation("NotificationSenders");
 
                     b.Navigation("NotificationUsers");
 
+                    b.Navigation("Notifications");
+
                     b.Navigation("Reactions");
 
                     b.Navigation("Reviews");
 
+                    b.Navigation("SavedReviews");
+
                     b.Navigation("UserBadges");
+
+                    b.Navigation("VerifiedBusinesses");
                 });
 #pragma warning restore 612, 618
         }
