@@ -17,7 +17,7 @@ namespace Taqyim.Api.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "9.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -101,12 +101,14 @@ namespace Taqyim.Api.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<int>("VerifiedByUserId")
+                    b.Property<int?>("VerifiedByUserId")
                         .HasColumnType("int");
 
                     b.HasKey("BusinessId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.HasIndex("VerifiedByUserId");
 
@@ -613,8 +615,12 @@ namespace Taqyim.Api.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Taqyim.Api.Models.User", "VerifiedByUser")
+                    b.HasOne("Taqyim.Api.Models.User", null)
                         .WithMany("BusinessVerifiedByUsers")
+                        .HasForeignKey("UserId1");
+
+                    b.HasOne("Taqyim.Api.Models.User", "VerifiedByUser")
+                        .WithMany()
                         .HasForeignKey("VerifiedByUserId")
                         .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired();
