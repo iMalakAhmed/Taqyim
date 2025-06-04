@@ -3,6 +3,7 @@ import VerticalLine from "./ui/VerticalLine";
 import Image from "next/image";
 import Button from "./ui/Button";
 import { motion } from "framer-motion";
+import { useRouter } from 'next/navigation';
 
 const slideInLeft = {
   hidden: { x: -100, opacity: 0 },
@@ -15,6 +16,7 @@ const slideInRight = {
 };
 
 export default function HeroSection() {
+  const router = useRouter();
   return (
     <div className="w-full max-h-[500px] flex flex-row justify-center items-center text-text">
       {/* IMAGE SECTION */}
@@ -55,7 +57,7 @@ export default function HeroSection() {
           <br />
           No subscription required — just your voice.
         </p>
-        <Button size="xl" className="w-full">
+        <Button size="xl" className="w-full" onClick={() => router.push('/auth/signup')}>
           SIGN UP
         </Button>
       </motion.section>
