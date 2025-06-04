@@ -2,7 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export default function HorizontalLine() {
+interface HorizontalLineProps {
+  className?: string;
+}
+
+export default function HorizontalLine({
+  className = "",
+}: HorizontalLineProps) {
   const [visible, setVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -11,7 +17,7 @@ export default function HorizontalLine() {
       ([entry]) => {
         if (entry.isIntersecting) {
           setVisible(true);
-          observer.disconnect(); // Trigger only once
+          observer.disconnect();
         }
       },
       {
@@ -31,7 +37,7 @@ export default function HorizontalLine() {
       ref={ref}
       className={`h-px bg-text transition-all duration-700 ease-out ${
         visible ? "w-full opacity-100" : "w-0 opacity-0"
-      }`}
+      } ${className}`}
     />
   );
 }
