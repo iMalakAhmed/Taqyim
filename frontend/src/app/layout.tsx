@@ -1,20 +1,7 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./redux/provider";
 import NavBar from "./components/ui/NavBar";
-
-const playfairDisplay = Playfair_Display({
-  variable: "--font-heading",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-});
-
-const inter = Inter({
-  variable: "--font-body",
-  subsets: ["latin"],
-  weight: ["200", "400", "700", "800"],
-});
 
 export const metadata: Metadata = {
   title: "Taqyim",
@@ -28,9 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${playfairDisplay.variable} ${inter.variable} antialiased`}
-      >
+      <body className="antialiased">
         <Providers>
           <NavBar />
           {children}

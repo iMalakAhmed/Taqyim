@@ -56,6 +56,7 @@ export default function HeroSection() {
         animate="visible"
       >
         <p className="font-body text-lg text-right">{date}</p>
+        <p className="font-body text-lg text-right">{date}</p>
         <h2 className="text-3xl font-heading py-3">
           Make Headlines —{" "}
           <span className="text-accent">Start Writing Reviews Today. </span>
@@ -67,6 +68,7 @@ export default function HeroSection() {
           <br />
           No subscription required — just your voice.
         </p>
+        <Button size="xl" className="w-full" onClick={() => router.push('/auth/signup')}>
         <Button size="xl" className="w-full" onClick={() => router.push('/auth/signup')}>
           SIGN UP
         </Button>
