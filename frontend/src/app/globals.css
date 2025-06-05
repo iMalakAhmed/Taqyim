@@ -72,3 +72,12 @@ p.underline-hover::after {
 p.underline-hover:hover::after {
   width: 100%;
 }
+
+@keyframes scrollNewspaper {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
