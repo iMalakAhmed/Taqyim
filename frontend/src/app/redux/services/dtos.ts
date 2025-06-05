@@ -1,4 +1,26 @@
-export type UserDTO = {
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface RegisterData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
+}
+
+export interface UserDTO {
   userId: number;
   email: string;
   firstName: string;
@@ -15,30 +37,30 @@ export type UserDTO = {
   bio?: string | null;
   createdAt: string;
   reputationPoints: number;
-};
+}
 
-export type UpdateUserDto = {
+export interface UpdateUserDto {
   firstName?: string | null;
   lastName?: string | null;
   bio?: string | null;
   profilePic?: string | null;
-};
+}
 
-export type BusinessLocationCreateDto = {
+export interface BusinessLocationCreateDto {
   address?: string | null;
   latitude?: number | null;
   longitude?: number | null;
   label?: string | null;
-};
+}
 
-export type BusinessLocationUpdateDto = {
+export interface BusinessLocationUpdateDto {
   address?: string | null;
   latitude?: number | null;
   longitude?: number | null;
   label?: string | null;
-};
+}
 
-export type BusinessLocationDTO = {
+export interface BusinessLocationDTO {
   locationId: number;
   businessId: number;
   address: string;
@@ -46,24 +68,24 @@ export type BusinessLocationDTO = {
   longitude?: number | null;
   label?: string | null;
   createdAt: string;
-};
+}
 
-export type BusinessCreateDto = {
+export interface BusinessCreateDto {
   name: string;
   location?: string | null;
   category?: string | null;
   description?: string | null;
   logo?: string | null;
-};
+}
 
-export type BusinessUpdateDto = {
+export interface BusinessUpdateDto {
   name?: string | null;
   category?: string | null;
   description?: string | null;
   logo?: string | null;
-};
+}
 
-export type BusinessDTO = {
+export interface BusinessDTO {
   businessId: number;
   userId: number;
   name: string;
@@ -77,9 +99,9 @@ export type BusinessDTO = {
   user: UserDTO;
   verifiedByUser?: UserDTO | null;
   businessLocations: BusinessLocationDTO[];
-};
+}
 
-export type ReviewDTO = {
+export interface ReviewDTO {
   reviewId: number;
   userId: number;
   businessId: number;
@@ -94,60 +116,60 @@ export type ReviewDTO = {
   reactions: ReactionDTO[];
   tags: TagDTO[];
   images: ReviewImageDTO[];
-};
+}
 
-export type CreateReviewDTO = {
+export interface CreateReviewDTO {
   businessId: number;
   rating: number;
   comment: string;
   tags?: string[] | null;
-};
+}
 
-export type UpdateReviewDTO = {
+export interface UpdateReviewDTO {
   rating: number;
   comment: string;
   tags?: string[] | null;
-};
+}
 
-export type CommentDTO = {
+export interface CommentDTO {
   commentId: number;
   commenterId: number;
   reviewId: number;
   content: string;
   createdAt: string;
   commenter: UserDTO;
-};
+}
 
-export type CreateCommentDTO = {
+export interface CreateCommentDTO {
   reviewId: number;
   content: string;
-};
+}
 
-export type ReactionDTO = {
+export interface ReactionDTO {
   reactionId: number;
   reviewId: number;
   userId: number;
   reactionType: string;
   createdAt: string;
   user: UserDTO;
-};
+}
 
-export type CreateReactionDTO = {
+export interface CreateReactionDTO {
   reviewId: number;
   reactionType: string;
-};
+}
 
-export type TagDTO = {
+export interface TagDTO {
   tagId: number;
   tagType: string;
   reviewId: number;
-};
+}
 
-export type ReviewImageDTO = {
+export interface ReviewImageDTO {
   reviewImageId: number;
   reviewId: number;
   imageUrl: string;
   caption?: string | null;
   createdAt: string;
   order: number;
-};
+}
