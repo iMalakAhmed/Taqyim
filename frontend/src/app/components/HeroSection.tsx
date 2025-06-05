@@ -3,6 +3,8 @@ import VerticalLine from "./ui/VerticalLine";
 import Image from "next/image";
 import Button from "./ui/Button";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
 
 const slideInLeft = {
   hidden: { x: -100, opacity: 0 },
@@ -15,6 +17,16 @@ const slideInRight = {
 };
 
 export default function HeroSection() {
+  const [date, setDate] = useState("");
+  const router = useRouter();
+
+  useEffect(() => {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, "0");
+    const month = now.toLocaleString("en-US", { month: "short" }).toUpperCase();
+    const year = now.getFullYear();
+    setDate(`${day} ${month} ${year}`);
+  }, []);
   return (
     <div className="w-full max-h-[500px] flex flex-row justify-center items-center text-text">
       {/* IMAGE SECTION */}
@@ -43,19 +55,19 @@ export default function HeroSection() {
         initial="hidden"
         animate="visible"
       >
-        <p className="font-body text-lg text-right">XX JUN XX</p>
+        <p className="font-body text-lg text-right">{date}</p>
         <h2 className="text-3xl font-heading py-3">
           Make Headlines —{" "}
           <span className="text-accent">Start Writing Reviews Today. </span>
         </h2>
         <p className="font-body font-extralight text-2xl tracking-wider leading-8 pb-5 ">
           Put your name in print. Share honest takes on local spots and help
-          your neighbors discover what’s worth their time.
+          your neighbors discover what's worth their time.
           <br />
           <br />
           No subscription required — just your voice.
         </p>
-        <Button size="xl" className="w-full">
+        <Button size="xl" className="w-full" onClick={() => router.push('/auth/signup')}>
           SIGN UP
         </Button>
       </motion.section>
