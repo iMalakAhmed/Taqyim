@@ -1,9 +1,10 @@
-import UserProfile from "./UserProfile";
-
+import UserProfile from "../components/UserProfile";
+import HorizontalLine from "../components/ui/HorizontalLine";
 export default function ProfilePage() {
   return (
-    <div className="min-h-screen bg-gray-50 py-10">
+    <div className="min-h-screen bg-background">
       <UserProfile />
+      <HorizontalLine className="my-8" />
     </div>
   );
 }

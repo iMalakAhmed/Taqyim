@@ -101,6 +101,9 @@ namespace Taqyim.Api.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("UserId1")
+                        .HasColumnType("int");
+
                     b.Property<int?>("VerifiedByUserId")
                         .HasColumnType("int");
 
@@ -622,8 +625,7 @@ namespace Taqyim.Api.Migrations
                     b.HasOne("Taqyim.Api.Models.User", "VerifiedByUser")
                         .WithMany()
                         .HasForeignKey("VerifiedByUserId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("User");
 

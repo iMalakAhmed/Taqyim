@@ -51,7 +51,7 @@ namespace Taqyim.Api.Controllers
                 .Include(u => u.BusinessUsers)
                 .FirstOrDefaultAsync(u => u.UserId == id);
 
-            if (user == null)
+            if (user == null || user.Type == "Deleted")
             {
                 return NotFound();
             }

@@ -6,27 +6,27 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: {
-    firstName: string;
-    lastName: string;
-    bio?: string;
-    profilePic?: string;
+    name?: string;
+    category?: string;
+    description?: string;
+    logo?: string;
   }) => void;
   initialData: {
-    firstName: string;
-    lastName: string;
-    bio?: string;
-    profilePic?: string;
+    name?: string;
+    category?: string;
+    description?: string;
+    logo?: string;
   };
 }
 
-const EditProfileModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialData }) => {
-  const [firstName, setFirstName] = useState(initialData.firstName);
-  const [lastName, setLastName] = useState(initialData.lastName);
-  const [bio, setBio] = useState(initialData.bio || "");
-  const [profilePic, setProfilePic] = useState(initialData.profilePic || "");
+const EditBusinessModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialData }) => {
+  const [name, setName] = useState(initialData.name || "");
+  const [category, setCategory] = useState(initialData.category || "");
+  const [description, setDescription] = useState(initialData.description || "");
+  const [logo, setLogo] = useState(initialData.logo || "");
 
   const handleSubmit = () => {
-    onSave({ firstName, lastName, bio, profilePic });
+    onSave({ name, category, description, logo });
     onClose();
   };
 
@@ -35,36 +35,36 @@ const EditProfileModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialDat
   return (
     <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-gray-300 opacity-80 p-6 rounded-lg w-full max-w-md shadow-lg">
-        <h2 className="text-xl font-semibold mb-4">Edit Profile</h2>
+        <h2 className="text-xl font-semibold mb-4">Edit Business</h2>
 
         <input
           type="text"
-          placeholder="First Name"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
+          placeholder="Business Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           className="w-full mb-3 p-2 border rounded"
         />
 
         <input
           type="text"
-          placeholder="Last Name"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
+          placeholder="Category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
           className="w-full mb-3 p-2 border rounded"
         />
 
         <textarea
-          placeholder="Bio"
-          value={bio}
-          onChange={(e) => setBio(e.target.value)}
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
           className="w-full mb-3 p-2 border rounded"
         />
 
         <input
           type="text"
-          placeholder="Profile Picture URL"
-          value={profilePic}
-          onChange={(e) => setProfilePic(e.target.value)}
+          placeholder="Logo URL"
+          value={logo}
+          onChange={(e) => setLogo(e.target.value)}
           className="w-full mb-4 p-2 border rounded"
         />
 
@@ -87,4 +87,4 @@ const EditProfileModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialDat
   );
 };
 
-export default EditProfileModal;
+export default EditBusinessModal;
