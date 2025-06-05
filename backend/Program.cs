@@ -23,8 +23,8 @@ builder.Services.AddCors(options =>
     {
         builder.WithOrigins(
             "http://localhost:3000",  // Development
-            "http://localhost:3001",  // Allow frontend running on http://localhost:3001
-            "https://localhost:3001"  // Production - Update this with your actual domain
+            "http://localhost:3003",  // Added for frontend on port 3003
+            "https://your-production-domain.com"  // Production - Update this with your actual domain
         )
         .AllowAnyMethod()
         .AllowAnyHeader()
@@ -87,6 +87,10 @@ else
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
+
+// Use CORS middleware early in the pipeline
+app.UseCors("AllowFrontend");
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -101,7 +105,6 @@ else
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowFrontend");
 
 // Enable static files
 app.UseStaticFiles();

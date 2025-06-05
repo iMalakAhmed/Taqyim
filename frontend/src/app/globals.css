@@ -1,6 +1,10 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Inter&family=Playfair+Display&display=swap");
+
+html,
+body {
+  overflow-x: hidden;
+}
 
 :root {
   --background: #fbfbfe;
@@ -16,7 +20,9 @@
   .dark {
     --color-text: #eae9fc;
     --color-text-inverse: #040316;
+    --color-text-inverse: #040316;
     --color-background: #010104;
+    --color-inverse: #fbfbfe;
     --color-inverse: #fbfbfe;
     --color-primary: #52bdff;
     --color-secondary: #1a71a8;
@@ -27,13 +33,17 @@
 body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-rgb));
+  color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-rgb));
   font-family: Arial, Helvetica, sans-serif;
 }
 
 @theme {
   --color-text: #040316;
   --color-text-inverse: #eae9fc;
+  --color-text-inverse: #eae9fc;
   --color-background: #fbfbfe;
+  --color-inverse: #010104;
   --color-inverse: #010104;
   --color-primary: #006bad;
   --color-secondary: #57afe5;

@@ -5,6 +5,7 @@ import Image from "next/image";
 import Button from "./ui/Button";
 import { motion } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 
 const slideLeft = {
   hidden: { x: -100, opacity: 0 },
@@ -22,6 +23,7 @@ export default function HeroSection() {
   const [date, setDate] = useState("");
   const [inView, setInView] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const now = new Date();
@@ -90,12 +92,16 @@ export default function HeroSection() {
         </h2>
         <p className="font-body font-extralight text-2xl tracking-wider leading-8 pb-5 ">
           Put your name in print. Share honest takes on local spots and help
-          your neighbors discover what’s worth their time.
+          your neighbors discover what's worth their time.
           <br />
           <br />
           No subscription required — just your voice.
         </p>
-        <Button size="xl" className="w-full" onClick={() => router.push('/auth/signup')}>
+        <Button
+          size="xl"
+          className="w-full"
+          onClick={() => router.push("/auth/signup")}
+        >
           SIGN UP
         </Button>
       </motion.section>
