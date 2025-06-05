@@ -78,6 +78,12 @@ namespace Taqyim.Api.Controllers
             });
         }
 
+        [HttpPost("signout")]
+        public IActionResult SignOut(){
+            // No server-side action needed for cookie-based auth removal
+            return Ok();
+        }
+
         private string HashPassword(string password)
         {
             using var sha256=SHA256.Create();

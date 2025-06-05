@@ -3,43 +3,36 @@
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 import { IconUser } from "@tabler/icons-react";
-
-interface User {
-  userId: number;
-  email: string;
-  firstName: string;
-  lastName: string;
-  // Add other fields you return from /api/me if needed
-}
+import { useDispatch } from 'react-redux';
+import { useGetCurrentUserQuery, authApi } from "../../redux/services/authApi";
+import { useRouter } from "next/navigation";
+import { removeAuthCookie } from "../../actions/auth";
 
 export default function NavBar() {
   const pathname = usePathname();
   const isFixed = pathname !== "/";
+  const router = useRouter();
+  const dispatch = useDispatch();
 
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: user, isLoading, error } = useGetCurrentUserQuery();
 
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const res = await fetch("/api/me");
-        if (res.ok) {
-          const data = await res.json();
-          console.log(data.user);
-          setUser(data.user); // your API returns { user: {...} }
-        } else {
-          setUser(null);
-        }
-      } catch {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
+  const handleSignOut = async () => {
+    try {
+      // Call the backend signout API
+      await fetch("/api/auth/signout", {
+        method: "POST",
+      });
+    } catch (err) {
+      console.error("Error calling signout API:", err);
+      // Continue with client-side signout even if API call fails
     }
-    fetchUser();
-  }, []);
+    
+    await removeAuthCookie(); // Remove the cookie
+    // Invalidate RTK Query cache related to the user
+    dispatch(authApi.util.resetApiState());
+    router.push("/auth/login"); // Redirect to login page
+  };
 
   return (
     <div
@@ -64,13 +57,26 @@ export default function NavBar() {
           </form>
         </div>
         <div className="flex items-center space-x-4">
-          {!loading && user && (
-            <Link
-              href="/profile"
-              className="text-text hover:text-accent flex items-center space-x-2"
-            >
-              <IconUser size={24} />
-              <span>{user.firstName}</span>
+          {!isLoading && user && (
+            <>
+              <Link
+                href="/profile"
+                className="text-text hover:text-accent flex items-center space-x-2"
+              >
+                <IconUser size={24} />
+                <span>{user.firstName}</span>
+              </Link>
+              <button
+                onClick={handleSignOut}
+                className="text-red-500 hover:text-red-700 cursor-pointer"
+              >
+                Sign Out
+              </button>
+            </>
+          )}
+          {!isLoading && !user && !error && (
+            <Link href="/auth/login" className="text-text hover:text-accent">
+              Login
             </Link>
           )}
           <ThemeToggle />

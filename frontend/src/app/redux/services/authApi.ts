@@ -4,6 +4,15 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { FetchArgs } from "@reduxjs/toolkit/query";
 import { AuthResponse, LoginCredentials, RegisterData } from "./dtos";
 
+// Define the interface for the current user response
+export interface CurrentUserResponse {
+  userId: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  type: string;
+}
+
 const API_BASE_URL = "http://localhost:5273/api";
 
 export const authApi = createApi({
@@ -27,7 +36,11 @@ export const authApi = createApi({
         body: data,
       }),
     }),
+    // Add the new query for fetching the current user
+    getCurrentUser: builder.query<CurrentUserResponse, void>({
+      query: () => "/auth/me",
+    }),
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation } = authApi;
+export const { useLoginMutation, useRegisterMutation, useGetCurrentUserQuery } = authApi;

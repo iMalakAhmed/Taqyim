@@ -2,41 +2,10 @@
 
 import Image from "next/image";
 import HorizontalLine from "./HorizontalLine";
+import { useGetCurrentUserQuery, CurrentUserResponse } from "../../redux/services/authApi";
 
 export default function Review() {
-  const dummyReviews = [
-    {
-      reviewId: 1,
-      comment: "This product is amazing!",
-      user: {
-        firstName: "Jane",
-        lastName: "Doe",
-        profilePic: "",
-      },
-      images: [
-        {
-          reviewImageId: 101,
-          imageUrl: "/example1.jpg",
-          caption: "Side view",
-        },
-        {
-          reviewImageId: 102,
-          imageUrl: "/example2.jpg",
-          caption: "Packaging",
-        },
-      ],
-    },
-    {
-      reviewId: 2,
-      comment: "Not what I expected, but still okay.",
-      user: {
-        firstName: "John",
-        lastName: "Smith",
-        profilePic: "/john-avatar.png",
-      },
-      images: [],
-    },
-  ];
+  const { data: user, isLoading, error } = useGetCurrentUserQuery();
 
   function StarRating({ rating }: { rating: number }) {
     return (
@@ -48,18 +17,23 @@ export default function Review() {
     );
   }
 
+  if (isLoading) return <div>Loading user profile...</div>;
+  if (error) return <div>Error loading user profile.</div>;
+
+  if (!user) return null;
+
   return (
     <div className="w-full h-full border flex flex-col p-10 text-text">
       <div className="flex flex-row">
         <Image
           src="/default-profile.jpg"
-          width={40}
-          height={40}
-          alt="default profile"
+          width={80}
+          height={80}
+          alt="user profile"
           className="rounded-full w-20 h-20"
         />
         <div className="flex flex-col py-2 px-5">
-          <h1 className="font-heading text-2xl">Jane Doe</h1>
+          <h1 className="font-heading text-2xl">{user.firstName} {user.lastName}</h1>
           <p className="text-xs font-body pb-2">XX JUNE XXXX</p>
           <HorizontalLine className="w-96" />
         </div>
@@ -68,7 +42,7 @@ export default function Review() {
         Neque porro quisquam est qui dolorem ipsum quia dolor sit amet,
         consectetur, adipisci velit...
       </p>
-      <Image src="/review-typewriter-image.png" width={40} height={40} />
+      <Image src="/review-typewriter-image.png" width={40} height={40} alt="Review image"/>
     </div>
   );
 }
