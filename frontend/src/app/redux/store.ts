@@ -1,7 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { userApi } from "./services/UserApi";
-import { jsonPlaceholderApi } from "./services/JsonPlaceholderApi";
-import counterReducer from "./slices/counterSlice";
 import { businessApi } from "./services/BusinessApi"; 
 import userReducer from "./slices/userSlice";
 import businessReducer from "./slices/businessSlice";
@@ -20,12 +18,10 @@ export const store = configureStore({
   },
   middleware: (getDefaultMiddleware) => 
     getDefaultMiddleware().concat(
-      jsonPlaceholderApi.middleware,
-      counterReducer.middleware,
       userApi.middleware,
       authApi.middleware,
-      reviewApi.middleware
-     , businessApi.middleware),
+      reviewApi.middleware, 
+      businessApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
