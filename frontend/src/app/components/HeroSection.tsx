@@ -1,23 +1,28 @@
 "use client";
+
 import VerticalLine from "./ui/VerticalLine";
 import Image from "next/image";
 import Button from "./ui/Button";
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 
-const slideInLeft = {
+const slideLeft = {
   hidden: { x: -100, opacity: 0 },
   visible: { x: 0, opacity: 1, transition: { duration: 0.8, ease: "easeOut" } },
+  exit: { x: -150, opacity: 0, transition: { duration: 0.5, ease: "easeIn" } },
 };
 
-const slideInRight = {
+const slideRight = {
   hidden: { x: 100, opacity: 0 },
   visible: { x: 0, opacity: 1, transition: { duration: 0.8, ease: "easeOut" } },
+  exit: { x: 150, opacity: 0, transition: { duration: 0.5, ease: "easeIn" } },
 };
 
 export default function HeroSection() {
   const [date, setDate] = useState("");
+  const [inView, setInView] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -27,14 +32,39 @@ export default function HeroSection() {
     const year = now.getFullYear();
     setDate(`${day} ${month} ${year}`);
   }, []);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setInView(entry.isIntersecting);
+      },
+      {
+        root: null,
+        rootMargin: "-30% 0px -30% 0px",
+        threshold: 0.1,
+      }
+    );
+
+    observer.observe(containerRef.current);
+
+    return () => {
+      if (containerRef.current) observer.unobserve(containerRef.current);
+    };
+  }, []);
+
   return (
-    <div className="w-full max-h-[500px] flex flex-row justify-center items-center text-text">
+    <div
+      ref={containerRef}
+      className="w-full max-h-[500px] flex flex-row justify-center items-center text-text relative"
+    >
       {/* IMAGE SECTION */}
       <motion.section
         className="w-2/3 ml-24 flex flex-col justify-center items-start"
-        variants={slideInLeft}
+        variants={slideLeft}
         initial="hidden"
-        animate="visible"
+        animate={inView ? "visible" : "exit"}
       >
         <h2 className="text-xl font-body font-bold p-2">JOIN OUR COMMUNITY</h2>
         <Image
@@ -51,11 +81,10 @@ export default function HeroSection() {
       {/* TEXT & CTA SECTION */}
       <motion.section
         className="w-1/3 m-24 text-justify"
-        variants={slideInRight}
+        variants={slideRight}
         initial="hidden"
-        animate="visible"
+        animate={inView ? "visible" : "exit"}
       >
-        <p className="font-body text-lg text-right">{date}</p>
         <p className="font-body text-lg text-right">{date}</p>
         <h2 className="text-3xl font-heading py-3">
           Make Headlines —{" "}
@@ -68,8 +97,11 @@ export default function HeroSection() {
           <br />
           No subscription required — just your voice.
         </p>
-        <Button size="xl" className="w-full" onClick={() => router.push('/auth/signup')}>
-        <Button size="xl" className="w-full" onClick={() => router.push('/auth/signup')}>
+        <Button
+          size="xl"
+          className="w-full"
+          onClick={() => router.push("/auth/signup")}
+        >
           SIGN UP
         </Button>
       </motion.section>

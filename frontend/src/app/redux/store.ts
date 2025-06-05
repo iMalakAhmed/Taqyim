@@ -5,15 +5,21 @@ import { setupListeners } from "@reduxjs/toolkit/query";
 import counterReducer from "./slices/counter/counterSlice";
 import { jsonPlaceholderApi } from "./services/jsonPlaceHolderApi";
 import { authApi } from "./services/authApi";
+import { reviewApi } from "./services/reviewApis";
 
 export const store = configureStore({
   reducer: {
     counter: counterReducer,
     [jsonPlaceholderApi.reducerPath]: jsonPlaceholderApi.reducer,
     [authApi.reducerPath]: authApi.reducer,
+    [reviewApi.reducerPath]: reviewApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(jsonPlaceholderApi.middleware, authApi.middleware),
+    getDefaultMiddleware().concat(
+      jsonPlaceholderApi.middleware,
+      authApi.middleware,
+      reviewApi.middleware
+    ),
 });
 
 setupListeners(store.dispatch);
