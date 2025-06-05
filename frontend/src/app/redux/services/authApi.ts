@@ -1,35 +1,33 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+"use client";
 
-// Assuming you have a baseApi setup elsewhere, otherwise you might need to adjust this
-// import { baseApi } from './baseApi';
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import type { FetchArgs } from "@reduxjs/toolkit/query";
+import { AuthResponse, LoginCredentials, RegisterData } from "./dtos";
+
+const API_BASE_URL = "http://localhost:5273/api";
 
 export const authApi = createApi({
-  reducerPath: 'authApi',
+  reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://localhost:5273/',
-    prepareHeaders: (headers, { endpoint }) => {
-      // Log the URL being fetched
-      console.log('Fetching endpoint:', endpoint);
-      console.log('Resolved URL:', `http://localhost:5273/${endpoint}`); // Manually construct for logging clarity
-      return headers;
-    },
-  }), // Set base URL to backend address
+    baseUrl: API_BASE_URL,
+    credentials: "include",
+  }),
   endpoints: (builder) => ({
-    login: builder.mutation({
+    login: builder.mutation<AuthResponse, LoginCredentials>({
       query: (credentials) => ({
-        url: 'api/auth/login', // Corrected login URL relative to baseUrl
-        method: 'POST',
+        url: "/auth/login",
+        method: "POST",
         body: credentials,
       }),
     }),
-    signup: builder.mutation({
-      query: (userData) => ({
-        url: 'api/auth/register', // Corrected signup URL relative to baseUrl
-        method: 'POST',
-        body: userData,
+    register: builder.mutation<AuthResponse, RegisterData>({
+      query: (data) => ({
+        url: "/auth/register",
+        method: "POST",
+        body: data,
       }),
     }),
   }),
 });
 
-export const { useLoginMutation, useSignupMutation } = authApi; 
+export const { useLoginMutation, useRegisterMutation } = authApi;

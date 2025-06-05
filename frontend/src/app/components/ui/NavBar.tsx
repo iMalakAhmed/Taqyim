@@ -3,11 +3,43 @@
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { IconUser } from "@tabler/icons-react";
+
+interface User {
+  userId: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  // Add other fields you return from /api/me if needed
+}
 
 export default function NavBar() {
   const pathname = usePathname();
-
   const isFixed = pathname !== "/";
+
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const res = await fetch("/api/me");
+        if (res.ok) {
+          const data = await res.json();
+          console.log(data.user);
+          setUser(data.user); // your API returns { user: {...} }
+        } else {
+          setUser(null);
+        }
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchUser();
+  }, []);
 
   return (
     <div
@@ -31,7 +63,16 @@ export default function NavBar() {
             />
           </form>
         </div>
-        <div>
+        <div className="flex items-center space-x-4">
+          {!loading && user && (
+            <Link
+              href="/profile"
+              className="text-text hover:text-accent flex items-center space-x-2"
+            >
+              <IconUser size={24} />
+              <span>{user.firstName}</span>
+            </Link>
+          )}
           <ThemeToggle />
         </div>
       </div>
