@@ -12,7 +12,7 @@ using Taqyim.Api.Data;
 namespace Taqyim.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250606094347_Init")]
+    [Migration("20250606205102_Init")]
     partial class Init
     {
         /// <inheritdoc />

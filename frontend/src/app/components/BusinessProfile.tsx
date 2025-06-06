@@ -9,7 +9,7 @@ import { useGetBusinessByIdQuery } from "@/app/redux/services/BusinessApi";
 import { useGetCurrentUserQuery } from "@/app/redux/services/userApi";
 
 const BusinessProfile = () => {
-  const businessId = 3;
+  const businessId = 2;
   const {
     data: business,
     isLoading,
