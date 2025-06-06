@@ -17,6 +17,7 @@ export default function LoginPage() {
       const res = await login({ email, password }).unwrap();
       await setAuthCookie(res.token);
       console.log(res.token);
+      document.cookie = `token=${res.token}; path=/;`;
       router.push("/home");
     } catch (err: any) {
       console.error("Login failed:", err);

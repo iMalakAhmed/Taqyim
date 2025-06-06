@@ -17,7 +17,7 @@ const baseStyles =
 
 const variants = {
   primary: "bg-primary hover:bg-accent/90 focus:ring-accent",
-  secondary: "bg-gray-100 hover:bg-gray-200 focus:ring-gray-300",
+  secondary: "bg-secondary hover:bg-accent/90 focus:ring-accent",
   outline:
     "border border-gray-300 text-gray-800 hover:bg-gray-100 bg-transparent focus:ring-gray-300",
 };

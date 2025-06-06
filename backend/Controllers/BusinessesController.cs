@@ -25,10 +25,6 @@ namespace Taqyim.Api.Controllers
         public async Task<IActionResult> CreateBusiness([FromBody] BusinessCreateDto dto)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var userType = User.FindFirst("Type")?.Value;
-
-            if (userType != "BusinessOwner" && userType != "Admin")
-                return Forbid("Only BusinessOwners or Admins can create businesses.");
 
             var business = new Business
             {
@@ -40,7 +36,7 @@ namespace Taqyim.Api.Controllers
                 CreatedAt = DateTime.UtcNow,
                 IsDeleted = false,
                 Logo = dto.Logo,
-                VerifiedByUserId = 0 // Set to 0 initially, can be updated later
+                VerifiedByUserId = null
             };
 
             _context.Businesses.Add(business);
@@ -109,35 +105,30 @@ namespace Taqyim.Api.Controllers
                 .Include(b => b.BusinessLocations)
                 .FirstOrDefaultAsync(b => b.BusinessId == id && !b.IsDeleted);
 
-            if (business == null)
-                return NotFound();
+            if (business == null) return NotFound();
 
-            return Ok(new
+            var result = new BusinessDTO
             {
-                business.BusinessId,
-                business.Name,
-                business.Category,
-                business.Location,
-                business.Description,
-                business.Logo,
-                AvgRating = business.Reviews.Any() ? business.Reviews.Average(r => r.Rating) : 0,
-                ReviewsCount = business.Reviews.Count,
-                Reviews = business.Reviews.Select(r => new
+                BusinessId = business.BusinessId,
+                Name = business.Name,
+                Category = business.Category,
+                Description = business.Description,
+                Logo = business.Logo,
+                UserId = business.UserId,
+                BusinessLocations = business.BusinessLocations.Select(loc => new BusinessLocationDTO
                 {
-                    r.ReviewId,
-                    r.Rating,
-                    r.Comment,
-                    r.CreatedAt,
-                    User = new
-                    {
-                        r.User.UserId,
-                        r.User.FirstName,
-                        r.User.LastName,
-                        r.User.ProfilePic
-                    }
+                    LocationId = loc.LocationId,
+                    BusinessId = loc.BusinessId,
+                    Address = loc.Address ?? "",
+                    Latitude = loc.Latitude != null ? (double?)loc.Latitude : 0,
+                    Longitude = loc.Longitude != null ? (double?)loc.Longitude : 0,
+                    Label = loc.Label ?? ""
                 }).ToList()
-            });
+            };
+
+            return Ok(result);
         }
+
 
         // PUT /api/businesses/{id}
         [Authorize]
@@ -181,6 +172,33 @@ namespace Taqyim.Api.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+        
+        [Authorize(Roles = "Admin,Moderator")]
+        [HttpPut("{id}/verify")]
+        public async Task<IActionResult> VerifyBusiness(int id)
+        {
+            var business = await _context.Businesses.FindAsync(id);
+            if (business == null) return NotFound();
+
+            var adminId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            business.VerifiedByUserId = adminId;
+
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Business verified." });
+        }
+
+        [Authorize(Roles = "Admin,Moderator")]
+        [HttpPut("{id}/unverify")]
+        public async Task<IActionResult> UnverifyBusiness(int id)
+        {
+            var business = await _context.Businesses.FindAsync(id);
+            if (business == null) return NotFound();
+
+            business.VerifiedByUserId = null;
+
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Business unverified." });
         }
     }
 }

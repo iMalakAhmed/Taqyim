@@ -24,7 +24,7 @@ namespace Taqyim.Api.Controllers
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _context.Users
-                .Where(u => u.Type != "Deleted") 
+                .Where(u => u.Type != "Deleted")
                 .Select(u => new
                 {
                     u.UserId,
@@ -51,7 +51,7 @@ namespace Taqyim.Api.Controllers
                 .Include(u => u.BusinessUsers)
                 .FirstOrDefaultAsync(u => u.UserId == id);
 
-            if (user == null)
+            if (user == null || user.Type == "Deleted")
             {
                 return NotFound();
             }
@@ -112,6 +112,36 @@ namespace Taqyim.Api.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        // GET: /api/users/me
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<ActionResult<UserDTO>> GetCurrentUser()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var user = await _context.Users
+                .Include(u => u.BusinessUsers)
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null || user.Type == "Deleted")
+            {
+                return NotFound();
+            }
+
+            return new UserDTO
+            {
+                UserId = user.UserId,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Type = user.Type,
+                IsVerified = user.IsVerified,
+                ProfilePic = user.ProfilePic,
+                Bio = user.Bio,
+                CreatedAt = user.CreatedAt,
+                ReputationPoints = user.ReputationPoints
+            };
         }
     }
 

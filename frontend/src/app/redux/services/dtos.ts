@@ -47,6 +47,7 @@ export interface UpdateUserDto {
 }
 
 export interface BusinessLocationCreateDto {
+  locationId: number;
   address?: string | null;
   latitude?: number | null;
   longitude?: number | null;
@@ -54,6 +55,7 @@ export interface BusinessLocationCreateDto {
 }
 
 export interface BusinessLocationUpdateDto {
+  locationId: number;
   address?: string | null;
   latitude?: number | null;
   longitude?: number | null;

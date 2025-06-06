@@ -1,31 +1,29 @@
-"use client";
-
 import { configureStore } from "@reduxjs/toolkit";
-import { setupListeners } from "@reduxjs/toolkit/query";
-import counterReducer from "./slices/counter/counterSlice";
-import { jsonPlaceholderApi } from "./services/jsonPlaceHolderApi";
+import { usersApi } from "./services/userApi";
+import { businessApi } from "./services/BusinessApi"; 
+import userReducer from "./slices/userSlice";
+import businessReducer from "./slices/businessSlice";
 import { authApi } from "./services/authApi";
 import { reviewApi } from "./services/reviewApis";
-import { usersApi } from "./services/userApi";
 
 export const store = configureStore({
   reducer: {
-    counter: counterReducer,
-    [jsonPlaceholderApi.reducerPath]: jsonPlaceholderApi.reducer,
+    [usersApi.reducerPath]: usersApi.reducer,
+    [businessApi.reducerPath]: businessApi.reducer,
     [authApi.reducerPath]: authApi.reducer,
-    [usersApi.reducerPath]: authApi.reducer,
     [reviewApi.reducerPath]: reviewApi.reducer,
+    user: userReducer,
+    business: businessReducer,
   },
-  middleware: (getDefaultMiddleware) =>
+  middleware: (getDefaultMiddleware) => 
     getDefaultMiddleware().concat(
-      jsonPlaceholderApi.middleware,
-      authApi.middleware,
       usersApi.middleware,
+      authApi.middleware,
+      businessApi.middleware,
       reviewApi.middleware
     ),
 });
 
-setupListeners(store.dispatch);
-
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+
