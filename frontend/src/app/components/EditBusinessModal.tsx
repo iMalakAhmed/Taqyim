@@ -1,13 +1,21 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { BusinessLocationUpdateDto, BusinessUpdateDto } from "@/app/redux/services/dtos";
+import {
+  BusinessLocationUpdateDto,
+  BusinessUpdateDto,
+} from "@/app/redux/services/dtos";
+import {
+  useUpdateBusinessMutation,
+  useUpdateLocationMutation,
+} from "@/app/redux/services/BusinessApi";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: BusinessUpdateDto & { businessLocations: BusinessLocationUpdateDto[] }) => void;
   initialData: BusinessUpdateDto & {
+    businessId: number;
     businessLocations?: BusinessLocationUpdateDto[];
   };
 }
@@ -19,26 +27,61 @@ const EditBusinessModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialDa
   const [logo, setLogo] = useState(initialData.logo || "");
   const [locations, setLocations] = useState<BusinessLocationUpdateDto[]>([]);
 
+  const [updateBusiness] = useUpdateBusinessMutation();
+  const [updateLocation] = useUpdateLocationMutation();
+
   useEffect(() => {
     setLocations(initialData.businessLocations || []);
   }, [initialData.businessLocations]);
 
-  const updateLocation = (index: number, key: keyof BusinessLocationUpdateDto, value: any) => {
+  const handleLocationChange = (
+    index: number,
+    key: keyof BusinessLocationUpdateDto,
+    value: any
+  ) => {
     const updated = [...locations];
     updated[index] = { ...updated[index], [key]: value };
     setLocations(updated);
   };
 
-  const handleSubmit = () => {
-    onSave({ name, category, description, logo, businessLocations: locations });
-    onClose();
+  const handleSubmit = async () => {
+    try {
+      // Save the business info
+      await updateBusiness({
+        id: initialData.businessId,
+        body: { name, category, description, logo },
+      });
+
+      // Save each location
+      for (const loc of locations) {
+        if (loc.locationId) {
+          await updateLocation({
+            businessId: initialData.businessId,
+            locationId: loc.locationId,
+            body: loc,
+          });
+        }
+      }
+
+      onSave({
+        name,
+        category,
+        description,
+        logo,
+        businessLocations: locations,
+      });
+
+      onClose();
+    } catch (error) {
+      console.error("Error updating business or locations:", error);
+    }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-gray-300 opacity-80 p-6 rounded-lg w-full max-w-md shadow-lg overflow-y-auto max-h-screen">
+    <div className="fixed inset-0 bg-opacity-50 flex justify-center items-start z-50 overflow-y-auto">
+      <div className="bg-gray-300 opacity-80 p-6 rounded-lg w-full max-w-md shadow-lg overflow-y-auto max-h-[90vh] mt-24">
         <h2 className="text-xl font-semibold mb-4">Edit Business</h2>
 
         <input
@@ -74,33 +117,33 @@ const EditBusinessModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialDa
 
         <h3 className="text-lg font-semibold mb-2">Business Locations</h3>
         {locations.map((loc, idx) => (
-          <div key={idx} className="mb-4">
+          <div key={loc.locationId || idx} className="mb-4">
             <input
               type="text"
               placeholder="Label"
               value={loc.label || ""}
-              onChange={(e) => updateLocation(idx, "label", e.target.value)}
+              onChange={(e) => handleLocationChange(idx, "label", e.target.value)}
               className="w-full mb-2 p-2 border rounded"
             />
             <input
               type="text"
               placeholder="Address"
               value={loc.address || ""}
-              onChange={(e) => updateLocation(idx, "address", e.target.value)}
+              onChange={(e) => handleLocationChange(idx, "address", e.target.value)}
               className="w-full mb-2 p-2 border rounded"
             />
             <input
               type="number"
               placeholder="Latitude"
-              value={loc.latitude !== null && loc.latitude !== undefined ? loc.latitude : ""}
-              onChange={(e) => updateLocation(idx, "latitude", parseFloat(e.target.value))}
+              value={loc.latitude ?? ""}
+              onChange={(e) => handleLocationChange(idx, "latitude", parseFloat(e.target.value))}
               className="w-full mb-2 p-2 border rounded"
             />
             <input
               type="number"
               placeholder="Longitude"
-              value={loc.longitude !== null && loc.longitude !== undefined ? loc.longitude : ""}
-              onChange={(e) => updateLocation(idx, "longitude", parseFloat(e.target.value))}
+              value={loc.longitude ?? ""}
+              onChange={(e) => handleLocationChange(idx, "longitude", parseFloat(e.target.value))}
               className="w-full mb-2 p-2 border rounded"
             />
           </div>

@@ -6,7 +6,7 @@ import EditBusinessModal from "@/app/components/EditBusinessModal";
 import Button from "@/app/components/ui/Button";
 import { IconEdit, IconShare } from "@tabler/icons-react";
 import { useGetBusinessByIdQuery } from "@/app/redux/services/BusinessApi";
-import { useGetCurrentUserQuery } from "@/app/redux/services/UserApi";
+import { useGetCurrentUserQuery } from "@/app/redux/services/userApi";
 
 const BusinessProfile = () => {
   const businessId = 1;
@@ -27,10 +27,10 @@ const BusinessProfile = () => {
       <div className="flex flex-row">
         <div className="w-1/3 p-3">
           <img
-            src={business.logo ?? ""}
+            src={business.logo && business.logo.trim() !== "" ? business.logo : "\default-profile.jpg"}
             alt={business.name}
             className="w-40 h-40 rounded-sm mt-4 ml-1.5"
-            onError={(e) => (e.currentTarget.src = "https://i.pravatar.cc/150?img=13")}
+            onError={(e) => (e.currentTarget.src = "\default-profile.jpg")}
           />
         </div>
 

@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { usersApi } from "./services/UserApi";
+import { usersApi } from "./services/userApi";
 import { businessApi } from "./services/BusinessApi"; 
 import userReducer from "./slices/userSlice";
 import businessReducer from "./slices/businessSlice";
@@ -19,7 +19,7 @@ export const store = configureStore({
     getDefaultMiddleware().concat(
       usersApi.middleware,
       authApi.middleware,
-
+      businessApi.middleware,
       reviewApi.middleware
     ),
 });
