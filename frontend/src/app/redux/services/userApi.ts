@@ -1,6 +1,12 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { UserDTO, UpdateUserDTO } from "./dtos";
-// Helper to get token from cookies (simple example)
+import {
+  UserDTO,
+  UpdateUserDto,
+  AuthResponse,
+  LoginCredentials,
+  RegisterData,
+} from "./dtos";
+
 function getTokenFromCookie() {
   if (typeof document === "undefined") return null;
   return (
@@ -15,10 +21,9 @@ export const usersApi = createApi({
   reducerPath: "usersApi",
   baseQuery: fetchBaseQuery({
     baseUrl: "http://localhost:5273/api/users",
-    credentials: "include", // Include credentials for cookie-based auth
+    credentials: "include",
     prepareHeaders: (headers) => {
       const token = getTokenFromCookie();
-      console.log("Token from cookie:", token);
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }
@@ -35,7 +40,11 @@ export const usersApi = createApi({
       query: (id) => `/${id}`,
       providesTags: (result, error, id) => [{ type: "User", id }],
     }),
-    updateUser: build.mutation<void, { id: number; data: UpdateUserDTO }>({
+    getCurrentUser: build.query<UserDTO, void>({
+      query: () => "/me",
+      providesTags: ["User"],
+    }),
+    updateUser: build.mutation<void, { id: number; data: UpdateUserDto }>({
       query: ({ id, data }) => ({
         url: `/${id}`,
         method: "PUT",
@@ -50,17 +59,29 @@ export const usersApi = createApi({
       }),
       invalidatesTags: ["User"],
     }),
-    getCurrentUser: build.query<UserDTO, void>({
-    query: () => "/me",
-    providesTags: ["User"],
-}),
+    login: build.mutation<AuthResponse, LoginCredentials>({
+      query: (credentials) => ({
+        url: "/login",
+        method: "POST",
+        body: credentials,
+      }),
+    }),
+    register: build.mutation<AuthResponse, RegisterData>({
+      query: (data) => ({
+        url: "/register",
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
 export const {
   useGetAllUsersQuery,
   useGetUserQuery,
+  useGetCurrentUserQuery,
   useUpdateUserMutation,
   useDeleteUserMutation,
-  useGetCurrentUserQuery,
+  useLoginMutation,
+  useRegisterMutation,
 } = usersApi;
