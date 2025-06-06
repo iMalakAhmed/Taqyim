@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  BusinessLocationUpdateDto,
-  BusinessUpdateDto,
-} from "@/app/redux/services/dtos";
+  BusinessLocationUpdateType,
+  BusinessUpdateType,
+} from "@/app/redux/services/types";
 import {
   useUpdateBusinessMutation,
   useUpdateLocationMutation,
@@ -13,19 +13,28 @@ import {
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: BusinessUpdateDto & { businessLocations: BusinessLocationUpdateDto[] }) => void;
-  initialData: BusinessUpdateDto & {
+  onSave: (
+    data: BusinessUpdateType & {
+      businessLocations: BusinessLocationUpdateType[];
+    }
+  ) => void;
+  initialData: BusinessUpdateType & {
     businessId: number;
-    businessLocations?: BusinessLocationUpdateDto[];
+    businessLocations?: BusinessLocationUpdateType[];
   };
 }
 
-const EditBusinessModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialData }) => {
+const EditBusinessModal: React.FC<Props> = ({
+  isOpen,
+  onClose,
+  onSave,
+  initialData,
+}) => {
   const [name, setName] = useState(initialData.name || "");
   const [category, setCategory] = useState(initialData.category || "");
   const [description, setDescription] = useState(initialData.description || "");
   const [logo, setLogo] = useState(initialData.logo || "");
-  const [locations, setLocations] = useState<BusinessLocationUpdateDto[]>([]);
+  const [locations, setLocations] = useState<BusinessLocationUpdateType[]>([]);
 
   const [updateBusiness] = useUpdateBusinessMutation();
   const [updateLocation] = useUpdateLocationMutation();
@@ -36,7 +45,7 @@ const EditBusinessModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialDa
 
   const handleLocationChange = (
     index: number,
-    key: keyof BusinessLocationUpdateDto,
+    key: keyof BusinessLocationUpdateType,
     value: any
   ) => {
     const updated = [...locations];
@@ -122,28 +131,44 @@ const EditBusinessModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialDa
               type="text"
               placeholder="Label"
               value={loc.label || ""}
-              onChange={(e) => handleLocationChange(idx, "label", e.target.value)}
+              onChange={(e) =>
+                handleLocationChange(idx, "label", e.target.value)
+              }
               className="w-full mb-2 p-2 border rounded"
             />
             <input
               type="text"
               placeholder="Address"
               value={loc.address || ""}
-              onChange={(e) => handleLocationChange(idx, "address", e.target.value)}
+              onChange={(e) =>
+                handleLocationChange(idx, "address", e.target.value)
+              }
               className="w-full mb-2 p-2 border rounded"
             />
             <input
               type="number"
               placeholder="Latitude"
               value={loc.latitude ?? ""}
-              onChange={(e) => handleLocationChange(idx, "latitude", parseFloat(e.target.value))}
+              onChange={(e) =>
+                handleLocationChange(
+                  idx,
+                  "latitude",
+                  parseFloat(e.target.value)
+                )
+              }
               className="w-full mb-2 p-2 border rounded"
             />
             <input
               type="number"
               placeholder="Longitude"
               value={loc.longitude ?? ""}
-              onChange={(e) => handleLocationChange(idx, "longitude", parseFloat(e.target.value))}
+              onChange={(e) =>
+                handleLocationChange(
+                  idx,
+                  "longitude",
+                  parseFloat(e.target.value)
+                )
+              }
               className="w-full mb-2 p-2 border rounded"
             />
           </div>

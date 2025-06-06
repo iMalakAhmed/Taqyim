@@ -20,7 +20,7 @@ export interface AuthResponse {
   };
 }
 
-export interface UserDTO {
+export interface UserType {
   userId: number;
   email: string;
   firstName: string;
@@ -39,14 +39,14 @@ export interface UserDTO {
   reputationPoints: number;
 }
 
-export interface UpdateUserDto {
+export interface UpdateUserType {
   firstName?: string | null;
   lastName?: string | null;
   bio?: string | null;
   profilePic?: string | null;
 }
 
-export interface BusinessLocationCreateDto {
+export interface BusinessLocationCreateType {
   locationId: number;
   address?: string | null;
   latitude?: number | null;
@@ -54,7 +54,7 @@ export interface BusinessLocationCreateDto {
   label?: string | null;
 }
 
-export interface BusinessLocationUpdateDto {
+export interface BusinessLocationUpdateType {
   locationId: number;
   address?: string | null;
   latitude?: number | null;
@@ -62,7 +62,7 @@ export interface BusinessLocationUpdateDto {
   label?: string | null;
 }
 
-export interface BusinessLocationDTO {
+export interface BusinessLocationType {
   locationId: number;
   businessId: number;
   address: string;
@@ -72,7 +72,7 @@ export interface BusinessLocationDTO {
   createdAt: string;
 }
 
-export interface BusinessCreateDto {
+export interface BusinessCreateType {
   name: string;
   location?: string | null;
   category?: string | null;
@@ -80,14 +80,14 @@ export interface BusinessCreateDto {
   logo?: string | null;
 }
 
-export interface BusinessUpdateDto {
+export interface BusinessUpdateType {
   name?: string | null;
   category?: string | null;
   description?: string | null;
   logo?: string | null;
 }
 
-export interface BusinessDTO {
+export interface BusinessType {
   businessId: number;
   userId: number;
   name: string;
@@ -98,12 +98,12 @@ export interface BusinessDTO {
   createdAt: string;
   isVerified: boolean;
   verifiedByUserId?: number | null;
-  user: UserDTO;
-  verifiedByUser?: UserDTO | null;
-  businessLocations: BusinessLocationDTO[];
+  user: UserType;
+  verifiedByUser?: UserType | null;
+  businessLocations: BusinessLocationType[];
 }
 
-export interface ReviewDTO {
+export interface ReviewType {
   reviewId: number;
   userId: number;
   businessId: number;
@@ -112,62 +112,62 @@ export interface ReviewDTO {
   createdAt: string;
   updatedAt?: string | null;
   savedAt?: string | null;
-  user: UserDTO;
-  business: BusinessDTO;
-  comments: CommentDTO[];
-  reactions: ReactionDTO[];
-  tags: TagDTO[];
-  images: ReviewImageDTO[];
+  user: UserType;
+  business: BusinessType;
+  comments: CommentType[];
+  reactions: ReactionType[];
+  tags: TagType[];
+  images: ReviewImageType[];
 }
 
-export interface CreateReviewDTO {
+export interface CreateReviewType {
   businessId: number;
   rating: number;
   comment: string;
   tags?: string[] | null;
 }
 
-export interface UpdateReviewDTO {
+export interface UpdateReviewType {
   rating: number;
   comment: string;
   tags?: string[] | null;
 }
 
-export interface CommentDTO {
+export interface CommentType {
   commentId: number;
   commenterId: number;
   reviewId: number;
   content: string;
   createdAt: string;
-  commenter: UserDTO;
+  commenter: UserType;
 }
 
-export interface CreateCommentDTO {
+export interface CreateCommentType {
   reviewId: number;
   content: string;
 }
 
-export interface ReactionDTO {
+export interface ReactionType {
   reactionId: number;
   reviewId: number;
   userId: number;
   reactionType: string;
   createdAt: string;
-  user: UserDTO;
+  user: UserType;
 }
 
-export interface CreateReactionDTO {
+export interface CreateReactionType {
   reviewId: number;
   reactionType: string;
 }
 
-export interface TagDTO {
+export interface TagType {
   tagId: number;
   tagType: string;
   reviewId: number;
 }
 
-export interface ReviewImageDTO {
+export interface ReviewImageType {
   reviewImageId: number;
   reviewId: number;
   imageUrl: string;

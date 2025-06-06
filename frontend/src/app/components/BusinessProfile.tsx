@@ -9,8 +9,13 @@ import { useGetBusinessByIdQuery } from "@/app/redux/services/BusinessApi";
 import { useGetCurrentUserQuery } from "@/app/redux/services/userApi";
 
 const BusinessProfile = () => {
-  const businessId = 1;
-  const { data: business, isLoading, error, refetch } = useGetBusinessByIdQuery(businessId);
+  const businessId = 3;
+  const {
+    data: business,
+    isLoading,
+    error,
+    refetch,
+  } = useGetBusinessByIdQuery(businessId);
   const { data: currentUser } = useGetCurrentUserQuery();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -27,10 +32,14 @@ const BusinessProfile = () => {
       <div className="flex flex-row">
         <div className="w-1/3 p-3">
           <img
-            src={business.logo && business.logo.trim() !== "" ? business.logo : "\default-profile.jpg"}
+            src={
+              business.logo && business.logo.trim() !== ""
+                ? business.logo
+                : "default-profile.jpg"
+            }
             alt={business.name}
             className="w-40 h-40 rounded-sm mt-4 ml-1.5"
-            onError={(e) => (e.currentTarget.src = "\default-profile.jpg")}
+            onError={(e) => (e.currentTarget.src = "default-profile.jpg")}
           />
         </div>
 
@@ -66,7 +75,11 @@ const BusinessProfile = () => {
 
         {canEdit && (
           <div className="flex flex-row mt-3">
-            <Button onClick={() => setIsModalOpen(true)} variant="primary" className="mr-3 p-6">
+            <Button
+              onClick={() => setIsModalOpen(true)}
+              variant="primary"
+              className="mr-3 p-6"
+            >
               <IconEdit stroke={2} /> Edit Business
             </Button>
             <Button variant="primary" className="ml-2 p-6">

@@ -1,8 +1,7 @@
 "use client";
 
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import type { FetchArgs } from "@reduxjs/toolkit/query";
-import { AuthResponse, LoginCredentials, RegisterData } from "./dtos";
+import { AuthResponse, LoginCredentials, RegisterData } from "./types";
 
 // Define the interface for the current user response
 export interface CurrentUserResponse {
@@ -13,7 +12,7 @@ export interface CurrentUserResponse {
   type: string;
 }
 
-const API_BASE_URL = "http://localhost:5273/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
 export const authApi = createApi({
   reducerPath: "authApi",
@@ -36,11 +35,11 @@ export const authApi = createApi({
         body: data,
       }),
     }),
-    // Add the new query for fetching the current user
     getCurrentUser: builder.query<CurrentUserResponse, void>({
       query: () => "/auth/me",
     }),
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useGetCurrentUserQuery } = authApi;
+export const { useLoginMutation, useRegisterMutation, useGetCurrentUserQuery } =
+  authApi;

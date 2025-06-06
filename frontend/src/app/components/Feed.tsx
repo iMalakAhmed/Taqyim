@@ -1,0 +1,15 @@
+import CreateReview from "./CreateReview";
+import ReactionButtons from "./ReactionButtons";
+import Review from "./ui/Review";
+
+export default function Feed() {
+  return (
+    <div>
+      <div>
+        <Review />
+        <CreateReview />
+        {/* <ReactionButtons /> */}
+      </div>
+    </div>
+  );
+}

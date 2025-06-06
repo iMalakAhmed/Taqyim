@@ -1,20 +1,25 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type {
-  ReviewDTO,
-  CreateReviewDTO,
-  UpdateReviewDTO,
-  CommentDTO,
-  CreateCommentDTO,
-  ReactionDTO,
-  CreateReactionDTO,
-} from "./dtos";
+  ReviewType,
+  CreateReviewType,
+  UpdateReviewType,
+  CommentType,
+  CreateCommentType,
+  ReactionType,
+  CreateReactionType,
+} from "./types"; // assuming you renamed dtos -> types
+import { getTokenFromCookie } from "@/app/utils/auth";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
 export const reviewApi = createApi({
   reducerPath: "reviewApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "/api/review",
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as any).auth.token;
+    baseUrl: `${API_BASE_URL}/review`,
+    credentials: "include",
+    prepareHeaders: (headers) => {
+      const token = getTokenFromCookie();
+      console.log("Token:", token);
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }
@@ -24,7 +29,7 @@ export const reviewApi = createApi({
   tagTypes: ["Reviews", "Review", "Comments", "Reactions"],
   endpoints: (build) => ({
     getReviews: build.query<
-      ReviewDTO[],
+      ReviewType[],
       { businessId?: number; userId?: number } | void
     >({
       query: (params) => {
@@ -47,12 +52,12 @@ export const reviewApi = createApi({
           : [{ type: "Reviews", id: "LIST" }],
     }),
 
-    getReview: build.query<ReviewDTO, number>({
+    getReview: build.query<ReviewType, number>({
       query: (id) => `/${id}`,
       providesTags: (result, error, id) => [{ type: "Review", id }],
     }),
 
-    createReview: build.mutation<ReviewDTO, CreateReviewDTO>({
+    createReview: build.mutation<ReviewType, CreateReviewType>({
       query: (body) => ({
         url: "",
         method: "POST",
@@ -61,7 +66,7 @@ export const reviewApi = createApi({
       invalidatesTags: [{ type: "Reviews", id: "LIST" }],
     }),
 
-    updateReview: build.mutation<void, { id: number; data: UpdateReviewDTO }>({
+    updateReview: build.mutation<void, { id: number; data: UpdateReviewType }>({
       query: ({ id, data }) => ({
         url: `/${id}`,
         method: "PUT",
@@ -79,8 +84,8 @@ export const reviewApi = createApi({
     }),
 
     addComment: build.mutation<
-      CommentDTO,
-      { reviewId: number; comment: CreateCommentDTO }
+      CommentType,
+      { reviewId: number; comment: CreateCommentType }
     >({
       query: ({ reviewId, comment }) => ({
         url: `/${reviewId}/comment`,
@@ -93,8 +98,8 @@ export const reviewApi = createApi({
     }),
 
     addReaction: build.mutation<
-      ReactionDTO | void,
-      { reviewId: number; reaction: CreateReactionDTO }
+      ReactionType | void,
+      { reviewId: number; reaction: CreateReactionType }
     >({
       query: ({ reviewId, reaction }) => ({
         url: `/${reviewId}/reaction`,

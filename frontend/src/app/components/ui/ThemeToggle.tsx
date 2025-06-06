@@ -28,13 +28,12 @@ export default function ThemeToggle() {
   }, [dark]);
 
   return (
-    <button 
+    <button
       onClick={() => {
         const newState = !dark;
-        console.log('Toggling theme to:', newState);
         setDark(newState);
       }}
-      style={{ color: dark ? 'white' : 'black' }}
+      style={{ color: dark ? "white" : "black" }}
     >
       Toggle {dark ? "Light" : "Dark"} Mode
     </button>

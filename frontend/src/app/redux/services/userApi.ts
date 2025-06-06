@@ -1,26 +1,14 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import {
-  UserDTO,
-  UpdateUserDto,
-  AuthResponse,
-  LoginCredentials,
-  RegisterData,
-} from "./dtos";
+import { UserType, UpdateUserType } from "./types";
 
-function getTokenFromCookie() {
-  if (typeof document === "undefined") return null;
-  return (
-    document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("token="))
-      ?.split("=")[1] ?? null
-  );
-}
+import { getTokenFromCookie } from "@/app/utils/auth";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
 export const userApi = createApi({
   reducerPath: "usersApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "http://localhost:5273/api/users",
+    baseUrl: `${API_BASE_URL}/users`,
     credentials: "include",
     prepareHeaders: (headers) => {
       const token = getTokenFromCookie();
@@ -32,19 +20,19 @@ export const userApi = createApi({
   }),
   tagTypes: ["User"],
   endpoints: (build) => ({
-    getAllUsers: build.query<UserDTO[], void>({
+    getAllUsers: build.query<UserType[], void>({
       query: () => "/",
       providesTags: ["User"],
     }),
-    getUser: build.query<UserDTO, number>({
+    getUser: build.query<UserType, number>({
       query: (id) => `/${id}`,
       providesTags: (result, error, id) => [{ type: "User", id }],
     }),
-    getCurrentUser: build.query<UserDTO, void>({
+    getCurrentUser: build.query<UserType, void>({
       query: () => "/me",
       providesTags: ["User"],
     }),
-    updateUser: build.mutation<void, { id: number; data: UpdateUserDto }>({
+    updateUser: build.mutation<void, { id: number; data: UpdateUserType }>({
       query: ({ id, data }) => ({
         url: `/${id}`,
         method: "PUT",
@@ -59,20 +47,6 @@ export const userApi = createApi({
       }),
       invalidatesTags: ["User"],
     }),
-    login: build.mutation<AuthResponse, LoginCredentials>({
-      query: (credentials) => ({
-        url: "/login",
-        method: "POST",
-        body: credentials,
-      }),
-    }),
-    register: build.mutation<AuthResponse, RegisterData>({
-      query: (data) => ({
-        url: "/register",
-        method: "POST",
-        body: data,
-      }),
-    }),
   }),
 });
 
@@ -82,6 +56,4 @@ export const {
   useGetCurrentUserQuery,
   useUpdateUserMutation,
   useDeleteUserMutation,
-  useLoginMutation,
-  useRegisterMutation,
 } = userApi;

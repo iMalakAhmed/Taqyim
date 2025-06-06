@@ -16,7 +16,6 @@ import { useReactToReviewMutation } from "../redux/services/reactionApi";
 const reactionsList = [
   { type: "like", label: "Like", icon: IconThumbUp },
   { type: "love", label: "Love", icon: IconHeart },
-  { type: "funny", label: "Funny", icon: IconMoodXd },
   { type: "surprised", label: "Surprised", icon: IconMoodSurprised },
   { type: "dislike", label: "Dislike", icon: IconThumbDown },
   { type: "helpful", label: "Helpful", icon: IconFlame },
