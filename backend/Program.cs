@@ -67,6 +67,17 @@ builder.Services.AddAuthentication(x =>
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"] ?? throw new InvalidOperationException("JWT Key not found")))
     };
+    
+    // Add this to read the token from a cookie
+    x.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            // Attempt to read the token from the cookie named "token"
+            context.Token = context.Request.Cookies["token"];
+            return Task.CompletedTask;
+        }
+    };
 });
 
 builder.Services.AddAuthorization();

@@ -6,7 +6,6 @@ import businessReducer from "./slices/businessSlice";
 import { authApi } from "./services/authApi";
 import { reviewApi } from "./services/reviewApis";
 
-
 export const store = configureStore({
   reducer: {
     [usersApi.reducerPath]: usersApi.reducer,
@@ -20,8 +19,9 @@ export const store = configureStore({
     getDefaultMiddleware().concat(
       usersApi.middleware,
       authApi.middleware,
-      reviewApi.middleware, 
-      businessApi.middleware),
+
+      reviewApi.middleware
+    ),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
