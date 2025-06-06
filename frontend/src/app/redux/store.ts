@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { userApi } from "./services/UserApi";
+import { usersApi } from "./services/UserApi";
 import { businessApi } from "./services/BusinessApi"; 
 import userReducer from "./slices/userSlice";
 import businessReducer from "./slices/businessSlice";
@@ -9,7 +9,7 @@ import { reviewApi } from "./services/reviewApis";
 
 export const store = configureStore({
   reducer: {
-    [userApi.reducerPath]: userApi.reducer,
+    [usersApi.reducerPath]: usersApi.reducer,
     [businessApi.reducerPath]: businessApi.reducer,
     [authApi.reducerPath]: authApi.reducer,
     [reviewApi.reducerPath]: reviewApi.reducer,
@@ -18,7 +18,7 @@ export const store = configureStore({
   },
   middleware: (getDefaultMiddleware) => 
     getDefaultMiddleware().concat(
-      userApi.middleware,
+      usersApi.middleware,
       authApi.middleware,
       reviewApi.middleware, 
       businessApi.middleware),

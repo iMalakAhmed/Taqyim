@@ -8,10 +8,6 @@ export default function HomePage() {
     <main className="w-full h-full pt-24 p-96">
       <div className="flex flex-col">
         <UserProfile />
-        <HorizontalLine className="my-8" />
-        <BusinessProfile />
-        <HorizontalLine className="my-8" />
-        <Review />
       </div>
     </main>
   );

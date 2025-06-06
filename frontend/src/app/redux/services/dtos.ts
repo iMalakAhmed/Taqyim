@@ -17,7 +17,7 @@ export type UserDTO = {
   reputationPoints: number;
 };
 
-export type UpdateUserDto = {
+export type UpdateUserDTO = {
   firstName?: string | null;
   lastName?: string | null;
   bio?: string | null;
