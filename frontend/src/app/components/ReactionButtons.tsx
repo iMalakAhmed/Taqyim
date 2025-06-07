@@ -133,27 +133,27 @@ export default function ReactionButtons({
         }
       }}
       style={{
-        paddingTop: 20,
-        paddingBottom: 30,
-        paddingLeft: 10,
-        paddingRight: 10,
+        paddingTop: 0,
+        paddingBottom: 5,
+        paddingLeft: 0,
+        paddingRight: 0,
       }}
     >
-      <span>
+      {/* <span>
         {localReactionCount} Reaction{localReactionCount !== 1 ? "s" : ""}
-      </span>
+      </span> */}
 
       <Button
-        variant="outline"
+        variant="none"
         size="sm"
         disabled={isReacting || isDeleting || isReactionLoading}
-        iconLeft={selected ? <selected.icon size={18} /> : undefined}
+        iconLeft={selected ? <selected.icon size={20} /> : undefined}
         onClick={async () => {
           if (selectedReaction && reactionData) {
             try {
               await deleteReaction(reactionData.reactionId).unwrap();
               setSelectedReaction(null);
-              setLocalReactionCount((count) => Math.max(0, count - 1)); // <-- Add this
+              setLocalReactionCount((count) => Math.max(0, count - 1));
             } catch (error) {
               console.error("Failed to delete reaction", error);
             }
@@ -163,12 +163,12 @@ export default function ReactionButtons({
           }
         }}
       >
-        {selected ? selected.label : "React"}
+        {selected ? selected.label : <IconThumbUp className="text-text" />}
       </Button>
 
       {isOpen && (
         <div
-          className="absolute left-0 mt-2 flex bg-background border border-text rounded-xl shadow-lg p-2 z-50 gap-2"
+          className="absolute left-[-42px] mt-2 flex bg-background border border-text shadow-lg p-1 z-50 gap-2"
           style={{ pointerEvents: "auto" }}
           onMouseEnter={() => {
             if (!isPinned) setIsOpen(true);

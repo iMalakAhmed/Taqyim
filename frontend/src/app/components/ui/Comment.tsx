@@ -99,7 +99,7 @@ export default function Comments({
 
   return (
     <div className="comments-section">
-      <h2 className="text-xl font-bold mb-4">Comments ({localCommentCount})</h2>
+      {/* <h2 className="text-xl font-bold mb-4">Comments ({localCommentCount})</h2> */}
 
       {/* Add new comment */}
       <div className="mb-6">

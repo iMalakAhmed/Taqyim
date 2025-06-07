@@ -12,6 +12,12 @@ import {
 import ReactionButtons from "../ReactionButtons";
 import Button from "./Button";
 import Comments from "./Comment";
+import {
+  IconMessage,
+  IconShare3,
+  IconStar,
+  IconStarFilled,
+} from "@tabler/icons-react";
 
 type ReviewCardProps = {
   reviewId: number;
@@ -66,9 +72,15 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
 
   function StarRating({ rating }: { rating: number }) {
     return (
-      <div className="flex space-x-1 text-yellow-500 cursor-pointer">
+      <div className="flex space-x-1 cursor-pointer px-3">
         {[...Array(5)].map((_, i) => (
-          <span key={i}>{i < rating ? "★" : "☆"}</span>
+          <span key={i}>
+            {i < rating ? (
+              <IconStarFilled className="text-primary" size={18} />
+            ) : (
+              <IconStar className="text-primary" size={18} />
+            )}
+          </span>
         ))}
       </div>
     );
@@ -78,38 +90,44 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
   if (userError || reviewError) return <div>Error loading review.</div>;
   if (!user || !review) return null;
 
-  // Check if logged-in user is the owner of the review
-  // Adjust the field `review.userId` if your API uses a different property
   const isOwner = user.userId === review.userId;
 
   return (
-    <div className="w-full flex flex-col gap-6 p-10 text-text border">
-      <div className="flex flex-row">
+    <div className="w-full flex flex-col gap-4 px-10 py-8 text-text border">
+      <div className="flex flex-row items-center">
         <Image
           src="/default-profile.jpg"
           width={80}
           height={80}
           alt="user profile"
-          className="rounded-full w-20 h-20"
+          className="w-20 h-20"
         />
-        <div className="flex flex-col py-2 px-5">
-          <h1 className="font-heading text-2xl">
+        <div className="flex flex-col px-5">
+          <h1 className="font-heading font-bold text-2xl">
             {user.firstName} {user.lastName}
           </h1>
-          <HorizontalLine className="w-96" />
-        </div>
-      </div>
-
-      <div className="p-5 space-y-3">
-        <div className="flex justify-between items-center">
-          <StarRating rating={review.rating} />
-          <span className="text-xs text-gray-500">
-            {new Date(review.createdAt).toLocaleDateString()}
+          <span className="text-sm text-text font-inter">
+            {new Date(review.createdAt)
+              .toLocaleDateString("en-UK", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })
+              .toUpperCase()}
           </span>
         </div>
-        <p className="text-sm">{review.comment}</p>
+      </div>
+      <div className="flex flex-col">
+        <HorizontalLine />
+        <div className="flex flex-row items-center pt-5">
+          <h1 className="font-heading font-bold text-xl">Business Name</h1>
+          <StarRating rating={review.rating} />
+        </div>
 
-        {isOwner && (
+        <p className="text-base font-body pt-2 pb-5">{review.comment}</p>
+        <HorizontalLine />
+      </div>
+      {/* {isOwner && (
           <div className="flex gap-2">
             <Button
               size="sm"
@@ -127,14 +145,25 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
               Update Review
             </Button>
           </div>
-        )}
-
-        <ReactionButtons
-          reviewId={reviewId}
-          reactionCount={review.reactions.length}
-        />
+        )} */}
+      <div className="flex flex-row items-center justify-between">
+        <div className="flex flex-row items-center">
+          <ReactionButtons
+            reviewId={reviewId}
+            reactionCount={review.reactions.length}
+          />
+          <Button variant="none" size="sm">
+            <IconMessage size={20} />
+          </Button>
+          <Button variant="none" size="sm">
+            <IconShare3 size={20} />
+          </Button>
+        </div>
+        <div className="flex flex-row items-center font-body text-sm gap-2">
+          <p>20 reactions</p>
+          <p>3 comments</p>
+        </div>
       </div>
-
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
@@ -186,7 +215,7 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
           </div>
         </div>
       )}
-      <Comments reviewId={reviewId} commentCount={review.comments.length} />
+      {/* <Comments reviewId={reviewId} commentCount={review.comments.length} /> */}
     </div>
   );
 }

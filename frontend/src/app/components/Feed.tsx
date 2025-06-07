@@ -7,6 +7,8 @@ export default function Feed() {
     <div>
       <div>
         <Review reviewId={4} />
+        <Review reviewId={1005} />
+        {/* <CreateReview /> */}
       </div>
     </div>
   );
