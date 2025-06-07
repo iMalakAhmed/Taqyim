@@ -7,9 +7,6 @@ export default function Feed() {
     <div>
       <div>
         <Review reviewId={4} />
-        {/* <Review reviewId={5} /> */}
-        <CreateReview />
-        {/* <ReactionButtons /> */}
       </div>
     </div>
   );

@@ -45,7 +45,7 @@ export default function CreateReview() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded shadow-md">
+    <div className="max-w-md mx-auto flex justify-center items-center p-6 bg-white rounded shadow-md">
       <h2 className="text-2xl font-semibold mb-6">Create Review</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">

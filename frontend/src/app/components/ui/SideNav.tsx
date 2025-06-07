@@ -15,10 +15,12 @@ import {
   IconPlaneDeparture,
 } from "@tabler/icons-react";
 import Button from "./Button";
+import CreateReview from "../CreateReview";
 
 export default function SideNav() {
   const pathname = usePathname();
   const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [showCreateReview, setShowCreateReview] = useState(false);
 
   const mainNavItems = [
     { href: "/home", label: "Home", icon: IconHome },
@@ -128,12 +130,18 @@ export default function SideNav() {
         )}
       </ul>
 
-      <div className="mb-32 ml-20 py-4 ">
-        <Button className="px-18 font-heading" size="lg">
+      <div className="mb-32 ml-20 py-4">
+        <Button
+          className="px-18 font-heading"
+          size="lg"
+          onClick={() => setShowCreateReview(true)}
+        >
           <IconPencilPlus />
           POST
         </Button>
       </div>
+
+      {showCreateReview && <CreateReview />}
     </nav>
   );
 }
