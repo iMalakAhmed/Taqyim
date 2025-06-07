@@ -171,4 +171,42 @@ public class ReactionController : ControllerBase
 
         return NoContent();
     }
+
+    // GET: /api/reaction/review/{reviewId}/user
+[Authorize]
+[HttpGet("review/{reviewId}/user")]
+public async Task<ActionResult<ReactionDTO?>> GetUserReactionForReview(int reviewId)
+{
+    var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+    var reaction = await _context.Reactions
+        .Include(r => r.User)
+        .FirstOrDefaultAsync(r => r.ReviewId == reviewId && r.UserId == userId);
+
+    if (reaction == null)
+        return NoContent();
+
+    return new ReactionDTO
+    {
+        ReactionId = reaction.ReactionId,
+        ReviewId = reaction.ReviewId,
+        UserId = reaction.UserId,
+        ReactionType = reaction.ReactionType ?? string.Empty,
+        CreatedAt = reaction.CreatedAt ?? DateTime.UtcNow,
+        User = new UserDTO
+        {
+            UserId = reaction.User.UserId,
+            Email = reaction.User.Email,
+            FirstName = reaction.User.FirstName,
+            LastName = reaction.User.LastName,
+            Type = reaction.User.Type,
+            IsVerified = reaction.User.IsVerified,
+            ProfilePic = reaction.User.ProfilePic,
+            Bio = reaction.User.Bio,
+            CreatedAt = reaction.User.CreatedAt,
+            ReputationPoints = reaction.User.ReputationPoints
+        }
+    };
+}
+
 } 

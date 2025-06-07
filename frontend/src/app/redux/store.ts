@@ -6,6 +6,7 @@ import businessReducer from "./slices/businessSlice";
 import { authApi } from "./services/authApi";
 import { reviewApi } from "./services/reviewApi";
 import { reactionApi } from "./services/reactionApi";
+import { mediaApi } from "./services/mediaApi";
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     [authApi.reducerPath]: authApi.reducer,
     [reviewApi.reducerPath]: reviewApi.reducer,
     [reactionApi.reducerPath]: reactionApi.reducer,
+    [mediaApi.reducerPath]: mediaApi.reducer,
     user: userReducer,
     business: businessReducer,
   },
@@ -23,7 +25,8 @@ export const store = configureStore({
       authApi.middleware,
       businessApi.middleware,
       reviewApi.middleware,
-      reactionApi.middleware
+      reactionApi.middleware,
+      mediaApi.middleware
     ),
 });
 
