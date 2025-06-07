@@ -47,7 +47,7 @@ export interface UpdateUserType {
 }
 
 export interface BusinessLocationCreateType {
-  locationId: number;
+  locationId?: number;
   address?: string | null;
   latitude?: number | null;
   longitude?: number | null;
@@ -55,7 +55,7 @@ export interface BusinessLocationCreateType {
 }
 
 export interface BusinessLocationUpdateType {
-  locationId: number;
+  locationId?: number;
   address?: string | null;
   latitude?: number | null;
   longitude?: number | null;

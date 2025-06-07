@@ -8,7 +8,10 @@ import {
 import {
   useUpdateBusinessMutation,
   useUpdateLocationMutation,
+  useCreateLocationMutation,
+  useDeleteLocationMutation,
 } from "@/app/redux/services/BusinessApi";
+import toast from "react-hot-toast";
 
 interface Props {
   isOpen: boolean;
@@ -38,6 +41,8 @@ const EditBusinessModal: React.FC<Props> = ({
 
   const [updateBusiness] = useUpdateBusinessMutation();
   const [updateLocation] = useUpdateLocationMutation();
+  const [addLocation] = useCreateLocationMutation();
+  const [deleteLocation] = useDeleteLocationMutation();
 
   useEffect(() => {
     setLocations(initialData.businessLocations || []);
@@ -53,24 +58,75 @@ const EditBusinessModal: React.FC<Props> = ({
     setLocations(updated);
   };
 
+  const addNewLocation = () => {
+    setLocations([
+      ...locations,
+      {
+        label: "",
+        address: "",
+        latitude: null,
+        longitude: null,
+      },
+    ]);
+  };
+
+  const removeLocation = (index: number) => {
+    const updated = [...locations];
+    updated.splice(index, 1);
+    setLocations(updated);
+  };
+
   const handleSubmit = async () => {
+    const hasInvalidLocation = locations.some(
+      (loc) =>
+        !loc.address ||
+        typeof loc.latitude !== "number" ||
+        typeof loc.longitude !== "number"
+    );
+
+    if (!name || hasInvalidLocation) {
+      toast.error("Please fill all required fields correctly.");
+      return;
+    }
+
     try {
-      // Save the business info
       await updateBusiness({
         id: initialData.businessId,
         body: { name, category, description, logo },
       });
 
-      // Save each location
+      const existingIds = (initialData.businessLocations?.map((l) => l.locationId).filter((id): id is number => typeof id === "number") ?? []);
+      const updatedIds = locations.map((l) => l.locationId).filter((id): id is number => typeof id === "number");
+
+      for (const existingId of existingIds) {
+        if (!updatedIds.includes(existingId)) {
+          await deleteLocation({
+            businessId: initialData.businessId,
+            locationId: existingId,
+          });
+        }
+      }
+
       for (const loc of locations) {
-        if (loc.locationId) {
+        if (loc.locationId && loc.locationId > 0) {
           await updateLocation({
             businessId: initialData.businessId,
             locationId: loc.locationId,
             body: loc,
           });
+        } else {
+          const result = await addLocation({
+            businessId: initialData.businessId,
+            body: loc,
+          }) as { data?: { locationId?: number } };
+
+          if ("data" in result && result.data?.locationId) {
+            loc.locationId = result.data.locationId;
+          }
         }
       }
+
+      toast.success("Business updated successfully.");
 
       onSave({
         name,
@@ -83,6 +139,7 @@ const EditBusinessModal: React.FC<Props> = ({
       onClose();
     } catch (error) {
       console.error("Error updating business or locations:", error);
+      toast.error("Update failed. Try again.");
     }
   };
 
@@ -126,53 +183,50 @@ const EditBusinessModal: React.FC<Props> = ({
 
         <h3 className="text-lg font-semibold mb-2">Business Locations</h3>
         {locations.map((loc, idx) => (
-          <div key={loc.locationId || idx} className="mb-4">
+          <div key={loc.locationId || idx} className="mb-4 border p-2 rounded bg-white">
             <input
               type="text"
               placeholder="Label"
               value={loc.label || ""}
-              onChange={(e) =>
-                handleLocationChange(idx, "label", e.target.value)
-              }
+              onChange={(e) => handleLocationChange(idx, "label", e.target.value)}
               className="w-full mb-2 p-2 border rounded"
             />
             <input
               type="text"
               placeholder="Address"
               value={loc.address || ""}
-              onChange={(e) =>
-                handleLocationChange(idx, "address", e.target.value)
-              }
+              onChange={(e) => handleLocationChange(idx, "address", e.target.value)}
               className="w-full mb-2 p-2 border rounded"
             />
             <input
               type="number"
               placeholder="Latitude"
               value={loc.latitude ?? ""}
-              onChange={(e) =>
-                handleLocationChange(
-                  idx,
-                  "latitude",
-                  parseFloat(e.target.value)
-                )
-              }
+              onChange={(e) => handleLocationChange(idx, "latitude", parseFloat(e.target.value))}
               className="w-full mb-2 p-2 border rounded"
             />
             <input
               type="number"
               placeholder="Longitude"
               value={loc.longitude ?? ""}
-              onChange={(e) =>
-                handleLocationChange(
-                  idx,
-                  "longitude",
-                  parseFloat(e.target.value)
-                )
-              }
+              onChange={(e) => handleLocationChange(idx, "longitude", parseFloat(e.target.value))}
               className="w-full mb-2 p-2 border rounded"
             />
+            <button
+              className="text-sm text-red-600 underline"
+              onClick={() => removeLocation(idx)}
+            >
+              Remove Location
+            </button>
           </div>
         ))}
+
+        <button
+          className="mb-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+          onClick={addNewLocation}
+        >
+          + Add New Location
+        </button>
 
         <div className="flex justify-end gap-2">
           <button
@@ -182,7 +236,7 @@ const EditBusinessModal: React.FC<Props> = ({
             Cancel
           </button>
           <button
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+            className="bg-primary hover:bg-secondary text-white px-4 py-2 rounded"
             onClick={handleSubmit}
           >
             Save

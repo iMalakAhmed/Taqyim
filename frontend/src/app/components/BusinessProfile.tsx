@@ -4,9 +4,11 @@
 import { useState } from "react";
 import EditBusinessModal from "@/app/components/EditBusinessModal";
 import Button from "@/app/components/ui/Button";
-import { IconEdit, IconShare } from "@tabler/icons-react";
-import { useGetBusinessByIdQuery } from "@/app/redux/services/BusinessApi";
+import { IconEdit, IconShare ,IconTrash } from "@tabler/icons-react";
+import { useGetBusinessByIdQuery,useDeleteBusinessMutation } from "@/app/redux/services/BusinessApi";
 import { useGetCurrentUserQuery } from "@/app/redux/services/userApi";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 const BusinessProfile = () => {
   const businessId = 3;
@@ -18,11 +20,27 @@ const BusinessProfile = () => {
   } = useGetBusinessByIdQuery(businessId);
   const { data: currentUser } = useGetCurrentUserQuery();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [deleteBusiness] = useDeleteBusinessMutation();
+  const router = useRouter();
+
 
   const canEdit =
     currentUser?.type === "Admin" ||
     currentUser?.type === "Moderator" ||
     currentUser?.userId === business?.userId;
+
+    const handleDelete = async () => {
+    if (confirm("Are you sure you want to delete this business?")) {
+      try {
+        await deleteBusiness(businessId);
+        toast.success("Business deleted successfully");
+        router.push("/home");
+      } catch (err) {
+        console.error("Delete failed", err);
+        toast.error("Failed to delete business");
+      }
+    }
+  };
 
   if (isLoading) return <div>Loading...</div>;
   if (error || !business) return <div>Error loading business data.</div>;
@@ -73,8 +91,8 @@ const BusinessProfile = () => {
           ))}
         </div>
 
-        {canEdit && (
           <div className="flex flex-row mt-3">
+          {canEdit && (
             <Button
               onClick={() => setIsModalOpen(true)}
               variant="primary"
@@ -82,11 +100,17 @@ const BusinessProfile = () => {
             >
               <IconEdit stroke={2} /> Edit Business
             </Button>
+            )}
             <Button variant="primary" className="ml-2 p-6">
               <IconShare stroke={2} /> Share Business
             </Button>
+            {canEdit && (
+              <Button variant="primary" className="ml-2 p-6" onClick={handleDelete}>
+                <IconTrash stroke={2} /> Delete Business
+              </Button>
+            )}
           </div>
-        )}
+
       </div>
     </div>
   );

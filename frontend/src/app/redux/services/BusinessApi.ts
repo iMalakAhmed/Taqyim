@@ -66,6 +66,13 @@ export const businessApi = createApi({
       }),
       invalidatesTags: ["Business"],
     }),
+    deleteBusiness: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Business"],
+    }),
     getBusinessLocations: builder.query<BusinessLocationType[], number>({
       query: (businessId) => `/${businessId}/locations`,
       providesTags: (result, error, businessId) => [
@@ -127,4 +134,5 @@ export const {
   useUpdateLocationMutation,
   useCreateLocationMutation,
   useDeleteLocationMutation,
+  useDeleteBusinessMutation
 } = businessApi;
