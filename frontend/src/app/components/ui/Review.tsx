@@ -18,6 +18,10 @@ import {
   IconStar,
   IconStarFilled,
 } from "@tabler/icons-react";
+import { useDispatch, useSelector } from "react-redux";
+import { setReactionCount } from "@/app/redux/slices/reactionCounterSlice";
+import { setCommentCount } from "@/app/redux/slices/commentCounterSlice";
+import { RootState } from "../../redux/store";
 
 type ReviewCardProps = {
   reviewId: number;
@@ -36,6 +40,15 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
     error: reviewError,
   } = useGetReviewQuery(reviewId);
 
+  const dispatch = useDispatch();
+  const reactionCount = useSelector(
+    (state: RootState) => state.reactionCounter[reviewId] || 0
+  );
+
+  const commentCount = useSelector(
+    (state: RootState) => state.commentCounter[reviewId] || 0
+  );
+
   const [updateReview, { isLoading: isUpdating }] = useUpdateReviewMutation();
   const [deleteReview, { isLoading: isDeleting }] = useDeleteReviewMutation();
 
@@ -52,6 +65,13 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
       setComment(review.comment);
     }
   }, [review]);
+
+  useEffect(() => {
+    if (review) {
+      dispatch(setReactionCount({ reviewId, count: review.reactions.length }));
+      dispatch(setCommentCount({ reviewId, count: review.comments.length }));
+    }
+  }, [dispatch, review, reviewId]);
 
   const handleReviewDelete = async () => {
     try {
@@ -160,8 +180,8 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
           </Button>
         </div>
         <div className="flex flex-row items-center font-body text-sm gap-2">
-          <p>20 reactions</p>
-          <p>3 comments</p>
+          <p>{reactionCount} reactions</p>
+          <p>{commentCount} comments</p>
         </div>
       </div>
       {/* Modal */}
@@ -215,7 +235,7 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
           </div>
         </div>
       )}
-      {/* <Comments reviewId={reviewId} commentCount={review.comments.length} /> */}
+      <Comments reviewId={reviewId} commentCount={review.comments.length} />
     </div>
   );
 }

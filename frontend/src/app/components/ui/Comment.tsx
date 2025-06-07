@@ -9,11 +9,17 @@ import {
 } from "../../redux/services/commentApi";
 import { useGetCurrentUserQuery } from "../../redux/services/authApi";
 import { CommentType } from "@/app/redux/services/types";
+import { useDispatch } from "react-redux";
+import {
+  setCommentCount,
+  incrementCommentCount,
+  decrementCommentCount,
+} from "../../redux/slices/commentCounterSlice";
 
 type CommentsProps = {
   reviewId: number;
-  commentCount: number; // New prop for initial count
-  onCommentCountChange?: (count: number) => void; // optional callback to notify parent
+  commentCount: number;
+  onCommentCountChange?: (count: number) => void;
 };
 
 export default function Comments({
@@ -40,27 +46,18 @@ export default function Comments({
   const [newContent, setNewContent] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editingContent, setEditingContent] = useState("");
-  const [localCommentCount, setLocalCommentCount] = useState(commentCount);
+  const dispatch = useDispatch();
 
-  // Sync local comment count if prop changes
   useEffect(() => {
-    setLocalCommentCount(commentCount);
-  }, [commentCount]);
-
-  // Helper to update local count and notify parent if callback provided
-  const updateCommentCount = (newCount: number) => {
-    setLocalCommentCount(newCount);
-    if (onCommentCountChange) {
-      onCommentCountChange(newCount);
-    }
-  };
+    dispatch(setCommentCount({ reviewId, count: commentCount }));
+  }, [dispatch, commentCount]);
 
   const handleAddComment = async () => {
     if (!newContent.trim()) return;
     try {
       await createComment({ reviewId, content: newContent }).unwrap();
       setNewContent("");
-      updateCommentCount(localCommentCount + 1);
+      dispatch(incrementCommentCount(reviewId));
     } catch (error) {
       console.error("Failed to add comment", error);
     }
@@ -88,7 +85,7 @@ export default function Comments({
   const handleDeleteComment = async (id: number) => {
     try {
       await deleteComment(id).unwrap();
-      updateCommentCount(localCommentCount - 1);
+      dispatch(decrementCommentCount(reviewId));
     } catch (error) {
       console.error("Failed to delete comment", error);
     }

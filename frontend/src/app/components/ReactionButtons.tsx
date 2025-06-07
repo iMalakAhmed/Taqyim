@@ -17,6 +17,12 @@ import {
 } from "../redux/services/reactionApi";
 import Button from "./ui/Button"; // adjust path if needed
 import clsx from "clsx";
+import { useDispatch } from "react-redux";
+import {
+  setReactionCount,
+  incrementReactionCount,
+  decrementReactionCount,
+} from "./../redux/slices/reactionCounterSlice";
 
 const reactionsList = [
   { type: "like", label: "Like", icon: IconThumbUp },
@@ -46,10 +52,13 @@ export default function ReactionButtons({
   const [isOpen, setIsOpen] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
-  const [localReactionCount, setLocalReactionCount] =
-    useState<number>(reactionCount);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(setReactionCount({ reviewId, count: reactionCount }));
+  }, [dispatch, reactionCount]);
 
   useEffect(() => {
     if (reactionData && reactionData.reactionType) {
@@ -59,16 +68,11 @@ export default function ReactionButtons({
     }
   }, [reactionData]);
 
-  useEffect(() => {
-    setLocalReactionCount(reactionCount);
-  }, [reactionCount]);
-
   const handleReactionClick = async (type: string) => {
     if (type === selectedReaction && reactionData) {
       try {
         await deleteReaction(reactionData.reactionId).unwrap();
         setSelectedReaction(null);
-        setLocalReactionCount((count) => Math.max(0, count - 1)); // decrement count on delete
       } catch (error) {
         console.error("Failed to delete reaction", error);
       }
@@ -82,7 +86,7 @@ export default function ReactionButtons({
         if (result) {
           if (!selectedReaction) {
             // user is adding a reaction for the first time
-            setLocalReactionCount((count) => count + 1);
+            dispatch(incrementReactionCount(reviewId));
           }
           // if user changed reaction type, count stays the same
 
@@ -153,7 +157,7 @@ export default function ReactionButtons({
             try {
               await deleteReaction(reactionData.reactionId).unwrap();
               setSelectedReaction(null);
-              setLocalReactionCount((count) => Math.max(0, count - 1));
+              dispatch(decrementReactionCount(reviewId));
             } catch (error) {
               console.error("Failed to delete reaction", error);
             }
