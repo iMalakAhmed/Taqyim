@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   useGetCommentsByReviewQuery,
   useCreateCommentMutation,
@@ -12,9 +12,15 @@ import { CommentType } from "@/app/redux/services/types";
 
 type CommentsProps = {
   reviewId: number;
+  commentCount: number; // New prop for initial count
+  onCommentCountChange?: (count: number) => void; // optional callback to notify parent
 };
 
-export default function Comments({ reviewId }: CommentsProps) {
+export default function Comments({
+  reviewId,
+  commentCount,
+  onCommentCountChange,
+}: CommentsProps) {
   const {
     data: comments,
     isLoading,
@@ -34,12 +40,27 @@ export default function Comments({ reviewId }: CommentsProps) {
   const [newContent, setNewContent] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editingContent, setEditingContent] = useState("");
+  const [localCommentCount, setLocalCommentCount] = useState(commentCount);
+
+  // Sync local comment count if prop changes
+  useEffect(() => {
+    setLocalCommentCount(commentCount);
+  }, [commentCount]);
+
+  // Helper to update local count and notify parent if callback provided
+  const updateCommentCount = (newCount: number) => {
+    setLocalCommentCount(newCount);
+    if (onCommentCountChange) {
+      onCommentCountChange(newCount);
+    }
+  };
 
   const handleAddComment = async () => {
     if (!newContent.trim()) return;
     try {
       await createComment({ reviewId, content: newContent }).unwrap();
       setNewContent("");
+      updateCommentCount(localCommentCount + 1);
     } catch (error) {
       console.error("Failed to add comment", error);
     }
@@ -67,6 +88,7 @@ export default function Comments({ reviewId }: CommentsProps) {
   const handleDeleteComment = async (id: number) => {
     try {
       await deleteComment(id).unwrap();
+      updateCommentCount(localCommentCount - 1);
     } catch (error) {
       console.error("Failed to delete comment", error);
     }
@@ -77,7 +99,7 @@ export default function Comments({ reviewId }: CommentsProps) {
 
   return (
     <div className="comments-section">
-      <h2 className="text-xl font-bold mb-4">Comments</h2>
+      <h2 className="text-xl font-bold mb-4">Comments ({localCommentCount})</h2>
 
       {/* Add new comment */}
       <div className="mb-6">

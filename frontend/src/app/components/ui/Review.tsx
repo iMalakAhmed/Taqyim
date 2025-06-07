@@ -108,12 +108,6 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
           </span>
         </div>
         <p className="text-sm">{review.comment}</p>
-        <div className="flex gap-4 text-sm text-gray-600">
-          <span>
-            {review.comments.length} Comment
-            {review.comments.length !== 1 ? "s" : ""}
-          </span>
-        </div>
 
         {isOwner && (
           <div className="flex gap-2">
@@ -192,7 +186,7 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
           </div>
         </div>
       )}
-      <Comments reviewId={reviewId} />
+      <Comments reviewId={reviewId} commentCount={review.comments.length} />
     </div>
   );
 }
