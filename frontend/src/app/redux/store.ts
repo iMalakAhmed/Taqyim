@@ -8,6 +8,8 @@ import { reviewApi } from "./services/reviewApi";
 import { reactionApi } from "./services/reactionApi";
 import { mediaApi } from "./services/mediaApi";
 import { commentApi } from "./services/commentApi";
+import reactionCounterReducer from "./slices/reactionCounterSlice";
+import commentCounterReducer from "./slices/commentCounterSlice";
 
 export const store = configureStore({
   reducer: {
@@ -20,6 +22,8 @@ export const store = configureStore({
     [commentApi.reducerPath]: commentApi.reducer,
     user: userReducer,
     business: businessReducer,
+    reactionCounter: reactionCounterReducer,
+    commentCounter: commentCounterReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(

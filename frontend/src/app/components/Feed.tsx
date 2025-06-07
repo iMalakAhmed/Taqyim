@@ -1,16 +1,20 @@
-import CreateReview from "./CreateReview";
-import ReactionButtons from "./ReactionButtons";
+"use client";
+import { useGetReviewsQuery } from "../redux/services/reviewApi";
 import Review from "./ui/Review";
 
 export default function Feed() {
+  const { data: reviews, error, isLoading, isSuccess } = useGetReviewsQuery();
+
+  if (isLoading) return <p>Loading reviews...</p>;
+  if (error) return <p>Failed to load reviews.</p>;
+
   return (
     <div>
-      <div>
-        <Review reviewId={4} />
-        {/* <Review reviewId={5} /> */}
-        <CreateReview />
-        {/* <ReactionButtons /> */}
-      </div>
+      {isSuccess && reviews?.length === 0 && <p>No reviews found.</p>}
+      {isSuccess &&
+        reviews?.map((review) => (
+          <Review key={review.reviewId} reviewId={review.reviewId} />
+        ))}
     </div>
   );
 }
