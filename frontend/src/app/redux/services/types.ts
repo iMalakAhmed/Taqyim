@@ -175,3 +175,14 @@ export interface ReviewImageType {
   createdAt: string;
   order: number;
 }
+
+export interface MediaType {
+  mediaId: number;
+  userId: number;
+  fileName: string;
+  filePath: string;
+  fileType: string;
+  fileSize: number;
+  uploadedAt: string;
+  user: UserType;
+}

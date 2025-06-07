@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useCreateReviewMutation } from "../redux/services/reviewApi";
+import MediaUpload from "./MediaUpload";
 
 export default function CreateReview() {
   const [businessId, setBusinessId] = useState("");
@@ -126,6 +127,7 @@ export default function CreateReview() {
           Failed to create review. Please try again.
         </p>
       )}
+      <MediaUpload />
     </div>
   );
 }

@@ -18,7 +18,7 @@ export const reactionApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Reaction"], // <-- Add this line
+  tagTypes: ["Reaction"],
   endpoints: (builder) => ({
     reactToReview: builder.mutation<ReactionType | null, CreateReactionType>({
       query: (body) => ({

@@ -28,7 +28,13 @@ const reactionsList = [
   { type: "accurate", label: "Accurate", icon: IconCertificate },
 ];
 
-export default function ReactionButtons({ reviewId }: { reviewId: number }) {
+export default function ReactionButtons({
+  reviewId,
+  reactionCount,
+}: {
+  reviewId: number;
+  reactionCount: number;
+}) {
   const { data: reactionData, isLoading: isReactionLoading } =
     useGetUserReactionForReviewQuery(reviewId);
 
@@ -40,6 +46,8 @@ export default function ReactionButtons({ reviewId }: { reviewId: number }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
+  const [localReactionCount, setLocalReactionCount] =
+    useState<number>(reactionCount);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -51,11 +59,16 @@ export default function ReactionButtons({ reviewId }: { reviewId: number }) {
     }
   }, [reactionData]);
 
+  useEffect(() => {
+    setLocalReactionCount(reactionCount);
+  }, [reactionCount]);
+
   const handleReactionClick = async (type: string) => {
     if (type === selectedReaction && reactionData) {
       try {
         await deleteReaction(reactionData.reactionId).unwrap();
         setSelectedReaction(null);
+        setLocalReactionCount((count) => Math.max(0, count - 1)); // decrement count on delete
       } catch (error) {
         console.error("Failed to delete reaction", error);
       }
@@ -65,7 +78,14 @@ export default function ReactionButtons({ reviewId }: { reviewId: number }) {
           reviewId,
           reactionType: type,
         }).unwrap();
+
         if (result) {
+          if (!selectedReaction) {
+            // user is adding a reaction for the first time
+            setLocalReactionCount((count) => count + 1);
+          }
+          // if user changed reaction type, count stays the same
+
           setSelectedReaction(result.reactionType);
         }
       } catch (error) {
@@ -119,6 +139,10 @@ export default function ReactionButtons({ reviewId }: { reviewId: number }) {
         paddingRight: 10,
       }}
     >
+      <span>
+        {localReactionCount} Reaction{localReactionCount !== 1 ? "s" : ""}
+      </span>
+
       <Button
         variant="outline"
         size="sm"
@@ -126,15 +150,14 @@ export default function ReactionButtons({ reviewId }: { reviewId: number }) {
         iconLeft={selected ? <selected.icon size={18} /> : undefined}
         onClick={async () => {
           if (selectedReaction && reactionData) {
-            // If a reaction is already selected, remove it immediately on button click
             try {
               await deleteReaction(reactionData.reactionId).unwrap();
               setSelectedReaction(null);
+              setLocalReactionCount((count) => Math.max(0, count - 1)); // <-- Add this
             } catch (error) {
               console.error("Failed to delete reaction", error);
             }
           } else {
-            // If no reaction selected, open the reaction picker
             setIsPinned(!isPinned);
             setIsOpen(true);
           }
