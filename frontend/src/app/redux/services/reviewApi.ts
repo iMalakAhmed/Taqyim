@@ -7,7 +7,7 @@ import type {
   CreateCommentType,
   ReactionType,
   CreateReactionType,
-} from "./types"; // assuming you renamed dtos -> types
+} from "./types";
 import { getTokenFromCookie } from "@/app/utils/auth";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
@@ -82,34 +82,6 @@ export const reviewApi = createApi({
       }),
       invalidatesTags: [{ type: "Reviews", id: "LIST" }],
     }),
-
-    addComment: build.mutation<
-      CommentType,
-      { reviewId: number; comment: CreateCommentType }
-    >({
-      query: ({ reviewId, comment }) => ({
-        url: `/${reviewId}/comment`,
-        method: "POST",
-        body: comment,
-      }),
-      invalidatesTags: (result, error, { reviewId }) => [
-        { type: "Review", id: reviewId },
-      ],
-    }),
-
-    addReaction: build.mutation<
-      ReactionType | void,
-      { reviewId: number; reaction: CreateReactionType }
-    >({
-      query: ({ reviewId, reaction }) => ({
-        url: `/${reviewId}/reaction`,
-        method: "POST",
-        body: reaction,
-      }),
-      invalidatesTags: (result, error, { reviewId }) => [
-        { type: "Review", id: reviewId },
-      ],
-    }),
   }),
 });
 
@@ -119,6 +91,4 @@ export const {
   useCreateReviewMutation,
   useUpdateReviewMutation,
   useDeleteReviewMutation,
-  useAddCommentMutation,
-  useAddReactionMutation,
 } = reviewApi;
