@@ -20,7 +20,7 @@ import CreateReview from "../CreateReview";
 export default function SideNav() {
   const pathname = usePathname();
   const [categoriesOpen, setCategoriesOpen] = useState(false);
-  const [showCreateReview, setShowCreateReview] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const mainNavItems = [
     { href: "/home", label: "Home", icon: IconHome },
@@ -134,14 +134,14 @@ export default function SideNav() {
         <Button
           className="px-18 font-heading"
           size="lg"
-          onClick={() => setShowCreateReview(true)}
+          onClick={() => setShowModal(true)}
         >
           <IconPencilPlus />
           POST
         </Button>
       </div>
 
-      {showCreateReview && <CreateReview />}
+      {showModal && <CreateReview onCancel={() => setShowModal(false)} />}
     </nav>
   );
 }

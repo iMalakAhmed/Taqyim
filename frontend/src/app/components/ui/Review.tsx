@@ -11,7 +11,7 @@ import {
 } from "../../redux/services/reviewApi";
 import ReactionButtons from "../ReactionButtons";
 import Button from "./Button";
-import Comments from "./Comment";
+import Comments from "./Comments";
 import {
   IconMessage,
   IconShare3,
@@ -22,6 +22,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setReactionCount } from "@/app/redux/slices/reactionCounterSlice";
 import { setCommentCount } from "@/app/redux/slices/commentCounterSlice";
 import { RootState } from "../../redux/store";
+import AddComment from "../AddComment";
 
 type ReviewCardProps = {
   reviewId: number;
@@ -54,6 +55,7 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showAddComment, setShowAddComment] = useState(false);
 
   // Form state
   const [rating, setRating] = useState<number>(review?.rating || 0);
@@ -172,9 +174,19 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
             reviewId={reviewId}
             reactionCount={review.reactions.length}
           />
-          <Button variant="none" size="sm">
+          <Button
+            variant="none"
+            size="sm"
+            onClick={() => setShowAddComment((prev) => !prev)}
+          >
             <IconMessage size={20} />
           </Button>
+          {showAddComment && (
+            <AddComment
+              reviewId={reviewId}
+              onCancel={() => setShowAddComment(false)}
+            />
+          )}
           <Button variant="none" size="sm">
             <IconShare3 size={20} />
           </Button>
