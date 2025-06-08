@@ -8,27 +8,28 @@ export default function TeamSection() {
   const team = [
     {
       name: "Haya Osama",
-      github: "https://github.com/",
+      github: "https://github.com/HayaOsama224",
       linkedin: "https://linkedin.com/in/",
       email: "@gmail.com",
     },
     {
       name: "Farida Hanafy",
       github: "https://github.com/fariioodaazz",
-      linkedin: "https://www.linkedin.com/in/faridaashraf",
-      email: "@gmail.com",
+      linkedin: "https://www.linkedin.com/in/farida-ashraf-0091a0301/",
+      email: "Fariida.hanafy@gmail.com",
     },
     {
       name: "Farida Nasrat",
       github: "https://github.com/FH-N",
-      linkedin: "www.linkedin.com/in/faridanasrat",
+      linkedin: "https://www.linkedin.com/in/faridanasrat/",
       email: "faridanasrat@gmail.com",
     },
     {
       name: "Malak Shams",
       github: "https://github.com/iMalakAhmed",
-      linkedin: "https://linkedin.com/in/malakshams",
-      email: "@gmail.com",
+      linkedin:
+        "https://www.linkedin.com/in/malak-shams-373a6329b?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app",
+      email: "malaksh2023@outlook.com",
     },
   ];
 

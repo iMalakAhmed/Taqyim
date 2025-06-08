@@ -47,8 +47,7 @@ public class MediaController : ControllerBase
                 {
                     UserId = m.User.UserId,
                     Email = m.User.Email,
-                    FirstName = m.User.FirstName,
-                    LastName = m.User.LastName,
+                    UserName = m.User.UserName,
                     Type = m.User.Type,
                     IsVerified = m.User.IsVerified,
                     ProfilePic = m.User.ProfilePic,
@@ -87,8 +86,7 @@ public class MediaController : ControllerBase
             {
                 UserId = media.User.UserId,
                 Email = media.User.Email,
-                FirstName = media.User.FirstName,
-                LastName = media.User.LastName,
+                UserName = media.User.UserName,
                 Type = media.User.Type,
                 IsVerified = media.User.IsVerified,
                 ProfilePic = media.User.ProfilePic,
@@ -160,8 +158,7 @@ public class MediaController : ControllerBase
             {
                 UserId = userId,
                 Email = User.FindFirst("Email")?.Value ?? string.Empty,
-                FirstName = User.FindFirst("FirstName")?.Value ?? string.Empty,
-                LastName = User.FindFirst("LastName")?.Value ?? string.Empty,
+                UserName = User.FindFirst("UserName")?.Value ?? string.Empty,
                 Type = User.FindFirst("Type")?.Value ?? string.Empty,
                 IsVerified = bool.TryParse(User.FindFirst("IsVerified")?.Value, out var isVerified) && isVerified,
                 ProfilePic = User.FindFirst("ProfilePic")?.Value ?? string.Empty,

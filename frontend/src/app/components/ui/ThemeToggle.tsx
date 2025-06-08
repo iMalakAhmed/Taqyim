@@ -28,7 +28,13 @@ export default function ThemeToggle() {
   }, [dark]);
 
   return (
-    <button onClick={() => setDark(!dark)}>
+    <button
+      onClick={() => {
+        const newState = !dark;
+        setDark(newState);
+      }}
+      style={{ color: dark ? "white" : "black" }}
+    >
       Toggle {dark ? "Light" : "Dark"} Mode
     </button>
   );

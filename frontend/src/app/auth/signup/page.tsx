@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -29,7 +29,7 @@ export default function SignupPage() {
   const [login, { isLoading: isLoggingIn }] = useLoginMutation();
   const { refetch: refetchCurrentUser } = useGetCurrentUserQuery({});
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleRegistrationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
     setIsSubmitting(true);
@@ -377,4 +377,4 @@ export default function SignupPage() {
       )}
     </div>
   );
-} 
+}
