@@ -171,6 +171,12 @@ namespace Taqyim.Api.Migrations
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("ParentCommentId")
+                        .HasColumnType("int");
+
                     b.Property<int>("ReviewId")
                         .HasColumnType("int");
 
@@ -178,9 +184,40 @@ namespace Taqyim.Api.Migrations
 
                     b.HasIndex("CommenterId");
 
+                    b.HasIndex("ParentCommentId");
+
                     b.HasIndex("ReviewId");
 
                     b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("Taqyim.Api.Models.CommentReaction", b =>
+                {
+                    b.Property<int>("CommentReactionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentReactionId"));
+
+                    b.Property<int>("CommentId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ReactionType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("CommentReactionId");
+
+                    b.HasIndex("CommentId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CommentReactions");
                 });
 
             modelBuilder.Entity("Taqyim.Api.Models.Connection", b =>
@@ -651,6 +688,11 @@ namespace Taqyim.Api.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Taqyim.Api.Models.Comment", "ParentComment")
+                        .WithMany("Replies")
+                        .HasForeignKey("ParentCommentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Taqyim.Api.Models.Review", "Review")
                         .WithMany("Comments")
                         .HasForeignKey("ReviewId")
@@ -659,7 +701,28 @@ namespace Taqyim.Api.Migrations
 
                     b.Navigation("Commenter");
 
+                    b.Navigation("ParentComment");
+
                     b.Navigation("Review");
+                });
+
+            modelBuilder.Entity("Taqyim.Api.Models.CommentReaction", b =>
+                {
+                    b.HasOne("Taqyim.Api.Models.Comment", "Comment")
+                        .WithMany("Reactions")
+                        .HasForeignKey("CommentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Taqyim.Api.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Comment");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Taqyim.Api.Models.Connection", b =>
@@ -860,6 +923,13 @@ namespace Taqyim.Api.Migrations
                     b.Navigation("BusinessLocations");
 
                     b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("Taqyim.Api.Models.Comment", b =>
+                {
+                    b.Navigation("Reactions");
+
+                    b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("Taqyim.Api.Models.Conversation", b =>

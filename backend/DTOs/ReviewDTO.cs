@@ -57,12 +57,18 @@ public class CommentDTO
     public string Content { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public required UserDTO Commenter { get; set; }
+
+    public int? ParentCommentId { get; set; }
+    public List<CommentDTO> Replies { get; set; } = new();
+    public List<CommentReactionDTO> Reactions { get; set; } = new();
 }
 
 public class CreateCommentDTO
 {
     public int ReviewId { get; set; }
     public string Content { get; set; } = string.Empty;
+
+    public int? ParentCommentId { get; set; }
 }
 
 public class ReactionDTO
@@ -79,6 +85,20 @@ public class CreateReactionDTO
 {
     public int ReviewId { get; set; }
     public string ReactionType { get; set; } = string.Empty;
+}
+
+public class CommentReactionDTO
+{
+    public int CommentReactionId { get; set; }
+    public int UserId { get; set; }
+    public string? ReactionType { get; set; }
+    public DateTime? CreatedAt { get; set; }
+}
+
+public class CreateCommentReactionDTO
+{
+    public int CommentId { get; set; }
+    public string? ReactionType { get; set; }
 }
 
 public class TagDTO
