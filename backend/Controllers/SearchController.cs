@@ -29,43 +29,38 @@ public class SearchController : ControllerBase
         var searchTerm = query.ToLower();
 
         var businesses = await _context.Businesses
-            .Include(b => b.User)
+            .Include(b => b.Owner)
             .Include(b => b.BusinessLocations)
             .Where(b => !b.IsDeleted && (
                 b.Name.ToLower().Contains(searchTerm) ||
-                b.Category.ToLower().Contains(searchTerm) ||
+                b.Category.Any(c => c.ToLower().Contains(searchTerm)) ||
                 b.Description.ToLower().Contains(searchTerm) ||
                 b.BusinessLocations.Any(l => l.Address.ToLower().Contains(searchTerm))
             ))
             .Select(b => new BusinessDTO
             {
                 BusinessId = b.BusinessId,
-                UserId = b.UserId,
-                Location = b.Location,
                 Name = b.Name,
                 Category = b.Category,
                 Description = b.Description,
-                VerifiedByUserId = b.VerifiedByUserId,
                 CreatedAt = b.CreatedAt,
-                User = new UserDTO
+                Owner = new UserDTO
                 {
-                    UserId = b.UserId,
-                    Email = b.User.Email,
-                    FirstName = b.User.FirstName,
-                    LastName = b.User.LastName,
-                    Type = b.User.Type,
-                    IsVerified = b.User.IsVerified,
-                    ProfilePic = b.User.ProfilePic,
-                    Bio = b.User.Bio,
-                    CreatedAt = b.User.CreatedAt,
-                    ReputationPoints = b.User.ReputationPoints
+                    UserId = b.Owner.UserId,
+                    Email = b.Owner.Email,
+                    UserName = b.Owner.UserName,
+                    Type = b.Owner.Type,
+                    IsVerified = b.Owner.IsVerified,
+                    ProfilePic = b.Owner.ProfilePic,
+                    Bio = b.Owner.Bio,
+                    CreatedAt = b.Owner.CreatedAt,
+                    ReputationPoints = b.Owner.ReputationPoints
                 },
                 VerifiedByUser = b.VerifiedByUser != null ? new UserDTO
                 {
                     UserId = b.VerifiedByUser.UserId,
                     Email = b.VerifiedByUser.Email,
-                    FirstName = b.VerifiedByUser.FirstName,
-                    LastName = b.VerifiedByUser.LastName,
+                    UserName = b.VerifiedByUser.UserName,
                     Type = b.VerifiedByUser.Type,
                     IsVerified = b.VerifiedByUser.IsVerified,
                     ProfilePic = b.VerifiedByUser.ProfilePic,
@@ -87,17 +82,15 @@ public class SearchController : ControllerBase
             .ToListAsync();
 
         var users = await _context.Users
-            .Where(u => !u.IsDeleted && (
-                u.FirstName.ToLower().Contains(searchTerm) ||
-                u.LastName.ToLower().Contains(searchTerm) ||
+            .Where(u => u.Type != "Deleted" && (
+                u.UserName.ToLower().Contains(searchTerm) ||
                 u.Email.ToLower().Contains(searchTerm)
             ))
             .Select(u => new UserDTO
             {
                 UserId = u.UserId,
                 Email = u.Email,
-                FirstName = u.FirstName,
-                LastName = u.LastName,
+                UserName = u.UserName,
                 Type = u.Type,
                 IsVerified = u.IsVerified,
                 ProfilePic = u.ProfilePic,
@@ -114,6 +107,7 @@ public class SearchController : ControllerBase
         };
     }
 
+
     [HttpGet("businesses")]
     public async Task<ActionResult<IEnumerable<SearchBusinessDTO>>> SearchBusinesses(
         [FromQuery] string? query,
@@ -128,24 +122,22 @@ public class SearchController : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(query))
         {
-            businesses = businesses.Where(b => 
-                b.Name.Contains(query) || 
-                b.Description.Contains(query));
-        }
-
-        if (!string.IsNullOrWhiteSpace(category))
-        {
-            businesses = businesses.Where(b => b.Category == category);
+            var loweredQuery = query.ToLower();
+            businesses = businesses.Where(b =>
+                b.Name.ToLower().Contains(loweredQuery) ||
+                b.Description.ToLower().Contains(loweredQuery) ||
+                b.Category.Any(c => c.ToLower().Contains(loweredQuery))
+            );
         }
 
         if (latitude.HasValue && longitude.HasValue && radius.HasValue)
         {
-            businesses = businesses.Where(b => 
-                b.BusinessLocations.Any(l => 
+            businesses = businesses.Where(b =>
+                b.BusinessLocations.Any(l =>
                     CalculateDistance(
-                        latitude.Value, 
-                        longitude.Value, 
-                        (double)l.Latitude!, 
+                        latitude.Value,
+                        longitude.Value,
+                        (double)l.Latitude!,
                         (double)l.Longitude!) <= radius.Value));
         }
 
@@ -154,10 +146,19 @@ public class SearchController : ControllerBase
             {
                 BusinessId = b.BusinessId,
                 Name = b.Name,
-                Category = b.Category,
+                Category = b.Category != null ? string.Join(", ", b.Category) : string.Empty,
                 Description = b.Description,
-                Location = b.Location,
-                CreatedAt = b.CreatedAt
+                CreatedAt = b.CreatedAt,
+                BusinessLocations = b.BusinessLocations.Select(l => new BusinessLocationDTO
+                {
+                    LocationId = l.LocationId,
+                    BusinessId = l.BusinessId,
+                    Address = l.Address,
+                    Latitude = (double?)l.Latitude,
+                    Longitude = (double?)l.Longitude,
+                    Label = l.Label,
+                    CreatedAt = l.CreatedAt ?? DateTime.UtcNow
+                }).ToList(),
             })
             .ToListAsync();
 
@@ -174,8 +175,7 @@ public class SearchController : ControllerBase
         if (!string.IsNullOrWhiteSpace(query))
         {
             users = users.Where(u => 
-                u.FirstName.Contains(query) || 
-                u.LastName.Contains(query) || 
+                u.UserName.Contains(query) || 
                 u.Email.Contains(query));
         }
 
@@ -188,8 +188,7 @@ public class SearchController : ControllerBase
             .Select(u => new SearchUserDTO
             {
                 UserId = u.UserId,
-                FirstName = u.FirstName,
-                LastName = u.LastName,
+                UserName = u.UserName,
                 Email = u.Email,
                 Type = u.Type,
                 ProfilePic = u.ProfilePic
@@ -236,14 +235,13 @@ public class SearchController : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(businessName))
         {
-            reviews = reviews.Where(r => r.Business.Name.Contains(businessName));
+            reviews = reviews.Where(r => r.Business.Owner.UserName.Contains(businessName));
         }
 
         if (!string.IsNullOrWhiteSpace(userName))
         {
             reviews = reviews.Where(r => 
-                r.User.FirstName.Contains(userName) || 
-                r.User.LastName.Contains(userName));
+                r.User.UserName.Contains(userName));
         }
 
         if (fromDate.HasValue)
@@ -266,7 +264,7 @@ public class SearchController : ControllerBase
                 UpdatedAt = r.UpdatedAt,
                 BusinessName = r.Business.Name,
                 BusinessId = r.BusinessId,
-                UserName = $"{r.User.FirstName} {r.User.LastName}",
+                UserName = $"{r.User.UserName}",
                 UserId = r.UserId,
                 UserProfilePic = r.User.ProfilePic,
                 CommentsCount = r.Comments.Count,

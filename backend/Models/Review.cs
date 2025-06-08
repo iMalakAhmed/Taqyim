@@ -26,4 +26,7 @@ public partial class Review
     public virtual ICollection<Tag> Tags { get; set; } = new List<Tag>();
     public virtual ICollection<SavedReview> SavedByUsers { get; set; } = new List<SavedReview>();
     public virtual ICollection<ReviewImage> ReviewImages { get; set; } = new List<ReviewImage>();
+
+    public int? ProductId { get; set; }
+    public Product? Product { get; set; }
 }

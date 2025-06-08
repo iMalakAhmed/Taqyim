@@ -45,17 +45,21 @@ namespace Taqyim.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> AddLocation(int businessId, [FromBody] BusinessLocationCreateDto dto)
         {
-            var business = await _context.Businesses.FindAsync(businessId);
+            var business = await _context.Businesses
+                .Include(b => b.Owner)
+                .FirstOrDefaultAsync(b => b.BusinessId == businessId && !b.IsDeleted);
+
             if (business == null || business.IsDeleted) return NotFound();
 
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var isOwner = business.UserId == userId;
+            var isOwner = business.Owner.UserId == userId;
             var isModerator = User.IsInRole("Admin") || User.IsInRole("Moderator");
 
             if (!isOwner && !isModerator) return Forbid();
 
             var location = new BusinessLocation
             {
+
                 BusinessId = businessId,
                 Address = dto.Address,
                 Latitude = dto.Latitude,
@@ -77,13 +81,14 @@ namespace Taqyim.Api.Controllers
         {
             var location = await _context.BusinessLocations
                 .Include(l => l.Business)
+                .Include(l => l.Business.Owner)
                 .FirstOrDefaultAsync(l => l.LocationId == locationId && l.BusinessId == businessId);
 
             if (location == null || location.Business.IsDeleted)
                 return NotFound();
 
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var isOwner = location.Business.UserId == userId;
+            var isOwner = location.Business.Owner.UserId == userId;
             var isModerator = User.IsInRole("Admin") || User.IsInRole("Moderator");
 
             if (!isOwner && !isModerator) return Forbid();
@@ -104,13 +109,14 @@ namespace Taqyim.Api.Controllers
         {
             var location = await _context.BusinessLocations
                 .Include(l => l.Business)
+                .Include(l => l.Business.Owner)
                 .FirstOrDefaultAsync(l => l.LocationId == locationId && l.BusinessId == businessId);
 
             if (location == null || location.Business.IsDeleted)
                 return NotFound();
 
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var isOwner = location.Business.UserId == userId;
+            var isOwner = location.Business.Owner.UserId == userId;
             var isModerator = User.IsInRole("Admin") || User.IsInRole("Moderator");
 
             if (!isOwner && !isModerator) return Forbid();
@@ -119,6 +125,28 @@ namespace Taqyim.Api.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        // GET /api/businesses/{businessId}/locations/{locationId}
+        [HttpGet("{locationId}")]
+        public async Task<IActionResult> GetLocation(int businessId, int locationId)
+        {
+            var location = await _context.BusinessLocations
+                .Include(l => l.Business)
+                .FirstOrDefaultAsync(l => l.LocationId == locationId && l.BusinessId == businessId);
+
+            if (location == null || location.Business.IsDeleted)
+                return NotFound();
+
+            return Ok(new
+            {
+                location.LocationId,
+                location.Label,
+                location.Address,
+                location.Latitude,
+                location.Longitude,
+                location.CreatedAt
+            });
         }
     }
 }

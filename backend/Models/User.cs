@@ -16,23 +16,15 @@ public class User
 
     [Required]
     public string PasswordHash { get; set; } = null!;
-
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
+    public string UserName { get; set; } = string.Empty;
     public string Type { get; set; } = "User";
-    public string? BusinessName { get; set; }
-    public string? BusinessCategory { get; set; }
-    public string? BusinessDescription { get; set; }
-    public string? BusinessAddress { get; set; }
-    public decimal? BusinessLatitude { get; set; }
-    public decimal? BusinessLongitude { get; set; }
-    public bool IsVerified { get; set; }
+    public string? phoneNumber { get; set; }
+    public bool IsVerified { get; set; }= false;
     public int? VerifiedByUserId { get; set; }
     public string? ProfilePic { get; set; }
     public string? Bio { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public int ReputationPoints { get; set; }
-    public bool IsDeleted { get; set; }
     public virtual User? VerifiedByUser { get; set; }
     public virtual ICollection<User> VerifiedBusinesses { get; set; } = new List<User>();
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
@@ -47,6 +39,7 @@ public class User
     public virtual ICollection<Conversation> Conversations { get; set; } = new List<Conversation>();
     public virtual ICollection<Business> BusinessUsers { get; set; } = new List<Business>();
     public virtual ICollection<Business> BusinessVerifiedByUsers { get; set; } = new List<Business>();
+    public virtual ICollection<Business> UsersBusinesses { get; set; } = new List<Business>();
     public virtual ICollection<Connection> Connections { get; set; } = new List<Connection>();
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
     public virtual ICollection<Media> Media { get; set; } = new List<Media>();

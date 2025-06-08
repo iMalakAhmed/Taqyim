@@ -24,6 +24,7 @@ namespace Taqyim.Api.Data
         public DbSet<Media> Media { get; set; }
         public DbSet<SavedReview> SavedReviews { get; set; }
         public DbSet<ReviewImage> ReviewImages { get; set; }
+        public DbSet<Product> Products { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -39,8 +40,8 @@ namespace Taqyim.Api.Data
             modelBuilder.Entity<Business>(entity =>
             {
                 entity.HasKey(e => e.BusinessId);
-                
-                entity.HasOne(d => d.User)
+
+                entity.HasOne(d => d.Owner)
                     .WithMany(p => p.BusinessUsers)
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.Restrict);
@@ -48,6 +49,16 @@ namespace Taqyim.Api.Data
                 modelBuilder.Entity<Business>()
                 .HasOne(b => b.VerifiedByUser)
                 .WithMany()
+                .HasForeignKey(b => b.VerifiedByUserId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+                modelBuilder.Entity<Business>()
+                .Property(b => b.Category)
+                .HasConversion<string>();
+
+                modelBuilder.Entity<Business>()
+                .HasOne(b => b.VerifiedByUser)
+                .WithMany(u => u.BusinessVerifiedByUsers)
                 .HasForeignKey(b => b.VerifiedByUserId)
                 .OnDelete(DeleteBehavior.SetNull);
 
@@ -67,6 +78,27 @@ namespace Taqyim.Api.Data
                     .HasForeignKey(d => d.BusinessId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+
+            modelBuilder.Entity<Product>(entity =>
+            {
+                entity.HasKey(p => p.ProductId);
+                entity.Property(p => p.Name).IsRequired();
+
+
+            });
+            
+            modelBuilder.Entity<Product>()
+                .HasOne(p => p.Business)
+                .WithMany(b => b.Products)
+                .HasForeignKey(p => p.BusinessId)
+                .OnDelete(DeleteBehavior.SetNull);  
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Product)
+                .WithMany(p => p.Reviews)
+                .HasForeignKey(r => r.ProductId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.User)
                 .WithMany(u => u.Reviews)
