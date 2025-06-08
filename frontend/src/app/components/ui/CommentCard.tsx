@@ -77,34 +77,38 @@ export default function CommentCard({ reviewId, comment }: CommentProps) {
   );
 
   return (
-    <li className="mb-4 border-b pb-2">
-      <div className="flex justify-between items-center mb-1">
+    <li className="mb-6 border-b border-gray-200 pb-4">
+      <div className="flex justify-between items-start mb-2">
         <div>
           {!deleted && (
             <>
-              <strong>
+              <strong className="text-gray-900">
                 {comment.commenter.firstName} {comment.commenter.lastName}
               </strong>{" "}
-              <span className="text-gray-500 text-xs">
+              <span className="text-gray-500 text-xs ml-2">
                 {new Date(comment.createdAt).toLocaleString()}
               </span>
             </>
           )}
 
           {!deleted && (
-            <>
+            <div className="mt-1 flex items-center space-x-4 text-gray-600 text-sm">
               <CommentReactionButtons
                 commentId={comment.commentId}
                 reactionCount={comment.reactions?.length ?? 0}
               />
-              <p>{reactionCount} reactions</p>
-              {!deleted && <p>{replyCount} replies</p>}
-            </>
+              <span>
+                {reactionCount} reaction{reactionCount !== 1 ? "s" : ""}
+              </span>
+              <span>
+                {replyCount} repl{replyCount !== 1 ? "ies" : "y"}
+              </span>
+            </div>
           )}
         </div>
 
         {isOwner && !deleted && (
-          <div className="space-x-2 flex flex-row items-center">
+          <div className="space-x-2 flex items-center">
             {editing ? (
               <>
                 <Button
@@ -113,7 +117,7 @@ export default function CommentCard({ reviewId, comment }: CommentProps) {
                   onClick={handleSave}
                   disabled={isUpdating}
                 >
-                  save
+                  Save
                 </Button>
                 <Button
                   variant="outline"
@@ -124,7 +128,7 @@ export default function CommentCard({ reviewId, comment }: CommentProps) {
                   }}
                   disabled={isUpdating}
                 >
-                  cancel
+                  Cancel
                 </Button>
               </>
             ) : (
@@ -134,6 +138,7 @@ export default function CommentCard({ reviewId, comment }: CommentProps) {
                   className="hover:text-primary"
                   size="sm"
                   onClick={() => setEditing(true)}
+                  aria-label="Edit comment"
                 >
                   <IconEdit size={20} />
                 </Button>
@@ -143,6 +148,7 @@ export default function CommentCard({ reviewId, comment }: CommentProps) {
                   className="hover:text-accent"
                   onClick={handleDelete}
                   disabled={isDeleting}
+                  aria-label="Delete comment"
                 >
                   <IconTrash size={20} />
                 </Button>
@@ -154,21 +160,31 @@ export default function CommentCard({ reviewId, comment }: CommentProps) {
 
       {editing ? (
         <textarea
-          className="w-full p-2 border rounded"
+          className="w-full p-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={3}
           disabled={isUpdating}
         />
       ) : (
-        <p className={deleted ? "italic text-gray-500" : ""}>{content}</p>
+        <p
+          className={
+            deleted
+              ? "italic text-gray-400"
+              : "text-gray-800 whitespace-pre-wrap"
+          }
+        >
+          {content}
+        </p>
       )}
 
       {!deleted && (
-        <div className="mt-1">
+        <div className="mt-2">
           <button
-            className="text-sm text-primary hover:underline"
+            className="text-sm text-primary hover:underline focus:outline-none"
             onClick={() => setReplying(!replying)}
+            aria-expanded={replying}
+            aria-controls={`reply-form-${comment.commentId}`}
           >
             {replying ? "Cancel Reply" : "Reply"}
           </button>
@@ -176,15 +192,17 @@ export default function CommentCard({ reviewId, comment }: CommentProps) {
       )}
 
       {replying && (
-        <AddComment
-          reviewId={reviewId}
-          parentCommentId={comment.commentId}
-          onCancel={() => setReplying(false)}
-        />
+        <div id={`reply-form-${comment.commentId}`} className="mt-3">
+          <AddComment
+            reviewId={reviewId}
+            parentCommentId={comment.commentId}
+            onCancel={() => setReplying(false)}
+          />
+        </div>
       )}
 
       {comment.replies && comment.replies.length > 0 && (
-        <ul className="ml-6 border-l pl-4 mt-2">
+        <ul className="ml-6 border-l border-gray-300 pl-4 mt-4 space-y-4">
           {comment.replies.map((reply) => (
             <CommentCard
               key={reply.commentId}
