@@ -4,9 +4,14 @@ export interface LoginCredentials {
 }
 
 export interface RegisterData {
-  userName: string;
   email: string;
   password: string;
+  userName: string;
+  type?: 'User' | 'Business';
+  businessName?: string;
+  businessCategory?: string;
+  businessDescription?: string;
+  businessAddress?: string;
 }
 
 export interface AuthResponse {
@@ -16,6 +21,7 @@ export interface AuthResponse {
     email: string;
     userName: string;
   };
+  redirectUrl?: string;
 }
 
 export interface UserType {
@@ -103,7 +109,6 @@ export interface ReviewType {
   reviewId: number;
   userId: number;
   businessId: number;
-  productId?: number;
   rating: number;
   comment: string;
   createdAt: string;
@@ -121,7 +126,6 @@ export interface CreateReviewType {
   businessId: number;
   rating: number;
   comment: string;
-  productId?: number;
   tags?: string[] | null;
 }
 
@@ -129,7 +133,6 @@ export interface UpdateReviewType {
   rating: number;
   comment: string;
   tags?: string[] | null;
-  productId?: number;
 }
 
 export interface CommentType {
@@ -137,18 +140,13 @@ export interface CommentType {
   commenterId: number;
   reviewId: number;
   content: string;
-  isDeleted?: boolean;
   createdAt: string;
-  parentCommentId?: number | null;
   commenter: UserType;
-  replies?: CommentType[];
-  reactions?: CommentReactionType[];
 }
 
 export interface CreateCommentType {
   reviewId: number;
   content: string;
-  parentCommentId?: number | null;
 }
 
 export interface ReactionType {
@@ -162,18 +160,6 @@ export interface ReactionType {
 
 export interface CreateReactionType {
   reviewId: number;
-  reactionType: string;
-}
-
-export interface CommentReactionType {
-  commentReactionId: number;
-  userId: number;
-  reactionType: string;
-  createdAt: string | null;
-}
-
-export interface CreateCommentReactionType {
-  commentId: number;
   reactionType: string;
 }
 

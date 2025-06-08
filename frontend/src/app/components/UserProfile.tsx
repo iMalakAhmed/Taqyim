@@ -38,8 +38,7 @@ const UserProfile = () => {
   const user = viewedUser ?? currentUser;
   const isLoading = viewedId ? isUserLoading : isCurrentLoading;
   const error = viewedId ? userError : currentError;
-  const isSelf =
-    !viewedId || (currentUser && Number(viewedId) === currentUser.userId);
+  const isSelf = !viewedId || (currentUser && Number(viewedId) === currentUser.userId);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [updateUser] = useUpdateUserMutation();
@@ -75,7 +74,9 @@ const UserProfile = () => {
               ? user.profilePic
               : "\\default-profile.jpg"
           }
-          alt={`${user.userName} `}
+          alt={
+            user.userName
+          }
           className="w-60 h-40 rounded-sm mb-4 object-cover"
           onError={(e) => {
             e.currentTarget.onerror = null;
@@ -85,7 +86,7 @@ const UserProfile = () => {
       </div>
 
       <div className="w-2/3 py-8 px-6 font-body">
-        <h2 className="text-xl font-heading font-bold">{`${user.userName} `}</h2>
+        <h2 className="text-xl font-heading font-bold">{user.userName}</h2>
         <p className="mb-4 py-3">{user.bio}</p>
 
         <div className="flex flex-row mt-3">
@@ -100,6 +101,13 @@ const UserProfile = () => {
           )}
           <Button variant="primary" className="ml-2 p-6">
             <IconShare stroke={2} /> Share profile
+          </Button>
+          <Button
+            onClick={() => router.push("/home")}
+            variant="primary"
+            className="ml-2 p-6"
+          >
+            <IconShare stroke={2} /> Go to Home
           </Button>
           {isSelf && (
             <Button
