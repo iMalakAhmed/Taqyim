@@ -28,6 +28,7 @@ import { RootState } from "../../redux/store";
 import { useRouter } from "next/navigation";
 import StarRating from "./StarRating";
 import Link from "next/link";
+import CopyToClipboardButton from "./ShareButton";
 
 type ReviewCardProps = {
   reviewId: number;
@@ -247,9 +248,14 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
             <IconMessage size={20} />
           </Button>
 
-          <Button variant="none" size="sm" className="hover:text-secondary">
+          {/* <Button variant="none" size="sm" className="hover:text-secondary">
             <IconShare3 size={20} />
-          </Button>
+          </Button> */}
+          <CopyToClipboardButton
+            copyText={`https://localhost:3000/reviews/${reviewId}`}
+          >
+            <IconShare3 size={20} />
+          </CopyToClipboardButton>
         </div>
         <div className="flex flex-row items-center font-body text-sm gap-2">
           <p>{reactionCount} reactions</p>
