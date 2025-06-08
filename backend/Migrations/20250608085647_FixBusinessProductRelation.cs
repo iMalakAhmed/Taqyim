@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Taqyim.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class FixBusinessProductRelation : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -85,14 +85,14 @@ namespace Taqyim.Api.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Category = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomCategory = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     VerifiedByUserId = table.Column<int>(type: "int", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     Logo = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserId = table.Column<int>(type: "int", nullable: true),
-                    UserId1 = table.Column<int>(type: "int", nullable: true),
-                    UserId2 = table.Column<int>(type: "int", nullable: true)
+                    UserId1 = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -106,11 +106,6 @@ namespace Taqyim.Api.Migrations
                     table.ForeignKey(
                         name: "FK_Businesses_Users_UserId1",
                         column: x => x.UserId1,
-                        principalTable: "Users",
-                        principalColumn: "UserId");
-                    table.ForeignKey(
-                        name: "FK_Businesses_Users_UserId2",
-                        column: x => x.UserId2,
                         principalTable: "Users",
                         principalColumn: "UserId");
                     table.ForeignKey(
@@ -317,6 +312,28 @@ namespace Taqyim.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Products",
+                columns: table => new
+                {
+                    ProductId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    BusinessId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Products", x => x.ProductId);
+                    table.ForeignKey(
+                        name: "FK_Products_Businesses_BusinessId",
+                        column: x => x.BusinessId,
+                        principalTable: "Businesses",
+                        principalColumn: "BusinessId",
+                        onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Reviews",
                 columns: table => new
                 {
@@ -327,7 +344,8 @@ namespace Taqyim.Api.Migrations
                     Rating = table.Column<int>(type: "int", nullable: false),
                     Comment = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ProductId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -338,6 +356,12 @@ namespace Taqyim.Api.Migrations
                         principalTable: "Businesses",
                         principalColumn: "BusinessId",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Reviews_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "ProductId",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_Reviews_Users_UserId",
                         column: x => x.UserId,
@@ -483,11 +507,6 @@ namespace Taqyim.Api.Migrations
                 column: "UserId1");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Businesses_UserId2",
-                table: "Businesses",
-                column: "UserId2");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Businesses_VerifiedByUserId",
                 table: "Businesses",
                 column: "VerifiedByUserId");
@@ -558,6 +577,11 @@ namespace Taqyim.Api.Migrations
                 column: "UserId1");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Products_BusinessId",
+                table: "Products",
+                column: "BusinessId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Reactions_ReviewId",
                 table: "Reactions",
                 column: "ReviewId");
@@ -576,6 +600,11 @@ namespace Taqyim.Api.Migrations
                 name: "IX_Reviews_BusinessId",
                 table: "Reviews",
                 column: "BusinessId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reviews_ProductId",
+                table: "Reviews",
+                column: "ProductId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reviews_UserId",
@@ -662,6 +691,9 @@ namespace Taqyim.Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "Reviews");
+
+            migrationBuilder.DropTable(
+                name: "Products");
 
             migrationBuilder.DropTable(
                 name: "Businesses");

@@ -33,7 +33,8 @@ public class SearchController : ControllerBase
             .Include(b => b.BusinessLocations)
             .Where(b => !b.IsDeleted && (
                 b.Name.ToLower().Contains(searchTerm) ||
-                b.Category.ToLower().Contains(searchTerm) ||
+                b.Category.ToString().ToLower().Contains(searchTerm) ||
+                (b.Category == BusinessCategory.Other && b.CustomCategory != null && b.CustomCategory.ToLower().Contains(searchTerm)) ||
                 b.Description.ToLower().Contains(searchTerm) ||
                 b.BusinessLocations.Any(l => l.Address.ToLower().Contains(searchTerm))
             ))
@@ -42,6 +43,7 @@ public class SearchController : ControllerBase
                 BusinessId = b.BusinessId,
                 Name = b.Name,
                 Category = b.Category,
+                CustomCategory = b.CustomCategory,
                 Description = b.Description,
                 CreatedAt = b.CreatedAt,
                 Owner = new UserDTO
@@ -82,7 +84,7 @@ public class SearchController : ControllerBase
             .ToListAsync();
 
         var users = await _context.Users
-            .Where(u => u.Type!="Deleted" && (
+            .Where(u => u.Type != "Deleted" && (
                 u.UserName.ToLower().Contains(searchTerm) ||
                 u.Email.ToLower().Contains(searchTerm)
             ))
@@ -107,6 +109,7 @@ public class SearchController : ControllerBase
         };
     }
 
+
     [HttpGet("businesses")]
     public async Task<ActionResult<IEnumerable<SearchBusinessDTO>>> SearchBusinesses(
         [FromQuery] string? query,
@@ -121,24 +124,34 @@ public class SearchController : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(query))
         {
-            businesses = businesses.Where(b => 
-                b.Name.Contains(query) || 
-                b.Description.Contains(query));
+            var loweredQuery = query.ToLower();
+            businesses = businesses.Where(b =>
+                b.Name.ToLower().Contains(loweredQuery) ||
+                b.Description.ToLower().Contains(loweredQuery) ||
+                (b.Category == BusinessCategory.Other && b.CustomCategory != null && b.CustomCategory.ToLower().Contains(loweredQuery)));
         }
 
         if (!string.IsNullOrWhiteSpace(category))
         {
-            businesses = businesses.Where(b => b.Category == category);
+            if (Enum.TryParse<BusinessCategory>(category, true, out var parsedCategory))
+            {
+                businesses = businesses.Where(b => b.Category == parsedCategory);
+            }
+            else
+            {
+                var loweredCategory = category.ToLower();
+                businesses = businesses.Where(b => b.Category == BusinessCategory.Other && b.CustomCategory != null && b.CustomCategory.ToLower().Contains(loweredCategory));
+            }
         }
 
         if (latitude.HasValue && longitude.HasValue && radius.HasValue)
         {
-            businesses = businesses.Where(b => 
-                b.BusinessLocations.Any(l => 
+            businesses = businesses.Where(b =>
+                b.BusinessLocations.Any(l =>
                     CalculateDistance(
-                        latitude.Value, 
-                        longitude.Value, 
-                        (double)l.Latitude!, 
+                        latitude.Value,
+                        longitude.Value,
+                        (double)l.Latitude!,
                         (double)l.Longitude!) <= radius.Value));
         }
 
@@ -147,7 +160,9 @@ public class SearchController : ControllerBase
             {
                 BusinessId = b.BusinessId,
                 Name = b.Name,
-                Category = b.Category,
+                Category = b.Category == BusinessCategory.Other && b.CustomCategory != null
+                ? b.CustomCategory
+                : b.Category.ToString(),
                 Description = b.Description,
                 CreatedAt = b.CreatedAt,
                 BusinessLocations = b.BusinessLocations.Select(l => new BusinessLocationDTO

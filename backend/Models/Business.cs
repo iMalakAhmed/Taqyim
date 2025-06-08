@@ -3,12 +3,15 @@ using System.Collections.Generic;
 
 namespace Taqyim.Api.Models;
 
+
 public partial class Business
 {
     public int BusinessId { get; set; }
 
     public string Name { get; set; } = string.Empty;
-    public string Category { get; set; } = string.Empty;
+
+    public BusinessCategory Category { get; set; }
+    public string? CustomCategory { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int? VerifiedByUserId { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -19,4 +22,6 @@ public partial class Business
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
     public virtual User Owner { get; set; } = null!;
     public virtual User? VerifiedByUser { get; set; } = null!;
+    public virtual ICollection<Product>? Products { get; set; } = new List<Product>();
 }
+

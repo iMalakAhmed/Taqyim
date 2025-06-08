@@ -34,13 +34,14 @@ namespace Taqyim.Api.Controllers
             {
                 Name = dto.Name,
                 Category = dto.Category,
+                CustomCategory = dto.Category == BusinessCategory.Other ? dto.CustomCategory : null,
                 Description = dto.Description,
                 CreatedAt = DateTime.UtcNow,
-                Logo = dto.Logo,
                 IsDeleted = false,
                 VerifiedByUserId = null,
-                Owner = user,
+                Owner = user
             };
+            user.Type = "BusinessOwner";
 
 
             _context.Businesses.Add(business);
@@ -57,6 +58,7 @@ namespace Taqyim.Api.Controllers
                 .Include(b => b.Reviews).ThenInclude(r => r.User)
                 .Include(b => b.Owner)
                 .Include(b => b.BusinessLocations)
+                .Include(b=> b.Products)
                 .AsQueryable();
 
             if (!includeDeleted)
@@ -66,7 +68,12 @@ namespace Taqyim.Api.Controllers
                 query = query.Where(b => b.Owner.UserName.Contains(name));
 
             if (!string.IsNullOrEmpty(category))
-                query = query.Where(b => b.Category == category);
+            {
+                if (Enum.TryParse<BusinessCategory>(category, true, out var parsedCategory))
+                    query = query.Where(b => b.Category == parsedCategory);
+                else
+                    query = query.Where(b => b.CustomCategory == category);
+            }
 
             var result = await query
                 .Select(b => new
@@ -104,7 +111,13 @@ namespace Taqyim.Api.Controllers
                             r.User.UserName,
                             r.User.ProfilePic
                         }
-                    }).ToList()
+                    }).ToList(),
+                    Products=b.Products.Where(bl => !b.IsDeleted).Select(p => new
+                    {
+                        p.ProductId,
+                        p.Name,
+                        p.Description
+                    }).ToList(),
                 })
                 .ToListAsync();
 
@@ -120,6 +133,7 @@ namespace Taqyim.Api.Controllers
                     .ThenInclude(r => r.User)
                 .Include(b => b.Owner)
                 .Include(b => b.BusinessLocations)
+                .Include(b => b.Products)
                 .FirstOrDefaultAsync(b => b.BusinessId == id && !b.IsDeleted);
 
             if (business == null) return NotFound();
@@ -129,6 +143,7 @@ namespace Taqyim.Api.Controllers
                 BusinessId = business.BusinessId,
                 Name = business.Name,
                 Category = business.Category,
+                CustomCategory = business.Category == BusinessCategory.Other ? business.CustomCategory : null,
                 Description = business.Description,
                 Logo = business.Logo,
                 Owner = new UserDTO
@@ -144,6 +159,12 @@ namespace Taqyim.Api.Controllers
                     Latitude = loc.Latitude != null ? (double?)loc.Latitude : 0,
                     Longitude = loc.Longitude != null ? (double?)loc.Longitude : 0,
                     Label = loc.Label ?? ""
+                }).ToList(),
+                Products = business.Products.Where(bl => !business.IsDeleted).Select(p => new ProductDTO
+                {
+                    ProductId = p.ProductId,
+                    Name = p.Name,
+                    Description = p.Description
                 }).ToList()
             };
 
@@ -168,7 +189,8 @@ namespace Taqyim.Api.Controllers
             if (!isOwner && !isModerator)
                 return Forbid();
             business.Name = dto.Name ?? business.Name;
-            business.Category = dto.Category ?? business.Category;
+            business.Category = dto.Category;
+            business.CustomCategory = dto.Category == BusinessCategory.Other ? dto.CustomCategory : null;
             business.Description = dto.Description ?? business.Description;
             business.Logo = dto.Logo ?? business.Logo;
             await _context.SaveChangesAsync();
@@ -196,6 +218,17 @@ namespace Taqyim.Api.Controllers
             business.IsDeleted = true;
             await _context.SaveChangesAsync();
 
+            // Check if the owner has any other non-deleted businesses
+            var owner = business.Owner;
+            bool hasOtherActiveBusinesses = await _context.Businesses
+                .AnyAsync(b => b.Owner.UserId == owner.UserId && !b.IsDeleted);
+
+            if (!hasOtherActiveBusinesses)
+            {
+                owner.Type = "User";
+                await _context.SaveChangesAsync();
+            }
+
             return NoContent();
         }
         
@@ -211,6 +244,7 @@ namespace Taqyim.Api.Controllers
             var adminId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             business.VerifiedByUserId = adminId;
             business.Owner.IsVerified = true;
+            business.Owner.Type = "BusinessOwner";
 
             await _context.SaveChangesAsync();
             return Ok(new { message = "Business verified." });
@@ -228,6 +262,7 @@ namespace Taqyim.Api.Controllers
 
             business.VerifiedByUserId = null;
             business.Owner.IsVerified = false;
+            business.Owner.Type = "User"; 
 
             await _context.SaveChangesAsync();
             return Ok(new { message = "Business unverified." });

@@ -58,6 +58,7 @@ public class SavedController : ControllerBase
                 CreatedAt = s.Review.CreatedAt,
                 UpdatedAt = s.Review.UpdatedAt,
                 SavedAt = s.SavedAt,
+                ProductId = s.Review.ProductId,
                 User = new UserDTO
                 {
                     UserId = s.Review.User!.UserId,
@@ -134,7 +135,13 @@ public class SavedController : ControllerBase
                     TagId = t.TagId,
                     TagType = t.TagType,
                     ReviewId = t.ReviewId
-                }).ToList() : new List<TagDTO>()
+                }).ToList() : new List<TagDTO>(),
+                Product = s.Review.Product == null ? null : new ProductDTO
+                {
+                    ProductId = s.Review.Product.ProductId,
+                    Name = s.Review.Product.Name,
+                    Description = s.Review.Product.Description
+                }
             })
             .ToListAsync();
 
