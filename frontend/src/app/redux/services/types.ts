@@ -104,6 +104,7 @@ export interface ReviewType {
   reviewId: number;
   userId: number;
   businessId: number;
+  productId?: number;
   rating: number;
   comment: string;
   createdAt: string;
@@ -121,6 +122,7 @@ export interface CreateReviewType {
   businessId: number;
   rating: number;
   comment: string;
+  productId?: number;
   tags?: string[] | null;
 }
 
@@ -128,6 +130,7 @@ export interface UpdateReviewType {
   rating: number;
   comment: string;
   tags?: string[] | null;
+  productId?: number;
 }
 
 export interface CommentType {

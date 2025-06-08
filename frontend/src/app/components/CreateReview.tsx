@@ -14,6 +14,7 @@ type CreateReviewProps = {
 
 export default function CreateReview({ onCancel }: CreateReviewProps) {
   const [businessId, setBusinessId] = useState<number | "">("");
+  const [productId, setProductId] = useState<number | "">("");
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [tags, setTags] = useState("");
@@ -36,6 +37,7 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
     try {
       await createReview({
         businessId: Number(businessId),
+        productId: productId ? Number(productId) : undefined,
         rating,
         comment,
         tags: tagsArray.length > 0 ? tagsArray : undefined,
@@ -43,6 +45,7 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
 
       // Reset form on success
       setBusinessId("");
+      setProductId("");
       setRating(5);
       setComment("");
       setTags("");
@@ -88,7 +91,7 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
                   e.target.value === "" ? "" : Number(e.target.value)
                 )
               }
-              className="w-full px-2 py-1 focus:outline-none  "
+              className="w-full px-2 py-1 focus:outline-none"
               required
               min={1}
             />
@@ -96,8 +99,27 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
           </div>
 
           <div>
+            <label htmlFor="productId" className="block font-medium mb-1">
+              Product ID (optional)
+            </label>
+            <input
+              id="productId"
+              type="number"
+              value={productId}
+              onChange={(e) =>
+                setProductId(
+                  e.target.value === "" ? "" : Number(e.target.value)
+                )
+              }
+              className="w-full px-2 py-1 focus:outline-none"
+              min={1}
+            />
+            <HorizontalLine />
+          </div>
+
+          <div>
             <label className="block font-medium mb-1">
-              Rating (1-5) <span className="text-accent">*</span>
+              Rating (1–5) <span className="text-accent">*</span>
             </label>
             <StarRating rating={rating} onChange={setRating} />
             <HorizontalLine className="mt-3" />

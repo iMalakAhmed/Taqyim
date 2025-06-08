@@ -180,6 +180,10 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
         <HorizontalLine />
         <div className="flex flex-row items-center pt-3">
           <h1 className="font-heading font-bold text-lg">Business Name</h1>
+          {review.productId && (
+            <h2 className="font-heading text-base pl-2">- Product Name</h2>
+          )}
+
           {isEditing ? (
             <div className="flex space-x-1 cursor-pointer px-3">
               {[...Array(5)].map((_, i) => (
