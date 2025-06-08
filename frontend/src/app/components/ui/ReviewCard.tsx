@@ -127,7 +127,7 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
           </div>
         </Link>
 
-        {isOwner && (
+        {isOwner ? (
           <div className="flex gap-2 ml-auto">
             {isEditing ? (
               <>
@@ -179,6 +179,12 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
                 </Button>
               </>
             )}
+          </div>
+        ) : (
+          <div className="ml-auto">
+            <Button size="md" variant="secondary">
+              Follow
+            </Button>
           </div>
         )}
       </div>
