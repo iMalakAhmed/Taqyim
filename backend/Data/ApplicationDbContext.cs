@@ -13,6 +13,7 @@ namespace Taqyim.Api.Data
         public DbSet<BusinessLocation> BusinessLocations { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<CommentReaction> CommentReactions { get; set; } 
         public DbSet<Reaction> Reactions { get; set; }
         public DbSet<Connection> Connections { get; set; }
         public DbSet<Notification> Notifications { get; set; }
@@ -124,6 +125,12 @@ namespace Taqyim.Api.Data
                     .WithMany(p => p.Comments)
                     .HasForeignKey(d => d.ReviewId)
                     .OnDelete(DeleteBehavior.Cascade);
+
+
+                entity.HasOne(c => c.ParentComment)
+                    .WithMany(c => c.Replies)
+                    .HasForeignKey(c => c.ParentCommentId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Reaction>(entity =>

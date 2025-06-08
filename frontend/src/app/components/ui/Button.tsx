@@ -20,7 +20,7 @@ const variants = {
   secondary: "text-white bg-secondary hover:bg-accent/90 focus:ring-accent",
   outline:
     "border border-accent text-accent hover:bg-accent hover:text-white bg-transparent focus:ring-accent text-accent",
-  none: "text-text bg-transparent ",
+  none: "bg-transparent ",
 };
 
 const sizes = {

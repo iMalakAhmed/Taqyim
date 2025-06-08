@@ -3,10 +3,10 @@
 import { IconThumbUp } from "@tabler/icons-react";
 import { useState, useEffect, useRef } from "react";
 import {
-  useReactToReviewMutation,
-  useGetUserReactionForReviewQuery,
+  useCreateReactionMutation,
+  useGetUserReactionForCommentQuery,
   useDeleteReactionMutation,
-} from "../redux/services/reactionApi";
+} from "../redux/services/commentReactionApi"; // adjust path & names
 import Button from "./ui/Button"; // adjust path if needed
 import clsx from "clsx";
 import { useDispatch } from "react-redux";
@@ -14,21 +14,24 @@ import {
   setReactionCount,
   incrementReactionCount,
   decrementReactionCount,
-} from "./../redux/slices/reactionCounterSlice";
+} from "../redux/slices/commentReactionCounterSlice";
 import { reactionsList } from "../utils/reactionList";
 
-export default function ReactionButtons({
-  reviewId,
-  reactionCount,
-}: {
-  reviewId: number;
+interface CommentReactionButtonsProps {
+  commentId: number;
   reactionCount: number;
-}) {
+}
+
+export default function CommentReactionButtons({
+  commentId,
+  reactionCount,
+}: CommentReactionButtonsProps) {
   const { data: reactionData, isLoading: isReactionLoading } =
-    useGetUserReactionForReviewQuery(reviewId);
+    useGetUserReactionForCommentQuery(commentId);
 
   const [selectedReaction, setSelectedReaction] = useState<string | null>(null);
-  const [reactToReview, { isLoading: isReacting }] = useReactToReviewMutation();
+  const [createReaction, { isLoading: isReacting }] =
+    useCreateReactionMutation();
   const [deleteReaction, { isLoading: isDeleting }] =
     useDeleteReactionMutation();
 
@@ -40,8 +43,8 @@ export default function ReactionButtons({
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(setReactionCount({ reviewId, count: reactionCount }));
-  }, [dispatch, reactionCount]);
+    dispatch(setReactionCount({ commentId, count: reactionCount }));
+  }, [dispatch, reactionCount, commentId]);
 
   useEffect(() => {
     if (reactionData && reactionData.reactionType) {
@@ -54,22 +57,23 @@ export default function ReactionButtons({
   const handleReactionClick = async (type: string) => {
     if (type === selectedReaction && reactionData) {
       try {
-        await deleteReaction(reactionData.reactionId).unwrap();
+        await deleteReaction(reactionData.commentReactionId).unwrap();
         setSelectedReaction(null);
+        dispatch(decrementReactionCount(commentId));
       } catch (error) {
         console.error("Failed to delete reaction", error);
       }
     } else {
       try {
-        const result = await reactToReview({
-          reviewId,
+        const result = await createReaction({
+          commentId,
           reactionType: type,
         }).unwrap();
 
         if (result) {
           if (!selectedReaction) {
             // user is adding a reaction for the first time
-            dispatch(incrementReactionCount(reviewId));
+            dispatch(incrementReactionCount(commentId));
           }
           // if user changed reaction type, count stays the same
 
@@ -126,10 +130,6 @@ export default function ReactionButtons({
         paddingRight: 0,
       }}
     >
-      {/* <span>
-        {localReactionCount} Reaction{localReactionCount !== 1 ? "s" : ""}
-      </span> */}
-
       <Button
         variant="none"
         size="sm"
@@ -139,9 +139,9 @@ export default function ReactionButtons({
         onClick={async () => {
           if (selectedReaction && reactionData) {
             try {
-              await deleteReaction(reactionData.reactionId).unwrap();
+              await deleteReaction(reactionData.commentReactionId).unwrap();
               setSelectedReaction(null);
-              dispatch(decrementReactionCount(reviewId));
+              dispatch(decrementReactionCount(commentId));
             } catch (error) {
               console.error("Failed to delete reaction", error);
             }

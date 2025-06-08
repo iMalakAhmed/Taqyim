@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Taqyim.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class FixBusinessProductRelation : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -378,11 +378,19 @@ namespace Taqyim.Api.Migrations
                     CommenterId = table.Column<int>(type: "int", nullable: false),
                     ReviewId = table.Column<int>(type: "int", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    isDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ParentCommentId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Comments", x => x.CommentId);
+                    table.ForeignKey(
+                        name: "FK_Comments_Comments_ParentCommentId",
+                        column: x => x.ParentCommentId,
+                        principalTable: "Comments",
+                        principalColumn: "CommentId",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Comments_Reviews_ReviewId",
                         column: x => x.ReviewId,
@@ -495,6 +503,34 @@ namespace Taqyim.Api.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "CommentReactions",
+                columns: table => new
+                {
+                    CommentReactionId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CommentId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    ReactionType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CommentReactions", x => x.CommentReactionId);
+                    table.ForeignKey(
+                        name: "FK_CommentReactions_Comments_CommentId",
+                        column: x => x.CommentId,
+                        principalTable: "Comments",
+                        principalColumn: "CommentId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_CommentReactions_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Businesses_UserId",
                 table: "Businesses",
@@ -516,9 +552,24 @@ namespace Taqyim.Api.Migrations
                 column: "BusinessId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CommentReactions_CommentId",
+                table: "CommentReactions",
+                column: "CommentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CommentReactions_UserId",
+                table: "CommentReactions",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Comments_CommenterId",
                 table: "Comments",
                 column: "CommenterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Comments_ParentCommentId",
+                table: "Comments",
+                column: "ParentCommentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Comments_ReviewId",
@@ -653,7 +704,7 @@ namespace Taqyim.Api.Migrations
                 name: "BusinessLocations");
 
             migrationBuilder.DropTable(
-                name: "Comments");
+                name: "CommentReactions");
 
             migrationBuilder.DropTable(
                 name: "Connections");
@@ -684,6 +735,9 @@ namespace Taqyim.Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserBadges");
+
+            migrationBuilder.DropTable(
+                name: "Comments");
 
             migrationBuilder.DropTable(
                 name: "Conversations");

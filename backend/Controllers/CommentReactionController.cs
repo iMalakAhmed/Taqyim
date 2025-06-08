@@ -10,27 +10,27 @@ namespace Taqyim.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ReactionController : ControllerBase
+public class CommentReactionController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
 
-    public ReactionController(ApplicationDbContext context)
+    public CommentReactionController(ApplicationDbContext context)
     {
         _context = context;
     }
 
-    // GET: /api/reaction/review/{reviewId}
-    [HttpGet("review/{reviewId}")]
-    public async Task<ActionResult<IEnumerable<ReactionDTO>>> GetReactionsByReview(int reviewId)
+    // GET: /api/commentreaction/comment/{commentId}
+    [HttpGet("comment/{commentId}")]
+    public async Task<ActionResult<IEnumerable<CommentReactionDTO>>> GetReactionsByComment(int commentId)
     {
-        var reactions = await _context.Reactions
+        var reactions = await _context.CommentReactions
             .Include(r => r.User)
-            .Where(r => r.ReviewId == reviewId)
+            .Where(r => r.CommentId == commentId)
             .OrderByDescending(r => r.CreatedAt)
-            .Select(r => new ReactionDTO
+            .Select(r => new CommentReactionDTO
             {
-                ReactionId = r.ReactionId,
-                ReviewId = r.ReviewId,
+                CommentReactionId = r.CommentReactionId,
+                CommentId = r.CommentId,
                 UserId = r.UserId,
                 ReactionType = r.ReactionType ?? string.Empty,
                 CreatedAt = r.CreatedAt ?? DateTime.UtcNow,
@@ -52,21 +52,21 @@ public class ReactionController : ControllerBase
         return reactions;
     }
 
-    // GET: /api/reaction/{id}
+    // GET: /api/commentreaction/{id}
     [HttpGet("{id}")]
-    public async Task<ActionResult<ReactionDTO>> GetReaction(int id)
+    public async Task<ActionResult<CommentReactionDTO>> GetReaction(int id)
     {
-        var reaction = await _context.Reactions
+        var reaction = await _context.CommentReactions
             .Include(r => r.User)
-            .FirstOrDefaultAsync(r => r.ReactionId == id);
+            .FirstOrDefaultAsync(r => r.CommentReactionId == id);
 
         if (reaction == null)
             return NotFound();
 
-        return new ReactionDTO
+        return new CommentReactionDTO
         {
-            ReactionId = reaction.ReactionId,
-            ReviewId = reaction.ReviewId,
+            CommentReactionId = reaction.CommentReactionId,
+            CommentId = reaction.CommentId,
             UserId = reaction.UserId,
             ReactionType = reaction.ReactionType ?? string.Empty,
             CreatedAt = reaction.CreatedAt ?? DateTime.UtcNow,
@@ -85,53 +85,53 @@ public class ReactionController : ControllerBase
         };
     }
 
-    // POST: /api/reaction
+    // POST: /api/commentreaction
     [Authorize]
     [HttpPost]
-    public async Task<ActionResult<ReactionDTO>> CreateReaction(CreateReactionDTO createReactionDTO)
+    public async Task<ActionResult<CommentReactionDTO>> CreateReaction(CreateCommentReactionDTO createDTO)
     {
         var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var review = await _context.Reviews.FindAsync(createReactionDTO.ReviewId);
 
-        if (review == null)
-            return NotFound("Review not found");
+        var comment = await _context.Comments.FindAsync(createDTO.CommentId);
+        if (comment == null)
+            return NotFound("Comment not found");
 
-        var existingReaction = await _context.Reactions
-            .FirstOrDefaultAsync(r => r.ReviewId == createReactionDTO.ReviewId && r.UserId == userId);
+        var existingReaction = await _context.CommentReactions
+            .FirstOrDefaultAsync(r => r.CommentId == createDTO.CommentId && r.UserId == userId);
 
         if (existingReaction != null)
         {
-            if (existingReaction.ReactionType == createReactionDTO.ReactionType)
+            if (existingReaction.ReactionType == createDTO.ReactionType)
             {
-                _context.Reactions.Remove(existingReaction);
+                _context.CommentReactions.Remove(existingReaction);
                 await _context.SaveChangesAsync();
                 return NoContent();
             }
-            existingReaction.ReactionType = createReactionDTO.ReactionType;
+            existingReaction.ReactionType = createDTO.ReactionType;
             existingReaction.CreatedAt = DateTime.UtcNow;
         }
         else
         {
-            var reaction = new Reaction
+            var reaction = new CommentReaction
             {
-                ReviewId = createReactionDTO.ReviewId,
+                CommentId = createDTO.CommentId,
                 UserId = userId,
-                ReactionType = createReactionDTO.ReactionType,
+                ReactionType = createDTO.ReactionType,
                 CreatedAt = DateTime.UtcNow
             };
-            _context.Reactions.Add(reaction);
+            _context.CommentReactions.Add(reaction);
         }
 
         await _context.SaveChangesAsync();
 
-        var createdReaction = await _context.Reactions
+        var createdReaction = await _context.CommentReactions
             .Include(r => r.User)
-            .FirstOrDefaultAsync(r => r.ReviewId == createReactionDTO.ReviewId && r.UserId == userId);
+            .FirstOrDefaultAsync(r => r.CommentId == createDTO.CommentId && r.UserId == userId);
 
-        return new ReactionDTO
+        return new CommentReactionDTO
         {
-            ReactionId = createdReaction!.ReactionId,
-            ReviewId = createdReaction.ReviewId,
+            CommentReactionId = createdReaction!.CommentReactionId,
+            CommentId = createdReaction.CommentId,
             UserId = createdReaction.UserId,
             ReactionType = createdReaction.ReactionType ?? string.Empty,
             CreatedAt = createdReaction.CreatedAt ?? DateTime.UtcNow,
@@ -150,12 +150,12 @@ public class ReactionController : ControllerBase
         };
     }
 
-    // DELETE: /api/reaction/{id}
+    // DELETE: /api/commentreaction/{id}
     [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteReaction(int id)
     {
-        var reaction = await _context.Reactions.FindAsync(id);
+        var reaction = await _context.CommentReactions.FindAsync(id);
         if (reaction == null)
             return NotFound();
 
@@ -163,46 +163,45 @@ public class ReactionController : ControllerBase
         if (reaction.UserId != userId && !User.IsInRole("Admin") && !User.IsInRole("Moderator"))
             return Forbid();
 
-        _context.Reactions.Remove(reaction);
+        _context.CommentReactions.Remove(reaction);
         await _context.SaveChangesAsync();
 
         return NoContent();
     }
 
-    // GET: /api/reaction/review/{reviewId}/user
-[Authorize]
-[HttpGet("review/{reviewId}/user")]
-public async Task<ActionResult<ReactionDTO?>> GetUserReactionForReview(int reviewId)
-{
-    var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
-    var reaction = await _context.Reactions
-        .Include(r => r.User)
-        .FirstOrDefaultAsync(r => r.ReviewId == reviewId && r.UserId == userId);
-
-    if (reaction == null)
-        return NoContent();
-
-    return new ReactionDTO
+    // GET: /api/commentreaction/comment/{commentId}/user
+    [Authorize]
+    [HttpGet("comment/{commentId}/user")]
+    public async Task<ActionResult<CommentReactionDTO?>> GetUserReactionForComment(int commentId)
     {
-        ReactionId = reaction.ReactionId,
-        ReviewId = reaction.ReviewId,
-        UserId = reaction.UserId,
-        ReactionType = reaction.ReactionType ?? string.Empty,
-        CreatedAt = reaction.CreatedAt ?? DateTime.UtcNow,
-        User = new UserDTO
-        {
-            UserId = reaction.User.UserId,
-            Email = reaction.User.Email,
-            UserName = reaction.User.UserName,
-            Type = reaction.User.Type,
-            IsVerified = reaction.User.IsVerified,
-            ProfilePic = reaction.User.ProfilePic,
-            Bio = reaction.User.Bio,
-            CreatedAt = reaction.User.CreatedAt,
-            ReputationPoints = reaction.User.ReputationPoints
-        }
-    };
-}
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-} 
+        var reaction = await _context.CommentReactions
+            .Include(r => r.User)
+            .FirstOrDefaultAsync(r => r.CommentId == commentId && r.UserId == userId);
+
+        if (reaction == null)
+            return NoContent();
+
+        return new CommentReactionDTO
+        {
+            CommentReactionId = reaction.CommentReactionId,
+            CommentId = reaction.CommentId,
+            UserId = reaction.UserId,
+            ReactionType = reaction.ReactionType ?? string.Empty,
+            CreatedAt = reaction.CreatedAt ?? DateTime.UtcNow,
+            User = new UserDTO
+            {
+                UserId = reaction.User.UserId,
+                Email = reaction.User.Email,
+                UserName = reaction.User.UserName,
+                Type = reaction.User.Type,
+                IsVerified = reaction.User.IsVerified,
+                ProfilePic = reaction.User.ProfilePic,
+                Bio = reaction.User.Bio,
+                CreatedAt = reaction.User.CreatedAt,
+                ReputationPoints = reaction.User.ReputationPoints
+            }
+        };
+    }
+}

@@ -10,6 +10,9 @@ import { mediaApi } from "./services/mediaApi";
 import { commentApi } from "./services/commentApi";
 import reactionCounterReducer from "./slices/reactionCounterSlice";
 import commentCounterReducer from "./slices/commentCounterSlice";
+import commentReactionCounterReducer from "./slices/commentReactionCounterSlice";
+import { commentReactionApi } from "./services/commentReactionApi";
+import replyCounterReducer from "./slices/replyCounterSlice";
 
 export const store = configureStore({
   reducer: {
@@ -20,10 +23,13 @@ export const store = configureStore({
     [reactionApi.reducerPath]: reactionApi.reducer,
     [mediaApi.reducerPath]: mediaApi.reducer,
     [commentApi.reducerPath]: commentApi.reducer,
+    [commentReactionApi.reducerPath]: commentReactionApi.reducer,
     user: userReducer,
     business: businessReducer,
     reactionCounter: reactionCounterReducer,
     commentCounter: commentCounterReducer,
+    commentReactionCounter: commentReactionCounterReducer,
+    replyCounter: replyCounterReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -33,7 +39,8 @@ export const store = configureStore({
       reviewApi.middleware,
       reactionApi.middleware,
       mediaApi.middleware,
-      commentApi.middleware
+      commentApi.middleware,
+      commentReactionApi.middleware
     ),
 });
 

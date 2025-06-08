@@ -3,13 +3,17 @@
 import { useState } from "react";
 import { useCreateReviewMutation } from "../redux/services/reviewApi";
 import MediaUpload from "./MediaUpload";
+import Button from "./ui/Button";
+import { IconX } from "@tabler/icons-react";
+import HorizontalLine from "./ui/HorizontalLine";
+import StarRating from "./ui/StarRating";
 
 type CreateReviewProps = {
   onCancel: () => void;
 };
 
 export default function CreateReview({ onCancel }: CreateReviewProps) {
-  const [businessId, setBusinessId] = useState("");
+  const [businessId, setBusinessId] = useState<number | "">("");
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [tags, setTags] = useState("");
@@ -42,6 +46,7 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
       setRating(5);
       setComment("");
       setTags("");
+      onCancel();
     } catch (err) {
       console.error("Failed to create review:", err);
     }
@@ -49,54 +54,53 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+      className="fixed inset-0 flex justify-center items-center z-50 bg-black/30 backdrop-invert-25"
       onClick={onCancel}
     >
       <div
-        className="bg-white rounded-lg shadow-lg p-4 w-full max-w-[480px] max-h-[360px] relative overflow-y-auto"
+        className="bg-background shadow-lg p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto relative"
         onClick={(e) => e.stopPropagation()}
-        style={{ minHeight: "280px" }}
       >
-        <button
+        <Button
           onClick={onCancel}
           aria-label="Close modal"
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 focus:outline-none text-lg"
+          variant="none"
+          size="sm"
+          className="absolute top-2 right-2 hover:text-accent"
         >
-          ✕
-        </button>
+          <IconX />
+        </Button>
 
-        <h2 className="text-xl font-semibold mb-4">Create Review</h2>
+        <h2 className="text-xl font-semibold mb-2">Create Review</h2>
+        <HorizontalLine />
 
-        <form onSubmit={handleSubmit} className="space-y-3 text-sm">
+        <form onSubmit={handleSubmit} className="space-y-3 text-base mt-3">
           <div>
             <label htmlFor="businessId" className="block font-medium mb-1">
-              Business ID <span className="text-red-500">*</span>
+              Business ID <span className="text-accent">*</span>
             </label>
             <input
               id="businessId"
               type="number"
               value={businessId}
-              onChange={(e) => setBusinessId(e.target.value)}
-              className="w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={(e) =>
+                setBusinessId(
+                  e.target.value === "" ? "" : Number(e.target.value)
+                )
+              }
+              className="w-full px-2 py-1 focus:outline-none  "
               required
               min={1}
             />
+            <HorizontalLine />
           </div>
 
           <div>
-            <label htmlFor="rating" className="block font-medium mb-1">
-              Rating (1-5) <span className="text-red-500">*</span>
+            <label className="block font-medium mb-1">
+              Rating (1-5) <span className="text-accent">*</span>
             </label>
-            <input
-              id="rating"
-              type="number"
-              min={1}
-              max={5}
-              value={rating}
-              onChange={(e) => setRating(Number(e.target.value))}
-              className="w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
+            <StarRating rating={rating} onChange={setRating} />
+            <HorizontalLine className="mt-3" />
           </div>
 
           <div>
@@ -105,51 +109,35 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
             </label>
             <textarea
               id="comment"
-              rows={2} // less height
+              rows={2}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              className="w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-2 py-1 focus:outline-none resize-none"
               required
             />
+            <HorizontalLine />
           </div>
 
-          <div>
-            <label htmlFor="tags" className="block font-medium mb-1">
-              Tags (comma separated)
-            </label>
-            <input
-              id="tags"
-              type="text"
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
-              placeholder="e.g. friendly, quick, clean"
-              className="w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <button
+          <Button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 rounded disabled:opacity-50 text-sm"
+            variant="primary"
+            size="md"
           >
             {isLoading ? "Submitting..." : "Submit Review"}
-          </button>
+          </Button>
         </form>
 
         {isSuccess && (
-          <p className="mt-3 text-green-600 font-medium text-sm">
+          <p className="mt-3 text-secondary font-medium text-sm">
             Review created successfully!
           </p>
         )}
         {error && (
-          <p className="mt-3 text-red-600 font-medium text-sm">
+          <p className="mt-3 text-accent font-medium text-sm">
             Failed to create review. Please try again.
           </p>
         )}
-
-        <div className="mt-4">
-          <MediaUpload />
-        </div>
       </div>
     </div>
   );

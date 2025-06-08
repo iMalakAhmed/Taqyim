@@ -1,6 +1,6 @@
 "use client";
 import { useGetReviewsQuery } from "../redux/services/reviewApi";
-import Review from "./ui/Review";
+import Review from "./ui/ReviewCard";
 
 export default function Feed() {
   const { data: reviews, error, isLoading, isSuccess } = useGetReviewsQuery();
