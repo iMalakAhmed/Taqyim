@@ -62,8 +62,7 @@ public class SavedController : ControllerBase
                 {
                     UserId = s.Review.User!.UserId,
                     Email = s.Review.User.Email,
-                    FirstName = s.Review.User.FirstName,
-                    LastName = s.Review.User.LastName,
+                    UserName = s.Review.User.UserName,
                     Type = s.Review.User.Type,
                     IsVerified = s.Review.User.IsVerified,
                     ProfilePic = s.Review.User.ProfilePic,
@@ -77,7 +76,7 @@ public class SavedController : ControllerBase
                     Name = s.Review.Business.Name,
                     Category = s.Review.Business.Category,
                     Description = s.Review.Business.Description,
-                    Location = s.Review.Business.Location,
+
                     CreatedAt = s.Review.Business.CreatedAt,
                     BusinessLocations = new List<BusinessLocationDTO>()
                 },
@@ -101,8 +100,7 @@ public class SavedController : ControllerBase
                     {
                         UserId = c.Commenter!.UserId,
                         Email = c.Commenter.Email,
-                        FirstName = c.Commenter.FirstName,
-                        LastName = c.Commenter.LastName,
+                        UserName = c.Commenter.UserName,
                         Type = c.Commenter.Type,
                         IsVerified = c.Commenter.IsVerified,
                         ProfilePic = c.Commenter.ProfilePic,
@@ -122,8 +120,7 @@ public class SavedController : ControllerBase
                     {
                         UserId = re.User!.UserId,
                         Email = re.User.Email,
-                        FirstName = re.User.FirstName,
-                        LastName = re.User.LastName,
+                        UserName = re.User.UserName,
                         Type = re.User.Type,
                         IsVerified = re.User.IsVerified,
                         ProfilePic = re.User.ProfilePic,

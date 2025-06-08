@@ -51,22 +51,15 @@ namespace Taqyim.Api.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    BusinessName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    BusinessCategory = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    BusinessDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    BusinessAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    BusinessLatitude = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    BusinessLongitude = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    phoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsVerified = table.Column<bool>(type: "bit", nullable: false),
                     VerifiedByUserId = table.Column<int>(type: "int", nullable: true),
                     ProfilePic = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Bio = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
                     ReputationPoints = table.Column<int>(type: "int", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     BadgeId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -90,8 +83,6 @@ namespace Taqyim.Api.Migrations
                 {
                     BusinessId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    Location = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Category = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -99,7 +90,9 @@ namespace Taqyim.Api.Migrations
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     Logo = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId1 = table.Column<int>(type: "int", nullable: true)
+                    UserId = table.Column<int>(type: "int", nullable: true),
+                    UserId1 = table.Column<int>(type: "int", nullable: true),
+                    UserId2 = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -113,6 +106,11 @@ namespace Taqyim.Api.Migrations
                     table.ForeignKey(
                         name: "FK_Businesses_Users_UserId1",
                         column: x => x.UserId1,
+                        principalTable: "Users",
+                        principalColumn: "UserId");
+                    table.ForeignKey(
+                        name: "FK_Businesses_Users_UserId2",
+                        column: x => x.UserId2,
                         principalTable: "Users",
                         principalColumn: "UserId");
                     table.ForeignKey(
@@ -483,6 +481,11 @@ namespace Taqyim.Api.Migrations
                 name: "IX_Businesses_UserId1",
                 table: "Businesses",
                 column: "UserId1");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Businesses_UserId2",
+                table: "Businesses",
+                column: "UserId2");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Businesses_VerifiedByUserId",

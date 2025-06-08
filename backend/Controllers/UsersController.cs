@@ -24,18 +24,38 @@ namespace Taqyim.Api.Controllers
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _context.Users
+                .Include(u => u.BusinessUsers)
                 .Where(u => u.Type != "Deleted")
                 .Select(u => new
                 {
                     u.UserId,
                     u.Email,
-                    u.FirstName,
-                    u.LastName,
+                    u.UserName,
                     u.Type,
                     u.ProfilePic,
                     u.Bio,
                     u.ReputationPoints,
-                    u.CreatedAt
+                    u.CreatedAt,
+                    u.IsVerified,
+                    UsersBusinesses = u.BusinessUsers
+                    .Where(b => !b.IsDeleted)
+                    .Select(b => new Business
+                    {
+                        BusinessId = b.BusinessId,
+                        Name = b.Name,
+                        BusinessLocations = b.BusinessLocations
+                            .Where(bl => !b.IsDeleted)
+                            .Select(bl => new BusinessLocation
+                            {
+                                LocationId = bl.LocationId,
+                                Label = bl.Label,
+                                Address = bl.Address,
+                                Latitude = bl.Latitude,
+                                Longitude = bl.Longitude,
+                                CreatedAt = bl.CreatedAt
+                            }).ToList()
+
+                    }).ToList()
                 })
                 .ToListAsync();
 
@@ -49,6 +69,8 @@ namespace Taqyim.Api.Controllers
         {
             var user = await _context.Users
                 .Include(u => u.BusinessUsers)
+                .ThenInclude(b => b.BusinessLocations)
+                .Where(u => u.Type != "Deleted")
                 .FirstOrDefaultAsync(u => u.UserId == id);
 
             if (user == null || user.Type == "Deleted")
@@ -60,21 +82,38 @@ namespace Taqyim.Api.Controllers
             {
                 UserId = user.UserId,
                 Email = user.Email,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
+                UserName = user.UserName,
                 Type = user.Type,
                 IsVerified = user.IsVerified,
                 ProfilePic = user.ProfilePic,
                 Bio = user.Bio,
                 CreatedAt = user.CreatedAt,
-                ReputationPoints = user.ReputationPoints
+                ReputationPoints = user.ReputationPoints,
+                UsersBusinesses = user.BusinessUsers
+                    .Where(b => !b.IsDeleted)
+                    .Select(b => new Business
+                    {
+                        BusinessId = b.BusinessId,
+                        Name = b.Name,
+                        BusinessLocations = b.BusinessLocations
+                            .Where(bl => !b.IsDeleted)
+                            .Select(bl => new BusinessLocation
+                            {
+                                LocationId = bl.LocationId,
+                                Label = bl.Label,
+                                Address = bl.Address,
+                                Latitude = bl.Latitude,
+                                Longitude = bl.Longitude,
+                                CreatedAt = bl.CreatedAt
+                            }).ToList()
+                    }).ToList()
             };
         }
 
         // PUT: /api/users/{id}
         [Authorize]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, UpdateUserDTO updateUserDto)
+        public async Task<IActionResult> UpdateUser(int id, UserDTO updateUserDto)
         {
             var user = await _context.Users.FindAsync(id);
             if (user == null)
@@ -82,8 +121,7 @@ namespace Taqyim.Api.Controllers
                 return NotFound();
             }
 
-            user.FirstName = updateUserDto.FirstName;
-            user.LastName = updateUserDto.LastName;
+            user.UserName = updateUserDto.UserName;
             user.Bio = updateUserDto.Bio;
             user.ProfilePic = updateUserDto.ProfilePic;
 
@@ -96,7 +134,9 @@ namespace Taqyim.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var user = await _context.Users.
+                Include(u => u.UsersBusinesses)
+                .FirstOrDefaultAsync(u => u.UserId == id && u.Type != "Deleted");
             if (user == null)
             {
                 return NotFound();
@@ -109,6 +149,7 @@ namespace Taqyim.Api.Controllers
                 return Forbid();
 
             user.Type = "Deleted"; // Mark as deleted
+            user.UsersBusinesses.ToList().ForEach(b => b.IsDeleted = true); // Soft delete associated businesses
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -133,14 +174,31 @@ namespace Taqyim.Api.Controllers
             {
                 UserId = user.UserId,
                 Email = user.Email,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
+                UserName = user.UserName,
                 Type = user.Type,
                 IsVerified = user.IsVerified,
                 ProfilePic = user.ProfilePic,
                 Bio = user.Bio,
                 CreatedAt = user.CreatedAt,
-                ReputationPoints = user.ReputationPoints
+                ReputationPoints = user.ReputationPoints,
+                UsersBusinesses = user.BusinessUsers
+                    .Where(b => !b.IsDeleted)
+                    .Select(b => new Business
+                    {
+                        BusinessId = b.BusinessId,
+                        Name = b.Name,
+                        BusinessLocations = b.BusinessLocations
+                            .Where(bl => !b.IsDeleted)
+                            .Select(bl => new BusinessLocation
+                            {
+                                LocationId = bl.LocationId,
+                                Label = bl.Label,
+                                Address = bl.Address,
+                                Latitude = bl.Latitude,
+                                Longitude = bl.Longitude,
+                                CreatedAt = bl.CreatedAt
+                            }).ToList()
+                    }).ToList()
             };
         }
     }

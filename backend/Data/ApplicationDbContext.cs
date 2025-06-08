@@ -40,7 +40,7 @@ namespace Taqyim.Api.Data
             {
                 entity.HasKey(e => e.BusinessId);
                 
-                entity.HasOne(d => d.User)
+                entity.HasOne(d => d.Owner)
                     .WithMany(p => p.BusinessUsers)
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.Restrict);

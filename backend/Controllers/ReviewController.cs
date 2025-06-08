@@ -53,8 +53,7 @@ public class ReviewController : ControllerBase
                 {
                     UserId = r.User.UserId,
                     Email = r.User.Email,
-                    FirstName = r.User.FirstName,
-                    LastName = r.User.LastName,
+                    UserName = r.User.UserName,
                     Type = r.User.Type,
                     IsVerified = r.User.IsVerified,
                     ProfilePic = r.User.ProfilePic,
@@ -68,7 +67,6 @@ public class ReviewController : ControllerBase
                     Name = r.Business.Name,
                     Category = r.Business.Category,
                     Description = r.Business.Description,
-                    Location = r.Business.Location,
                     CreatedAt = r.Business.CreatedAt,
                     BusinessLocations = new List<BusinessLocationDTO>()
                 },
@@ -83,8 +81,7 @@ public class ReviewController : ControllerBase
                     {
                         UserId = c.Commenter.UserId,
                         Email = c.Commenter.Email,
-                        FirstName = c.Commenter.FirstName,
-                        LastName = c.Commenter.LastName,
+                        UserName = c.Commenter.UserName,
                         Type = c.Commenter.Type,
                         IsVerified = c.Commenter.IsVerified,
                         ProfilePic = c.Commenter.ProfilePic,
@@ -104,8 +101,7 @@ public class ReviewController : ControllerBase
                     {
                         UserId = re.User.UserId,
                         Email = re.User.Email,
-                        FirstName = re.User.FirstName,
-                        LastName = re.User.LastName,
+                        UserName = re.User.UserName,
                         Type = re.User.Type,
                         IsVerified = re.User.IsVerified,
                         ProfilePic = re.User.ProfilePic,
@@ -155,8 +151,7 @@ public class ReviewController : ControllerBase
             {
                 UserId = review.User.UserId,
                 Email = review.User.Email,
-                FirstName = review.User.FirstName,
-                LastName = review.User.LastName,
+                UserName = review.User.UserName,
                 Type = review.User.Type,
                 IsVerified = review.User.IsVerified,
                 ProfilePic = review.User.ProfilePic,
@@ -170,7 +165,6 @@ public class ReviewController : ControllerBase
                 Name = review.Business.Name,
                 Category = review.Business.Category,
                 Description = review.Business.Description,
-                Location = review.Business.Location,
                 CreatedAt = review.Business.CreatedAt,
                 BusinessLocations = new List<BusinessLocationDTO>()
             },
@@ -185,8 +179,7 @@ public class ReviewController : ControllerBase
                 {
                     UserId = c.Commenter.UserId,
                     Email = c.Commenter.Email,
-                    FirstName = c.Commenter.FirstName,
-                    LastName = c.Commenter.LastName,
+                    UserName = c.Commenter.UserName,
                     Type = c.Commenter.Type,
                     IsVerified = c.Commenter.IsVerified,
                     ProfilePic = c.Commenter.ProfilePic,
@@ -206,8 +199,7 @@ public class ReviewController : ControllerBase
                 {
                     UserId = re.User.UserId,
                     Email = re.User.Email,
-                    FirstName = re.User.FirstName,
-                    LastName = re.User.LastName,
+                    UserName = re.User.UserName,
                     Type = re.User.Type,
                     IsVerified = re.User.IsVerified,
                     ProfilePic = re.User.ProfilePic,
@@ -355,8 +347,7 @@ public class ReviewController : ControllerBase
             {
                 UserId = createdComment.Commenter.UserId,
                 Email = createdComment.Commenter.Email,
-                FirstName = createdComment.Commenter.FirstName,
-                LastName = createdComment.Commenter.LastName,
+                UserName = createdComment.Commenter.UserName,
                 Type = createdComment.Commenter.Type,
                 IsVerified = createdComment.Commenter.IsVerified,
                 ProfilePic = createdComment.Commenter.ProfilePic,
@@ -420,8 +411,7 @@ public class ReviewController : ControllerBase
             {
                 UserId = createdReaction.User.UserId,
                 Email = createdReaction.User.Email,
-                FirstName = createdReaction.User.FirstName,
-                LastName = createdReaction.User.LastName,
+                UserName = createdReaction.User.UserName,
                 Type = createdReaction.User.Type,
                 IsVerified = createdReaction.User.IsVerified,
                 ProfilePic = createdReaction.User.ProfilePic,

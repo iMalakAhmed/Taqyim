@@ -87,10 +87,6 @@ namespace Taqyim.Api.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Logo")
                         .HasColumnType("nvarchar(max)");
 
@@ -98,10 +94,13 @@ namespace Taqyim.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("int");
 
                     b.Property<int?>("UserId1")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId2")
                         .HasColumnType("int");
 
                     b.Property<int?>("VerifiedByUserId")
@@ -112,6 +111,8 @@ namespace Taqyim.Api.Migrations
                     b.HasIndex("UserId");
 
                     b.HasIndex("UserId1");
+
+                    b.HasIndex("UserId2");
 
                     b.HasIndex("VerifiedByUserId");
 
@@ -499,24 +500,6 @@ namespace Taqyim.Api.Migrations
                     b.Property<string>("Bio")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("BusinessAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("BusinessCategory")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("BusinessDescription")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("BusinessLatitude")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("BusinessLongitude")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("BusinessName")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -526,19 +509,8 @@ namespace Taqyim.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -554,8 +526,15 @@ namespace Taqyim.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("VerifiedByUserId")
                         .HasColumnType("int");
+
+                    b.Property<string>("phoneNumber")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId");
 
@@ -612,22 +591,25 @@ namespace Taqyim.Api.Migrations
 
             modelBuilder.Entity("Taqyim.Api.Models.Business", b =>
                 {
-                    b.HasOne("Taqyim.Api.Models.User", "User")
+                    b.HasOne("Taqyim.Api.Models.User", "Owner")
                         .WithMany("BusinessUsers")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Taqyim.Api.Models.User", null)
                         .WithMany("BusinessVerifiedByUsers")
                         .HasForeignKey("UserId1");
+
+                    b.HasOne("Taqyim.Api.Models.User", null)
+                        .WithMany("UsersBusinesses")
+                        .HasForeignKey("UserId2");
 
                     b.HasOne("Taqyim.Api.Models.User", "VerifiedByUser")
                         .WithMany()
                         .HasForeignKey("VerifiedByUserId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("User");
+                    b.Navigation("Owner");
 
                     b.Navigation("VerifiedByUser");
                 });
@@ -911,6 +893,8 @@ namespace Taqyim.Api.Migrations
                     b.Navigation("SavedReviews");
 
                     b.Navigation("UserBadges");
+
+                    b.Navigation("UsersBusinesses");
 
                     b.Navigation("VerifiedBusinesses");
                 });

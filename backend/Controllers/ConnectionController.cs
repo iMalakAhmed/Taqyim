@@ -81,8 +81,7 @@ public class ConnectionController : ControllerBase
                 {
                     UserId = c.Follower.UserId,
                     Email = c.Follower.Email,
-                    FirstName = c.Follower.FirstName,
-                    LastName = c.Follower.LastName,
+                    UserName = c.Follower.UserName,
                     Type = c.Follower.Type,
                     IsVerified = c.Follower.IsVerified,
                     ProfilePic = c.Follower.ProfilePic,
@@ -122,8 +121,7 @@ public class ConnectionController : ControllerBase
                 {
                     UserId = c.Following.UserId,
                     Email = c.Following.Email,
-                    FirstName = c.Following.FirstName,
-                    LastName = c.Following.LastName,
+                    UserName = c.Following.UserName,
                     Type = c.Following.Type,
                     IsVerified = c.Following.IsVerified,
                     ProfilePic = c.Following.ProfilePic,
