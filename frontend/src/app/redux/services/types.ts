@@ -138,13 +138,18 @@ export interface CommentType {
   commenterId: number;
   reviewId: number;
   content: string;
+  isDeleted?: boolean;
   createdAt: string;
+  parentCommentId?: number | null;
   commenter: UserType;
+  replies?: CommentType[];
+  reactions?: CommentReactionType[];
 }
 
 export interface CreateCommentType {
   reviewId: number;
   content: string;
+  parentCommentId?: number | null;
 }
 
 export interface ReactionType {
@@ -158,6 +163,18 @@ export interface ReactionType {
 
 export interface CreateReactionType {
   reviewId: number;
+  reactionType: string;
+}
+
+export interface CommentReactionType {
+  commentReactionId: number;
+  userId: number;
+  reactionType: string;
+  createdAt: string | null;
+}
+
+export interface CreateCommentReactionType {
+  commentId: number;
   reactionType: string;
 }
 

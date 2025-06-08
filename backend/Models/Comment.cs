@@ -10,7 +10,7 @@ public partial class Comment
     public int CommenterId { get; set; }
     public int ReviewId { get; set; }
     public string Content { get; set; } = null!;
-    public bool IsDeleted { get; set; } = false;
+    public bool isDeleted { get; set; } = false;
     public DateTime? CreatedAt { get; set; }
 
     public int? ParentCommentId { get; set; } 

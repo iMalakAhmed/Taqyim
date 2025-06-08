@@ -57,8 +57,7 @@ public class CommentDTO
     public string Content { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public required UserDTO Commenter { get; set; }
-
-    public int? ParentCommentId { get; set; }
+    public bool isDeleted { get; set; }    public int? ParentCommentId { get; set; }
     public List<CommentDTO> Replies { get; set; } = new();
     public List<CommentReactionDTO> Reactions { get; set; } = new();
 }
@@ -90,9 +89,12 @@ public class CreateReactionDTO
 public class CommentReactionDTO
 {
     public int CommentReactionId { get; set; }
+    public int CommentId { get; set; }
     public int UserId { get; set; }
     public string? ReactionType { get; set; }
     public DateTime? CreatedAt { get; set; }
+
+    public required UserDTO User { get; set; }
 }
 
 public class CreateCommentReactionDTO

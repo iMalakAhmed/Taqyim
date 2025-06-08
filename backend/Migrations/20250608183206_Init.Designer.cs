@@ -12,7 +12,7 @@ using Taqyim.Api.Data;
 namespace Taqyim.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250608014356_Init")]
+    [Migration("20250608183206_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -174,14 +174,14 @@ namespace Taqyim.Api.Migrations
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
                     b.Property<int?>("ParentCommentId")
                         .HasColumnType("int");
 
                     b.Property<int>("ReviewId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("isDeleted")
+                        .HasColumnType("bit");
 
                     b.HasKey("CommentId");
 

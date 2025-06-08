@@ -84,8 +84,6 @@ namespace Taqyim.Api.Data
             {
                 entity.HasKey(e => e.CommentId);
 
-                entity.HasQueryFilter(c => !c.IsDeleted);
-
                 entity.HasOne(d => d.Commenter)
                     .WithMany(p => p.Comments)
                     .HasForeignKey(d => d.CommenterId)

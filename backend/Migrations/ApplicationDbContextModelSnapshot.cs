@@ -171,14 +171,14 @@ namespace Taqyim.Api.Migrations
                     b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
                     b.Property<int?>("ParentCommentId")
                         .HasColumnType("int");
 
                     b.Property<int>("ReviewId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("isDeleted")
+                        .HasColumnType("bit");
 
                     b.HasKey("CommentId");
 
