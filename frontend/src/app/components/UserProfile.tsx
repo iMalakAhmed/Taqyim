@@ -75,7 +75,7 @@ const UserProfile = () => {
               ? user.profilePic
               : "\\default-profile.jpg"
           }
-          alt={`${user.UserName} `}
+          alt={`${user.userName} `}
           className="w-60 h-40 rounded-sm mb-4 object-cover"
           onError={(e) => {
             e.currentTarget.onerror = null;
@@ -85,7 +85,7 @@ const UserProfile = () => {
       </div>
 
       <div className="w-2/3 py-8 px-6 font-body">
-        <h2 className="text-xl font-heading font-bold">{`${user.UserName} `}</h2>
+        <h2 className="text-xl font-heading font-bold">{`${user.userName} `}</h2>
         <p className="mb-4 py-3">{user.bio}</p>
 
         <div className="flex flex-row mt-3">
@@ -123,7 +123,7 @@ const UserProfile = () => {
             setIsModalOpen(false);
           }}
           initialData={{
-            userName: user.UserName,
+            userName: user.userName,
             bio: user.bio ?? "",
             profilePic: user.profilePic ?? "",
           }}

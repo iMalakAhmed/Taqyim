@@ -7,7 +7,7 @@ import { AuthResponse, LoginCredentials, RegisterData } from "./types";
 export interface CurrentUserResponse {
   userId: number;
   email: string;
-  UserName: string;
+  userName: string;
   type: string;
 }
 
