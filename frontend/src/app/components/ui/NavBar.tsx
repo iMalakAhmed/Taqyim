@@ -4,7 +4,7 @@ import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
 import { usePathname } from "next/navigation";
 import { IconUser } from "@tabler/icons-react";
-import { useDispatch } from 'react-redux';
+import { useDispatch } from "react-redux";
 import { useGetCurrentUserQuery, authApi } from "../../redux/services/authApi";
 import { useRouter } from "next/navigation";
 import { removeAuthCookie } from "../../actions/auth";
@@ -27,7 +27,7 @@ export default function NavBar() {
       console.error("Error calling signout API:", err);
       // Continue with client-side signout even if API call fails
     }
-    
+
     await removeAuthCookie(); // Remove the cookie
     // Invalidate RTK Query cache related to the user
     dispatch(authApi.util.resetApiState());
@@ -64,7 +64,7 @@ export default function NavBar() {
                 className="text-text hover:text-accent flex items-center space-x-2"
               >
                 <IconUser size={24} />
-                <span>{user.firstName}</span>
+                <span>{user.userName}</span>
               </Link>
               <button
                 onClick={handleSignOut}

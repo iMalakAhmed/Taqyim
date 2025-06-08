@@ -27,6 +27,7 @@ import { setCommentCount } from "@/app/redux/slices/commentCounterSlice";
 import { RootState } from "../../redux/store";
 import { useRouter } from "next/navigation";
 import StarRating from "./StarRating";
+import Link from "next/link";
 
 type ReviewCardProps = {
   reviewId: number;
@@ -99,27 +100,33 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
   return (
     <div className="w-full flex flex-col gap-3 pt-5 px-8 text-text border">
       <div className="flex flex-row items-center">
-        <Image
-          src="/default-profile.jpg"
-          width={80}
-          height={80}
-          alt="user profile"
-          className="w-16 h-16"
-        />
-        <div className="flex flex-col px-5">
-          <h1 className="font-heading font-bold text-xl">
-            {review.user.UserName}
-          </h1>
-          <span className="text-xs text-text font-inter">
-            {new Date(review.createdAt)
-              .toLocaleDateString("en-UK", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-              })
-              .toUpperCase()}
-          </span>
-        </div>
+        <Link
+          href={`/profile?id=${review.user.userId}`}
+          className="flex flex-row items-center"
+        >
+          <Image
+            src="/default-profile.jpg"
+            width={80}
+            height={80}
+            alt="user profile"
+            className="w-16 h-16"
+          />
+          <div className="flex flex-col px-5">
+            <h1 className="font-heading font-bold text-xl">
+              {review.user.userName}
+            </h1>
+            <span className="text-xs text-text font-inter">
+              {new Date(review.createdAt)
+                .toLocaleDateString("en-UK", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })
+                .toUpperCase()}
+            </span>
+          </div>
+        </Link>
+
         {isOwner && (
           <div className="flex gap-2 ml-auto">
             {isEditing ? (
