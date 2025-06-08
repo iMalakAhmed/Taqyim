@@ -43,8 +43,7 @@ public async Task<ActionResult<IEnumerable<CommentDTO>>> GetCommentsByReview(int
         {
             UserId = c.Commenter.UserId,
             Email = c.Commenter.Email,
-            FirstName = c.Commenter.FirstName,
-            LastName = c.Commenter.LastName,
+            UserName = c.Commenter.UserName,
             Type = c.Commenter.Type,
             IsVerified = c.Commenter.IsVerified,
             ProfilePic = c.Commenter.ProfilePic,
@@ -63,8 +62,7 @@ public async Task<ActionResult<IEnumerable<CommentDTO>>> GetCommentsByReview(int
             {
                 UserId = r.User.UserId,
                 Email = r.User.Email,
-                FirstName = r.User.FirstName,
-                LastName = r.User.LastName,
+                UserName = c.Commenter.UserName,
                 Type = r.User.Type,
                 IsVerified = r.User.IsVerified,
                 ProfilePic = r.User.ProfilePic,
@@ -198,8 +196,7 @@ public async Task<ActionResult<IEnumerable<CommentDTO>>> GetCommentsByReview(int
             {
                 UserId = comment.Commenter.UserId,
                 Email = comment.Commenter.Email,
-                FirstName = comment.Commenter.FirstName,
-                LastName = comment.Commenter.LastName,
+                UserName = comment.Commenter.UserName,
                 Type = comment.Commenter.Type,
                 IsVerified = comment.Commenter.IsVerified,
                 ProfilePic = comment.Commenter.ProfilePic,
@@ -219,8 +216,7 @@ public async Task<ActionResult<IEnumerable<CommentDTO>>> GetCommentsByReview(int
                 {
                     UserId = r.User.UserId,
                     Email = r.User.Email,
-                    FirstName = r.User.FirstName,
-                    LastName = r.User.LastName,
+                    UserName = r.User.UserName,
                     Type = r.User.Type,
                     IsVerified = r.User.IsVerified,
                     ProfilePic = r.User.ProfilePic,

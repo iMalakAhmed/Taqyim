@@ -9,18 +9,18 @@ public class SearchBusinessDTO
     public required string Name { get; set; }
     public required string Category { get; set; }
     public required string Description { get; set; }
-    public required string Location { get; set; }
     public double? Rating { get; set; }
     public double? PriceRange { get; set; }
     public DateTime CreatedAt { get; set; }
     public int ReviewCount { get; set; }
+    public required ICollection<BusinessLocationDTO> BusinessLocations { get; set; } 
+
 }
 
 public class SearchUserDTO
 {
     public int UserId { get; set; }
-    public required string FirstName { get; set; }
-    public required string LastName { get; set; }
+    public required string UserName { get; set; }
     public required string Email { get; set; }
     public required string Type { get; set; }
     public string? ProfilePic { get; set; }

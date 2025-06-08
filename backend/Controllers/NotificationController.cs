@@ -39,8 +39,7 @@ public class NotificationController : ControllerBase
                 {
                     UserId = n.User.UserId,
                     Email = n.User.Email,
-                    FirstName = n.User.FirstName,
-                    LastName = n.User.LastName,
+                    UserName = n.User.UserName,
                     Type = n.User.Type,
                     IsVerified = n.User.IsVerified,
                     ProfilePic = n.User.ProfilePic,
@@ -52,8 +51,7 @@ public class NotificationController : ControllerBase
                 {
                     UserId = n.Sender.UserId,
                     Email = n.Sender.Email,
-                    FirstName = n.Sender.FirstName,
-                    LastName = n.Sender.LastName,
+                    UserName = n.Sender.UserName,
                     Type = n.Sender.Type,
                     IsVerified = n.Sender.IsVerified,
                     ProfilePic = n.Sender.ProfilePic,
@@ -105,8 +103,7 @@ public class NotificationController : ControllerBase
             {
                 UserId = createdNotification.Sender.UserId,
                 Email = createdNotification.Sender.Email,
-                FirstName = createdNotification.Sender.FirstName,
-                LastName = createdNotification.Sender.LastName,
+                UserName = createdNotification.Sender.UserName,
                 Type = createdNotification.Sender.Type,
                 IsVerified = createdNotification.Sender.IsVerified,
                 ProfilePic = createdNotification.Sender.ProfilePic,
@@ -118,8 +115,7 @@ public class NotificationController : ControllerBase
             {
                 UserId = createdNotification.User.UserId,
                 Email = createdNotification.User.Email,
-                FirstName = createdNotification.User.FirstName,
-                LastName = createdNotification.User.LastName,
+                UserName = createdNotification.User.UserName,
                 Type = createdNotification.User.Type,
                 IsVerified = createdNotification.User.IsVerified,
                 ProfilePic = createdNotification.User.ProfilePic,

@@ -4,8 +4,7 @@ export interface LoginCredentials {
 }
 
 export interface RegisterData {
-  firstName: string;
-  lastName: string;
+  UserName: string;
   email: string;
   password: string;
 }
@@ -15,16 +14,14 @@ export interface AuthResponse {
   user: {
     id: string;
     email: string;
-    firstName: string;
-    lastName: string;
+    UserName: string;
   };
 }
 
 export interface UserType {
   userId: number;
   email: string;
-  firstName: string;
-  lastName: string;
+  UserName: string;
   type: string;
   businessName?: string | null;
   businessCategory?: string | null;

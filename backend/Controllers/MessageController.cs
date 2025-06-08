@@ -40,8 +40,7 @@ public class MessageController : ControllerBase
                 {
                     UserId = u.UserId,
                     Email = u.Email,
-                    FirstName = u.FirstName,
-                    LastName = u.LastName,
+                    UserName = u.UserName,
                     Type = u.Type,
                     IsVerified = u.IsVerified,
                     ProfilePic = u.ProfilePic,
@@ -61,8 +60,7 @@ public class MessageController : ControllerBase
                     {
                         UserId = m.Sender.UserId,
                         Email = m.Sender.Email,
-                        FirstName = m.Sender.FirstName,
-                        LastName = m.Sender.LastName,
+                        UserName = m.Sender.UserName,
                         Type = m.Sender.Type,
                         IsVerified = m.Sender.IsVerified,
                         ProfilePic = m.Sender.ProfilePic,
@@ -103,8 +101,7 @@ public class MessageController : ControllerBase
             {
                 UserId = u.UserId,
                 Email = u.Email,
-                FirstName = u.FirstName,
-                LastName = u.LastName,
+                UserName = u.UserName,
                 Type = u.Type,
                 IsVerified = u.IsVerified,
                 ProfilePic = u.ProfilePic,
@@ -123,8 +120,7 @@ public class MessageController : ControllerBase
                 {
                     UserId = m.Sender.UserId,
                     Email = m.Sender.Email,
-                    FirstName = m.Sender.FirstName,
-                    LastName = m.Sender.LastName,
+                    UserName = m.Sender.UserName,
                     Type = m.Sender.Type,
                     IsVerified = m.Sender.IsVerified,
                     ProfilePic = m.Sender.ProfilePic,
@@ -250,8 +246,7 @@ public class MessageController : ControllerBase
             {
                 UserId = createdMessage.Sender.UserId,
                 Email = createdMessage.Sender.Email,
-                FirstName = createdMessage.Sender.FirstName,
-                LastName = createdMessage.Sender.LastName,
+                UserName = createdMessage.Sender.UserName,
                 Type = createdMessage.Sender.Type,
                 IsVerified = createdMessage.Sender.IsVerified,
                 ProfilePic = createdMessage.Sender.ProfilePic,

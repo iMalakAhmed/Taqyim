@@ -38,8 +38,7 @@ public class ReactionController : ControllerBase
                 {
                     UserId = r.User.UserId,
                     Email = r.User.Email,
-                    FirstName = r.User.FirstName,
-                    LastName = r.User.LastName,
+                    UserName = r.User.UserName,
                     Type = r.User.Type,
                     IsVerified = r.User.IsVerified,
                     ProfilePic = r.User.ProfilePic,
@@ -75,8 +74,7 @@ public class ReactionController : ControllerBase
             {
                 UserId = reaction.User.UserId,
                 Email = reaction.User.Email,
-                FirstName = reaction.User.FirstName,
-                LastName = reaction.User.LastName,
+                UserName = reaction.User.UserName,
                 Type = reaction.User.Type,
                 IsVerified = reaction.User.IsVerified,
                 ProfilePic = reaction.User.ProfilePic,
@@ -141,8 +139,7 @@ public class ReactionController : ControllerBase
             {
                 UserId = createdReaction.User.UserId,
                 Email = createdReaction.User.Email,
-                FirstName = createdReaction.User.FirstName,
-                LastName = createdReaction.User.LastName,
+                UserName = createdReaction.User.UserName,
                 Type = createdReaction.User.Type,
                 IsVerified = createdReaction.User.IsVerified,
                 ProfilePic = createdReaction.User.ProfilePic,
@@ -197,8 +194,7 @@ public async Task<ActionResult<ReactionDTO?>> GetUserReactionForReview(int revie
         {
             UserId = reaction.User.UserId,
             Email = reaction.User.Email,
-            FirstName = reaction.User.FirstName,
-            LastName = reaction.User.LastName,
+            UserName = reaction.User.UserName,
             Type = reaction.User.Type,
             IsVerified = reaction.User.IsVerified,
             ProfilePic = reaction.User.ProfilePic,

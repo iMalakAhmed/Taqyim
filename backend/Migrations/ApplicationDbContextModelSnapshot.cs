@@ -74,7 +74,6 @@ namespace Taqyim.Api.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BusinessId"));
 
                     b.Property<string>("Category")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
@@ -87,10 +86,6 @@ namespace Taqyim.Api.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Logo")
                         .HasColumnType("nvarchar(max)");
 
@@ -98,7 +93,7 @@ namespace Taqyim.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("int");
 
                     b.Property<int?>("UserId1")
@@ -376,6 +371,34 @@ namespace Taqyim.Api.Migrations
                     b.ToTable("Notifications");
                 });
 
+            modelBuilder.Entity("Taqyim.Api.Models.Product", b =>
+                {
+                    b.Property<int>("ProductId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductId"));
+
+                    b.Property<int?>("BusinessId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ProductId");
+
+                    b.HasIndex("BusinessId");
+
+                    b.ToTable("Products");
+                });
+
             modelBuilder.Entity("Taqyim.Api.Models.Reaction", b =>
                 {
                     b.Property<int>("ReactionId")
@@ -423,6 +446,9 @@ namespace Taqyim.Api.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Rating")
                         .HasColumnType("int");
 
@@ -435,6 +461,8 @@ namespace Taqyim.Api.Migrations
                     b.HasKey("ReviewId");
 
                     b.HasIndex("BusinessId");
+
+                    b.HasIndex("ProductId");
 
                     b.HasIndex("UserId");
 
@@ -536,24 +564,6 @@ namespace Taqyim.Api.Migrations
                     b.Property<string>("Bio")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("BusinessAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("BusinessCategory")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("BusinessDescription")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("BusinessLatitude")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("BusinessLongitude")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("BusinessName")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -563,19 +573,8 @@ namespace Taqyim.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -591,8 +590,15 @@ namespace Taqyim.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("VerifiedByUserId")
                         .HasColumnType("int");
+
+                    b.Property<string>("phoneNumber")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId");
 
@@ -649,22 +655,21 @@ namespace Taqyim.Api.Migrations
 
             modelBuilder.Entity("Taqyim.Api.Models.Business", b =>
                 {
-                    b.HasOne("Taqyim.Api.Models.User", "User")
+                    b.HasOne("Taqyim.Api.Models.User", "Owner")
                         .WithMany("BusinessUsers")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Taqyim.Api.Models.User", null)
-                        .WithMany("BusinessVerifiedByUsers")
+                        .WithMany("UsersBusinesses")
                         .HasForeignKey("UserId1");
 
                     b.HasOne("Taqyim.Api.Models.User", "VerifiedByUser")
-                        .WithMany()
+                        .WithMany("BusinessVerifiedByUsers")
                         .HasForeignKey("VerifiedByUserId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("User");
+                    b.Navigation("Owner");
 
                     b.Navigation("VerifiedByUser");
                 });
@@ -800,6 +805,16 @@ namespace Taqyim.Api.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Taqyim.Api.Models.Product", b =>
+                {
+                    b.HasOne("Taqyim.Api.Models.Business", "Business")
+                        .WithMany("Products")
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Business");
+                });
+
             modelBuilder.Entity("Taqyim.Api.Models.Reaction", b =>
                 {
                     b.HasOne("Taqyim.Api.Models.Review", "Review")
@@ -827,6 +842,11 @@ namespace Taqyim.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Taqyim.Api.Models.Product", "Product")
+                        .WithMany("Reviews")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Taqyim.Api.Models.User", "User")
                         .WithMany("Reviews")
                         .HasForeignKey("UserId")
@@ -834,6 +854,8 @@ namespace Taqyim.Api.Migrations
                         .IsRequired();
 
                     b.Navigation("Business");
+
+                    b.Navigation("Product");
 
                     b.Navigation("User");
                 });
@@ -922,6 +944,8 @@ namespace Taqyim.Api.Migrations
                 {
                     b.Navigation("BusinessLocations");
 
+                    b.Navigation("Products");
+
                     b.Navigation("Reviews");
                 });
 
@@ -935,6 +959,11 @@ namespace Taqyim.Api.Migrations
             modelBuilder.Entity("Taqyim.Api.Models.Conversation", b =>
                 {
                     b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("Taqyim.Api.Models.Product", b =>
+                {
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("Taqyim.Api.Models.Review", b =>
@@ -981,6 +1010,8 @@ namespace Taqyim.Api.Migrations
                     b.Navigation("SavedReviews");
 
                     b.Navigation("UserBadges");
+
+                    b.Navigation("UsersBusinesses");
 
                     b.Navigation("VerifiedBusinesses");
                 });

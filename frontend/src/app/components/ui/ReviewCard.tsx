@@ -108,7 +108,7 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
         />
         <div className="flex flex-col px-5">
           <h1 className="font-heading font-bold text-xl">
-            {review.user.firstName} {review.user.lastName}
+            {review.user.UserName}
           </h1>
           <span className="text-xs text-text font-inter">
             {new Date(review.createdAt)

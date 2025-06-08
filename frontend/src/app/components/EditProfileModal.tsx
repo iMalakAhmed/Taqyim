@@ -6,27 +6,29 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: {
-    firstName: string;
-    lastName: string;
+    userName: string;
     bio?: string;
     profilePic?: string;
   }) => void;
   initialData: {
-    firstName: string;
-    lastName: string;
+    userName: string;
     bio?: string;
     profilePic?: string;
   };
 }
 
-const EditProfileModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialData }) => {
-  const [firstName, setFirstName] = useState(initialData.firstName);
-  const [lastName, setLastName] = useState(initialData.lastName);
+const EditProfileModal: React.FC<Props> = ({
+  isOpen,
+  onClose,
+  onSave,
+  initialData,
+}) => {
+  const [userName, setUserName] = useState(initialData.userName);
   const [bio, setBio] = useState(initialData.bio || "");
   const [profilePic, setProfilePic] = useState(initialData.profilePic || "");
 
   const handleSubmit = () => {
-    onSave({ firstName, lastName, bio, profilePic });
+    onSave({ userName, bio, profilePic });
     onClose();
   };
 
@@ -40,16 +42,8 @@ const EditProfileModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialDat
         <input
           type="text"
           placeholder="First Name"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-          className="w-full mb-3 p-2 border rounded"
-        />
-
-        <input
-          type="text"
-          placeholder="Last Name"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
+          value={userName}
+          onChange={(e) => setUserName(e.target.value)}
           className="w-full mb-3 p-2 border rounded"
         />
 

@@ -9,6 +9,7 @@ public class ReviewDTO
     public int ReviewId { get; set; }
     public int UserId { get; set; }
     public int BusinessId { get; set; }
+    public int? ProductId { get; set; }
     public int Rating { get; set; }
     public string Comment { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
@@ -16,6 +17,9 @@ public class ReviewDTO
     public DateTime? SavedAt { get; set; }
     public required UserDTO User { get; set; }
     public required BusinessDTO Business { get; set; }
+    public required ProductDTO? Product { get; set; }
+
+    
     public ICollection<CommentDTO> Comments { get; set; } = new List<CommentDTO>();
     public ICollection<ReactionDTO> Reactions { get; set; } = new List<ReactionDTO>();
     public ICollection<TagDTO> Tags { get; set; } = new List<TagDTO>();
@@ -35,6 +39,7 @@ public class CreateReviewDTO
     public string Comment { get; set; } = string.Empty;
 
     public List<string>? Tags { get; set; }
+    public int? ProductId { get; set; }
 }
 
 public class UpdateReviewDTO
