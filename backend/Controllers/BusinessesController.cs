@@ -34,7 +34,6 @@ namespace Taqyim.Api.Controllers
             {
                 Name = dto.Name,
                 Category = dto.Category,
-                CustomCategory = dto.Category == BusinessCategory.Other ? dto.CustomCategory : null,
                 Description = dto.Description,
                 CreatedAt = DateTime.UtcNow,
                 IsDeleted = false,
@@ -66,14 +65,6 @@ namespace Taqyim.Api.Controllers
 
             if (!string.IsNullOrEmpty(name))
                 query = query.Where(b => b.Owner.UserName.Contains(name));
-
-            if (!string.IsNullOrEmpty(category))
-            {
-                if (Enum.TryParse<BusinessCategory>(category, true, out var parsedCategory))
-                    query = query.Where(b => b.Category == parsedCategory);
-                else
-                    query = query.Where(b => b.CustomCategory == category);
-            }
 
             var result = await query
                 .Select(b => new
@@ -112,11 +103,13 @@ namespace Taqyim.Api.Controllers
                             r.User.ProfilePic
                         }
                     }).ToList(),
-                    Products=b.Products.Where(bl => !b.IsDeleted).Select(p => new
+                    Products=b.Products.Where(p => !p.IsDeleted).Select(p => new
                     {
                         p.ProductId,
                         p.Name,
-                        p.Description
+                        p.Description,
+                        p.IsDeleted,
+                        BusinessId = p.BusinessId ?? 0
                     }).ToList(),
                 })
                 .ToListAsync();
@@ -142,8 +135,7 @@ namespace Taqyim.Api.Controllers
             {
                 BusinessId = business.BusinessId,
                 Name = business.Name,
-                Category = business.Category,
-                CustomCategory = business.Category == BusinessCategory.Other ? business.CustomCategory : null,
+                Category = business.Category ?? new List<string>(),
                 Description = business.Description,
                 Logo = business.Logo,
                 Owner = new UserDTO
@@ -160,11 +152,13 @@ namespace Taqyim.Api.Controllers
                     Longitude = loc.Longitude != null ? (double?)loc.Longitude : 0,
                     Label = loc.Label ?? ""
                 }).ToList(),
-                Products = business.Products.Where(bl => !business.IsDeleted).Select(p => new ProductDTO
+                Products = business.Products.Where(p => !p.IsDeleted).Select(p => new ProductDTO
                 {
                     ProductId = p.ProductId,
                     Name = p.Name,
-                    Description = p.Description
+                    Description = p.Description,
+                    IsDeleted = p.IsDeleted,
+                    BusinessId = p.BusinessId ?? 0
                 }).ToList()
             };
 
@@ -190,7 +184,6 @@ namespace Taqyim.Api.Controllers
                 return Forbid();
             business.Name = dto.Name ?? business.Name;
             business.Category = dto.Category;
-            business.CustomCategory = dto.Category == BusinessCategory.Other ? dto.CustomCategory : null;
             business.Description = dto.Description ?? business.Description;
             business.Logo = dto.Logo ?? business.Logo;
             await _context.SaveChangesAsync();

@@ -33,8 +33,7 @@ public class SearchController : ControllerBase
             .Include(b => b.BusinessLocations)
             .Where(b => !b.IsDeleted && (
                 b.Name.ToLower().Contains(searchTerm) ||
-                b.Category.ToString().ToLower().Contains(searchTerm) ||
-                (b.Category == BusinessCategory.Other && b.CustomCategory != null && b.CustomCategory.ToLower().Contains(searchTerm)) ||
+                b.Category.Any(c => c.ToLower().Contains(searchTerm)) ||
                 b.Description.ToLower().Contains(searchTerm) ||
                 b.BusinessLocations.Any(l => l.Address.ToLower().Contains(searchTerm))
             ))
@@ -43,7 +42,6 @@ public class SearchController : ControllerBase
                 BusinessId = b.BusinessId,
                 Name = b.Name,
                 Category = b.Category,
-                CustomCategory = b.CustomCategory,
                 Description = b.Description,
                 CreatedAt = b.CreatedAt,
                 Owner = new UserDTO
@@ -128,20 +126,8 @@ public class SearchController : ControllerBase
             businesses = businesses.Where(b =>
                 b.Name.ToLower().Contains(loweredQuery) ||
                 b.Description.ToLower().Contains(loweredQuery) ||
-                (b.Category == BusinessCategory.Other && b.CustomCategory != null && b.CustomCategory.ToLower().Contains(loweredQuery)));
-        }
-
-        if (!string.IsNullOrWhiteSpace(category))
-        {
-            if (Enum.TryParse<BusinessCategory>(category, true, out var parsedCategory))
-            {
-                businesses = businesses.Where(b => b.Category == parsedCategory);
-            }
-            else
-            {
-                var loweredCategory = category.ToLower();
-                businesses = businesses.Where(b => b.Category == BusinessCategory.Other && b.CustomCategory != null && b.CustomCategory.ToLower().Contains(loweredCategory));
-            }
+                b.Category.Any(c => c.ToLower().Contains(loweredQuery))
+            );
         }
 
         if (latitude.HasValue && longitude.HasValue && radius.HasValue)
@@ -160,9 +146,7 @@ public class SearchController : ControllerBase
             {
                 BusinessId = b.BusinessId,
                 Name = b.Name,
-                Category = b.Category == BusinessCategory.Other && b.CustomCategory != null
-                ? b.CustomCategory
-                : b.Category.ToString(),
+                Category = b.Category != null ? string.Join(", ", b.Category) : string.Empty,
                 Description = b.Description,
                 CreatedAt = b.CreatedAt,
                 BusinessLocations = b.BusinessLocations.Select(l => new BusinessLocationDTO

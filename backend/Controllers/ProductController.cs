@@ -9,7 +9,7 @@ using Taqyim.Api.Models;
 namespace Taqyim.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/businesses/{businessId}/products")]
     public class ProductsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -19,102 +19,108 @@ namespace Taqyim.Api.Controllers
             _context = context;
         }
 
-        // GET: /api/products
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetAllProducts()
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetAllProducts(int businessId)
         {
             var products = await _context.Products
-                .Where(p => !p.IsDeleted)
+                .Where(p => p.BusinessId == businessId && !p.IsDeleted)
                 .Select(p => new ProductDTO
                 {
                     ProductId = p.ProductId,
                     Name = p.Name,
                     Description = p.Description,
-                    BusinessId = p.BusinessId ??0,
-                    IsDeleted = p.IsDeleted
+                    BusinessId = p.BusinessId ?? 0,
+
                 })
                 .ToListAsync();
 
             return Ok(products);
         }
 
-        // GET: /api/products/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProductDTO>> GetProductById(int id)
+        public async Task<ActionResult<ProductDTO>> GetProductById(int businessId, int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null || product.IsDeleted) return NotFound();
+            var product = await _context.Products
+                .FirstOrDefaultAsync(p => p.ProductId == id && p.BusinessId == businessId && !p.IsDeleted);
+
+            if (product == null) return NotFound();
 
             var dto = new ProductDTO
             {
                 ProductId = product.ProductId,
                 Name = product.Name,
                 Description = product.Description,
-                BusinessId = product.BusinessId??0,
-                IsDeleted = product.IsDeleted
+                BusinessId = product.BusinessId ?? 0,
             };
 
             return Ok(dto);
         }
 
-        // POST: /api/products
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> CreateProduct([FromBody] ProductCreateDTO dto)
+        public async Task<IActionResult> CreateProduct(int businessId, [FromBody] ProductCreateDTO dto)
         {
+            var business = await _context.Businesses
+                .Include(b => b.Owner)
+                .FirstOrDefaultAsync(b => b.BusinessId == businessId && !b.IsDeleted);
+
+            if (business?.Owner == null)
+                return NotFound(new { message = "Product or related business not found." });
+
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var isOwner = business.Owner.Type == "BusinessOwner";
+            var isModerator = (business.Owner.Type == "Moderator" || business.Owner.Type == "Admin");
+            if (!isOwner && !isModerator)
+                return Forbid();
+
             var product = new Product
             {
                 Name = dto.Name,
                 Description = dto.Description,
-                BusinessId = dto.BusinessId,
+                BusinessId = businessId,
                 IsDeleted = false
             };
 
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
-            Console.WriteLine($"Product added to BusinessId {product.BusinessId}");
             return Ok(new { message = "Product created", product.ProductId });
         }
 
-        // PUT: /api/products/{id}
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> UpdateProduct(int id, [FromBody] ProductUpdateDTO dto)
+        public async Task<IActionResult> UpdateProduct(int businessId, int id, [FromBody] ProductUpdateDTO dto)
         {
             var product = await _context.Products
-            .Include(p => p.Business)
-                .ThenInclude(b => b.Owner)
-            .FirstOrDefaultAsync(p => p.ProductId == id && !p.IsDeleted);
+                .Include(p => p.Business)
+                    .ThenInclude(b => b.Owner)
+                .FirstOrDefaultAsync(p => p.ProductId == id && p.BusinessId == businessId && !p.IsDeleted);
 
-            if (product == null || product.Business == null || product.Business.Owner == null)
+            if (product == null || product.Business?.Owner == null)
                 return NotFound(new { message = "Product or related business not found." });
-                
+
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var isOwner = product.Business.Owner.Type == "BusinessOwner";
-            var isModerator = (product.Business.Owner.Type == "Moderator"||product.Business.Owner.Type == "Moderator" || product.Business.Owner.Type == "Admin");
-
+            var isModerator = (product.Business.Owner.Type == "Moderator" || product.Business.Owner.Type == "Admin");
             if (!isOwner && !isModerator)
                 return Forbid();
 
             product.Name = dto.Name ?? product.Name;
             product.Description = dto.Description ?? product.Description;
 
-
             await _context.SaveChangesAsync();
             return Ok(new { message = "Product updated" });
         }
 
-        // DELETE: /api/products/{id} (Soft Delete)
         [HttpDelete("{id}")]
         [Authorize]
-        public async Task<IActionResult> SoftDeleteProduct(int id)
+        public async Task<IActionResult> SoftDeleteProduct(int businessId, int id)
         {
             var product = await _context.Products
                 .Include(p => p.Business)
-                    .ThenInclude(p => p.Owner)
-                .FirstOrDefaultAsync(p => p.ProductId == id && !p.IsDeleted);
+                    .ThenInclude(b => b.Owner)
+                .FirstOrDefaultAsync(p => p.ProductId == id && p.BusinessId == businessId && !p.IsDeleted);
 
-            if (product == null || product.Business == null || product.Business.Owner == null)
+            if (product == null || product.Business?.Owner == null)
                 return NotFound(new { message = "Product or related business not found." });
 
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -125,14 +131,8 @@ namespace Taqyim.Api.Controllers
                 return Forbid();
 
             product.IsDeleted = true;
-            var products = await _context.Products
-                .Where(p => p.BusinessId == product.BusinessId && !p.IsDeleted)
-                .ToListAsync();
-            foreach (var p in products)
-            {
-                p.IsDeleted = true;
-            }
             await _context.SaveChangesAsync();
+
             return Ok(new { message = "Product soft deleted" });
         }
     }
