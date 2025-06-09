@@ -5,13 +5,16 @@ import { getTokenFromCookie } from "@/app/utils/auth";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
+console.log("NEXT_PUBLIC_API_BASE_URL:", process.env.NEXT_PUBLIC_API_BASE_URL);
+console.log("API_BASE_URL constructed:", API_BASE_URL);
+
 export const userApi = createApi({
   reducerPath: "usersApi",
   baseQuery: fetchBaseQuery({
     baseUrl: `${API_BASE_URL}/users`,
     credentials: "include",
     prepareHeaders: (headers) => {
-      const token = getTokenFromCookie();
+      const token = sessionStorage.getItem('token');
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }

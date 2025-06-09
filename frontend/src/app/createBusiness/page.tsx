@@ -1,39 +1,54 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import {
-  useGetBusinessByIdQuery,
   useUpdateBusinessMutation,
   useCreateLocationMutation,
   useUpdateLocationMutation,
   useDeleteLocationMutation,
+  useCreateBusinessMutation,
+  useGetBusinessByIdQuery,
 } from "@/app/redux/services/BusinessApi";
 import { BusinessLocationUpdateType } from "@/app/redux/services/types";
+import { useDispatch } from "react-redux";
+import { authApi } from "@/app/redux/services/authApi";
+import { skipToken } from "@reduxjs/toolkit/query";
 
 export default function CreateBusinessProfilePage() {
   const router = useRouter();
-  const businessId = 2; // Replace with dynamic logic as needed
-  const { data: business, isLoading } = useGetBusinessByIdQuery(businessId);
   const [updateBusiness] = useUpdateBusinessMutation();
   const [addLocation] = useCreateLocationMutation();
   const [updateLocation] = useUpdateLocationMutation();
   const [deleteLocation] = useDeleteLocationMutation();
+  const [createBusiness] = useCreateBusinessMutation();
+  const dispatch = useDispatch();
 
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [logo, setLogo] = useState("");
   const [locations, setLocations] = useState<BusinessLocationUpdateType[]>([]);
+  const [currentBusinessId, setCurrentBusinessId] = useState<number | null>(null);
+  const [location, setLocation] = useState("");
+
+  const searchParams = useSearchParams();
+  const editBusinessId = searchParams.get('businessId');
+
+  const { data: business, isLoading: isBusinessLoading } = useGetBusinessByIdQuery(
+    editBusinessId ? Number(editBusinessId) : skipToken
+  );
 
   useEffect(() => {
     if (business) {
       setName(business.name);
-      setCategory(business.category);
+      setCategory(business.category?.[0] || ""); // Assuming single category for now
       setDescription(business.description || "");
       setLogo(business.logo || "");
+      setLocation(business.location || "");
       setLocations(business.businessLocations || []);
+      setCurrentBusinessId(business.businessId);
     }
   }, [business]);
 
@@ -52,51 +67,78 @@ export default function CreateBusinessProfilePage() {
   };
 
   const handleSubmit = async () => {
+    console.log("handleSubmit called");
     if (!name || locations.some(l => !l.address || !l.latitude || !l.longitude)) {
       toast.error("Please fill all required fields.");
       return;
     }
 
     try {
-      if (!business) {
-        toast.error("Business data is missing.");
-        return;
+      let newBusinessId = currentBusinessId;
+
+      if (!newBusinessId) {
+        console.log("Attempting to create business with:", {
+          name,
+          category: category ? [category] : undefined,
+          description,
+          logo: logo || undefined,
+          location: location || undefined,
+        });
+        const res = await createBusiness({
+          name,
+          category: category ? [category] : undefined,
+          description,
+          logo: logo || undefined,
+          location: location || undefined,
+        }).unwrap();
+        newBusinessId = res.businessId;
+        setCurrentBusinessId(newBusinessId);
       }
-      await updateBusiness({ id: business.businessId, body: { name, category, description, logo } });
-      const existingIds = business.businessLocations?.map(l => l.locationId).filter(Boolean) || [];
+
+      const existingIds = business?.businessLocations?.map(l => l.locationId).filter(Boolean) || [];
       const updatedIds = locations.map(l => l.locationId).filter(Boolean) as number[];
 
       for (const id of existingIds) {
         if (!updatedIds.includes(id)) {
-          await deleteLocation({ businessId: business.businessId, locationId: id });
+          if (newBusinessId) {
+            await deleteLocation({ businessId: newBusinessId, locationId: id });
+          }
         }
       }
 
       for (const loc of locations) {
         if (loc.locationId) {
-          await updateLocation({
-            businessId: business.businessId,
-            locationId: loc.locationId,
-            body: loc,
-          });
+          if (newBusinessId) {
+            await updateLocation({
+              businessId: newBusinessId,
+              locationId: loc.locationId,
+              body: loc,
+            });
+          }
         } else {
-          await addLocation({
-            businessId: business.businessId,
-            body: loc,
-          });
+          if (newBusinessId) {
+            await addLocation({
+              businessId: newBusinessId,
+              body: loc,
+            });
+          }
         }
       }
 
       toast.success("Business profile saved!");
-      router.push(`/Business/${business.businessId}`);
-      router.refresh();
+      
+      dispatch(authApi.util.invalidateTags(['Auth']));
+
+      if (newBusinessId) {
+        router.push(`/Business/${newBusinessId}`);
+      } else {
+        router.push("/profile");
+      }
     } catch (error) {
       console.error("Failed to save business:", error);
-      toast.error("Update failed.");
+      toast.error("Error creating/saving business.");
     }
   };
-
-  if (isLoading || !business) return <div>Loading...</div>;
 
   return (
     <div className="max-w-2xl mx-auto mt-20 p-6 bg-white rounded shadow">
@@ -126,6 +168,13 @@ export default function CreateBusinessProfilePage() {
         placeholder="Logo URL"
         value={logo}
         onChange={(e) => setLogo(e.target.value)}
+      />
+
+      <input
+        className="w-full p-2 border rounded mb-4"
+        placeholder="Business Location"
+        value={location}
+        onChange={(e) => setLocation(e.target.value)}
       />
 
       {logo && (

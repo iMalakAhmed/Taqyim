@@ -184,6 +184,27 @@ const UserProfile = () => {
           >
             <IconShare stroke={2} className="hover:text-primary" />
           </CopyToClipboardButton>
+
+
+          {isSelf && user.type === "BusinessOwner" && user.usersBusinesses && user.usersBusinesses.length > 0 && (
+            <Button
+              onClick={() => router.push(`/Business/${user.usersBusinesses[0].BusinessId}`)}
+              variant="primary"
+              className="ml-2 p-6"
+            >
+              <IconEdit stroke={2} /> View Business Profile
+            </Button>
+          )}
+          {isSelf && (
+            <Button
+              variant="primary"
+              className="ml-2 p-6"
+              onClick={handleDelete}
+            >
+              <IconTrash stroke={2} /> Delete profile
+            </Button>
+          )}
+
         </div>
 
         {/* Bio */}

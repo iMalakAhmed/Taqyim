@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -10,6 +10,7 @@ import {
 } from "../../redux/services/authApi";
 import UserTypeSelection from "./UserTypeSelection";
 import { motion } from "framer-motion";
+import { setAuthCookie } from "../../actions/auth";
 
 export default function SignupPage() {
   const [userType, setUserType] = useState<"User" | "Business" | null>(null);
@@ -62,14 +63,24 @@ export default function SignupPage() {
         password: form.password,
       }).unwrap();
 
-      // 3. Wait for the current user query to complete
+      // Set the token cookie using the server action
+      // await setAuthCookie(loginResult.token);
+      sessionStorage.setItem('token', loginResult.token);
+      console.log("Token stored in session storage:", loginResult.token);
+
+      // 3. Wait for the current user query to complete with a small delay
+      await new Promise(resolve => setTimeout(resolve, 100)); // Add a 100ms delay
       await refetchCurrentUser();
 
       // 4. Redirect based on user type or redirect URL from backend
       if (registerResult.redirectUrl) {
         router.push(registerResult.redirectUrl);
       } else {
-        router.push("/profile");
+        if (userType === "Business") {
+          router.push("/createBusiness");
+        } else {
+          router.push("/createProfile");
+        }
       }
     } catch (err: any) {
       setErrorMsg(err.data?.message || err.error || "An error occurred");
