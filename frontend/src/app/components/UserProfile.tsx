@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import EditProfileModal from "@/app/components/EditProfileModal";
 import Button from "@/app/components/ui/Button";
 import {
@@ -10,15 +10,16 @@ import {
   useDeleteUserMutation,
 } from "@/app/redux/services/userApi";
 import { IconEdit, IconShare, IconTrash } from "@tabler/icons-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter,notFound } from "next/navigation";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { authApi } from "@/app/redux/services/authApi";
 import { removeAuthCookie } from "@/app/actions/auth";
+import CopyToClipboardButton from "@/app/components/ui/ShareButton";
 
 const UserProfile = () => {
-  const searchParams = useSearchParams();
-  const viewedId = searchParams.get("id");
+  const params = useParams();
+  const viewedId = params?.id as string | undefined;
 
   const {
     data: currentUser,
@@ -30,27 +31,39 @@ const UserProfile = () => {
     data: viewedUser,
     isLoading: isUserLoading,
     error: userError,
-    refetch,
+    refetch: refetchUser,
   } = useGetUserQuery(Number(viewedId), {
-    skip: !viewedId,
+    skip: !viewedId || viewedId === "me",
   });
 
-  const user = viewedUser ?? currentUser;
-  const isLoading = viewedId ? isUserLoading : isCurrentLoading;
-  const error = viewedId ? userError : currentError;
-  const isSelf = !viewedId || (currentUser && Number(viewedId) === currentUser.userId);
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [updateUser] = useUpdateUserMutation();
   const [deleteUser] = useDeleteUserMutation();
-  const router = useRouter();
   const dispatch = useDispatch();
+  const router = useRouter();
 
-  if (isLoading || (viewedId && !currentUser)) return <div>Loading...</div>;
-  if (error || !user) return <div>Error loading profile</div>;
+  const user =
+    viewedId && viewedId !== "me" ? viewedUser : currentUser;
+  const isLoading =
+    viewedId && viewedId !== "me" ? isUserLoading : isCurrentLoading;
+  const error =
+    viewedId && viewedId !== "me" ? userError : currentError;
+  const isSelf =
+    !viewedId || viewedId === "me" || (currentUser && Number(viewedId) === currentUser.userId);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (viewedId && viewedId !== "me") {
+      refetchUser();
+    }
+  }, [viewedId]);
 
   const handleDelete = async () => {
     if (confirm("Are you sure you want to delete this user?")) {
+      if (!user) {
+        toast.error("User not found");
+        return;
+      }
       try {
         await deleteUser(user.userId);
         await fetch("/api/auth/signout", { method: "POST" });
@@ -65,6 +78,9 @@ const UserProfile = () => {
     }
   };
 
+  if (isLoading) return <div>Loading...</div>;
+  if (error || !user) return notFound();
+
   return (
     <div className="W-full h-full flex flex-row text-text justify-center py-10 ml-16">
       <div className="w-1/3 p-3">
@@ -72,15 +88,13 @@ const UserProfile = () => {
           src={
             user.profilePic && user.profilePic.trim() !== ""
               ? user.profilePic
-              : "\\default-profile.jpg"
+              : "/default-profile.jpg"
           }
-          alt={
-            user.userName
-          }
+          alt={user.userName}
           className="w-60 h-40 rounded-sm mb-4 object-cover"
           onError={(e) => {
             e.currentTarget.onerror = null;
-            e.currentTarget.src = "default-profile.jpg";
+            e.currentTarget.src = "/default-profile.jpg";
           }}
         />
       </div>
@@ -99,16 +113,14 @@ const UserProfile = () => {
               <IconEdit stroke={2} /> Edit profile
             </Button>
           )}
-          <Button variant="primary" className="ml-2 p-6">
-            <IconShare stroke={2} /> Share profile
-          </Button>
-          <Button
-            onClick={() => router.push("/home")}
-            variant="primary"
+          <CopyToClipboardButton
+            copyText={`https://localhost:3000/profile/${user.userId}`}
             className="ml-2 p-6"
+            variant="primary"
           >
-            <IconShare stroke={2} /> Go to Home
-          </Button>
+            <IconShare stroke={2} /> Share profile
+
+          </CopyToClipboardButton>
           {isSelf && (
             <Button
               variant="primary"
@@ -127,7 +139,6 @@ const UserProfile = () => {
           onClose={() => setIsModalOpen(false)}
           onSave={async (data) => {
             await updateUser({ id: user.userId, data });
-            refetch();
             setIsModalOpen(false);
           }}
           initialData={{

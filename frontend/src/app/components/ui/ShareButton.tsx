@@ -6,12 +6,14 @@ type CopyToClipboardButtonProps = {
   children: React.ReactNode; // e.g. your Icon component or any button content
   className?: string;
   copyText?: string; // text to copy, default to window.location.href
+  variant?: "default" | "primary" | "secondary"; // optional variant prop for styling
 };
 
 export default function CopyToClipboardButton({
   children,
   className,
   copyText,
+  variant,
 }: CopyToClipboardButtonProps) {
   const [copySuccess, setCopySuccess] = useState(false);
 
