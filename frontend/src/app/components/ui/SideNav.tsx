@@ -26,7 +26,7 @@ export default function SideNav() {
   const { data: currentUser, isLoading } = useGetCurrentUserQuery();
 
   // Don't render if user is not logged in or loading
-  if (isLoading || !currentUser) return null;
+  if (isLoading || !currentUser || pathname === "/") return null;
 
   const mainNavItems = [
     { href: "/home", label: "Home", icon: IconHome },

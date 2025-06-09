@@ -14,6 +14,7 @@ import commentCounterReducer from "./slices/commentCounterSlice";
 import commentReactionCounterReducer from "./slices/commentReactionCounterSlice";
 import { commentReactionApi } from "./services/commentReactionApi";
 import replyCounterReducer from "./slices/replyCounterSlice";
+import authReducer from "./slices/authSlice";
 
 export const store = configureStore({
   reducer: {
@@ -26,6 +27,7 @@ export const store = configureStore({
     [commentApi.reducerPath]: commentApi.reducer,
     [commentReactionApi.reducerPath]: commentReactionApi.reducer,
     [connectionApi.reducerPath]: connectionApi.reducer,
+    auth: authReducer,
     user: userReducer,
     business: businessReducer,
     reactionCounter: reactionCounterReducer,
