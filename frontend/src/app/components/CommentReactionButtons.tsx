@@ -154,7 +154,7 @@ export default function CommentReactionButtons({
         {selected ? (
           selected.label
         ) : (
-          <IconThumbUp className="text-text hover:text-secondary" />
+          <IconThumbUp size={20} className="text-text hover:text-secondary" />
         )}
       </Button>
 

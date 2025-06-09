@@ -11,7 +11,6 @@ import {
 } from "../../redux/services/reviewApi";
 import ReactionButtons from "../ReactionButtons";
 import Button from "./Button";
-import Comments from "./CommentCard";
 import {
   IconEdit,
   IconMessage,
@@ -102,7 +101,7 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
 
   return (
     <div
-      className="w-full flex flex-col gap-3 pt-5 px-8 text-text border"
+      className="w-full flex flex-col gap-3 pt-5 px-8 text-text border hover:cursor-pointer"
       onClick={() => router.push(`/reviews/${reviewId}`)}
     >
       <div className="flex flex-row items-center">

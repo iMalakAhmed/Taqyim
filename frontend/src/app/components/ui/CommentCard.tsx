@@ -14,13 +14,18 @@ import { IconEdit, IconTrash } from "@tabler/icons-react";
 import Button from "./Button";
 import CommentReactionButtons from "../CommentReactionButtons";
 import AddComment from "../AddComment";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type CommentProps = {
   reviewId: number;
   comment: CommentType;
 };
 
+const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
+
 export default function CommentCard({ reviewId, comment }: CommentProps) {
+  const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [content, setContent] = useState(
     comment.isDeleted ? "[deleted]" : comment.content
@@ -77,22 +82,35 @@ export default function CommentCard({ reviewId, comment }: CommentProps) {
   );
 
   return (
-    <li className="mb-6 border-b border-gray-200 pb-4">
+    <li
+      className="mb-6 border-b border-gray-200 pb-4"
+      onClick={() => router.push(`/comments/${comment.commentId}`)}
+    >
       <div className="flex justify-between items-start mb-2">
         <div>
           {!deleted && (
-            <>
+            <Link
+              href={`/profile?id=${comment.commenterId}`}
+              onClick={(e) => {
+                stopPropagation(e);
+              }}
+            >
               <strong className="text-gray-900">
                 {comment.commenter.userName}
               </strong>{" "}
               <span className="text-gray-500 text-xs ml-2">
                 {new Date(comment.createdAt).toLocaleString()}
               </span>
-            </>
+            </Link>
           )}
 
           {!deleted && (
-            <div className="mt-1 flex items-center space-x-4 text-gray-600 text-sm">
+            <div
+              className="mt-1 flex items-center space-x-4 text-gray-600 text-sm"
+              onClick={(e) => {
+                stopPropagation(e);
+              }}
+            >
               <CommentReactionButtons
                 commentId={comment.commentId}
                 reactionCount={comment.reactions?.length ?? 0}
@@ -114,7 +132,10 @@ export default function CommentCard({ reviewId, comment }: CommentProps) {
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={handleSave}
+                  onClick={(e) => {
+                    stopPropagation(e);
+                    handleSave();
+                  }}
                   disabled={isUpdating}
                 >
                   Save
@@ -122,7 +143,8 @@ export default function CommentCard({ reviewId, comment }: CommentProps) {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => {
+                  onClick={(e) => {
+                    stopPropagation(e);
                     setContent(comment.content);
                     setEditing(false);
                   }}
@@ -137,7 +159,11 @@ export default function CommentCard({ reviewId, comment }: CommentProps) {
                   variant="none"
                   className="hover:text-primary"
                   size="sm"
-                  onClick={() => setEditing(true)}
+                  onClick={(e) => {
+                    stopPropagation(e);
+                    setContent(comment.content);
+                    setEditing(true);
+                  }}
                   aria-label="Edit comment"
                 >
                   <IconEdit size={20} />
@@ -146,7 +172,10 @@ export default function CommentCard({ reviewId, comment }: CommentProps) {
                   variant="none"
                   size="sm"
                   className="hover:text-accent"
-                  onClick={handleDelete}
+                  onClick={(e) => {
+                    stopPropagation(e);
+                    handleDelete();
+                  }}
                   disabled={isDeleting}
                   aria-label="Delete comment"
                 >
@@ -165,6 +194,9 @@ export default function CommentCard({ reviewId, comment }: CommentProps) {
           onChange={(e) => setContent(e.target.value)}
           rows={3}
           disabled={isUpdating}
+          onClick={(e) => {
+            stopPropagation(e);
+          }}
         />
       ) : (
         <p
@@ -182,7 +214,10 @@ export default function CommentCard({ reviewId, comment }: CommentProps) {
         <div className="mt-2">
           <button
             className="text-sm text-primary hover:underline focus:outline-none"
-            onClick={() => setReplying(!replying)}
+            onClick={(e) => {
+              stopPropagation(e);
+              setReplying(!replying);
+            }}
             aria-expanded={replying}
             aria-controls={`reply-form-${comment.commentId}`}
           >
@@ -192,7 +227,13 @@ export default function CommentCard({ reviewId, comment }: CommentProps) {
       )}
 
       {replying && (
-        <div id={`reply-form-${comment.commentId}`} className="mt-3">
+        <div
+          id={`reply-form-${comment.commentId}`}
+          className="mt-3"
+          onClick={(e) => {
+            stopPropagation(e);
+          }}
+        >
           <AddComment
             reviewId={reviewId}
             parentCommentId={comment.commentId}
