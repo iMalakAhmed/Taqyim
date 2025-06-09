@@ -25,6 +25,7 @@ import { useRouter } from "next/navigation";
 import CopyToClipboardButton from "./ShareButton";
 import Image from "next/image";
 import { formatTimestamp } from "./FormatTimeStamp";
+import FollowButton from "./FollowButton";
 
 type CommentProps = {
   reviewId: number;
@@ -122,65 +123,74 @@ export default function CommentCard({ reviewId, comment }: CommentProps) {
           )}
         </div>
 
-        {isOwner && !deleted && (
-          <div className="space-x-2 flex items-center">
-            {editing ? (
-              <>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={(e) => {
-                    stopPropagation(e);
-                    handleSave();
-                  }}
-                  disabled={isUpdating}
-                >
-                  Save
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => {
-                    stopPropagation(e);
-                    setContent(comment.content);
-                    setEditing(false);
-                  }}
-                  disabled={isUpdating}
-                >
-                  Cancel
-                </Button>
-              </>
+        {!deleted && (
+          <>
+            {isOwner ? (
+              <div className="space-x-2 flex items-center">
+                {editing ? (
+                  <>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={(e) => {
+                        stopPropagation(e);
+                        handleSave();
+                      }}
+                      disabled={isUpdating}
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        stopPropagation(e);
+                        setContent(comment.content);
+                        setEditing(false);
+                      }}
+                      disabled={isUpdating}
+                    >
+                      Cancel
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      variant="none"
+                      className="hover:text-primary"
+                      size="sm"
+                      onClick={(e) => {
+                        stopPropagation(e);
+                        setContent(comment.content);
+                        setEditing(true);
+                      }}
+                      aria-label="Edit comment"
+                    >
+                      <IconEdit size={20} />
+                    </Button>
+                    <Button
+                      variant="none"
+                      size="sm"
+                      className="hover:text-accent"
+                      onClick={(e) => {
+                        stopPropagation(e);
+                        handleDelete();
+                      }}
+                      disabled={isDeleting}
+                      aria-label="Delete comment"
+                    >
+                      <IconTrash size={20} />
+                    </Button>
+                  </>
+                )}
+              </div>
             ) : (
-              <>
-                <Button
-                  variant="none"
-                  className="hover:text-primary"
-                  size="sm"
-                  onClick={(e) => {
-                    stopPropagation(e);
-                    setContent(comment.content);
-                    setEditing(true);
-                  }}
-                  aria-label="Edit comment"
-                >
-                  <IconEdit size={20} />
-                </Button>
-                <Button
-                  variant="none"
-                  size="sm"
-                  className="hover:text-accent"
-                  onClick={(e) => {
-                    stopPropagation(e);
-                    handleDelete();
-                  }}
-                  disabled={isDeleting}
-                  aria-label="Delete comment"
-                >
-                  <IconTrash size={20} />
-                </Button>
-              </>
+              <FollowButton
+                followingId={comment.commenterId}
+                followingType="User"
+              />
             )}
-          </div>
+          </>
         )}
       </div>
 

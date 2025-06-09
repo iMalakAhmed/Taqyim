@@ -9,4 +9,3 @@ export default function ProfilePage() {
     </main>
   );
 }
-// This page serves as the main profile page for the user.

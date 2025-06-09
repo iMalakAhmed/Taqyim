@@ -134,12 +134,10 @@ const UserProfile = () => {
             <FollowButton
               followingId={user.userId}
               followingType="User"
-              isInitiallyFollowing={isFollowing}
-              onToggle={(newState) => {
-                setIsFollowing(newState);
+              className="ml-2 p-6"
+              onToggle={() => {
                 refetchFollowers();
               }}
-              className="ml-2 p-6"
             />
           )}
         </div>

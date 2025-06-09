@@ -21,11 +21,14 @@ export default function NavBar() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const { data: user, isLoading, refetch } = useGetCurrentUserQuery(undefined, {
+  const {
+    data: user,
+    isLoading,
+    refetch,
+  } = useGetCurrentUserQuery(undefined, {
     pollingInterval: 1000, // Optional auto-refresh
     refetchOnMountOrArgChange: true,
   });
-
 
   const handleSignOut = async () => {
     try {
@@ -71,7 +74,7 @@ export default function NavBar() {
             <>
               <div className="relative group inline-block">
                 <Link
-                  href="/profile"
+                  href={`/profile/${user.userId}`}
                   className="text-text hover:text-secondary flex items-center space-x-2"
                 >
                   <IconUserCircle size={24} />

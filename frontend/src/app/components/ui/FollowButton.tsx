@@ -1,15 +1,17 @@
 "use client";
 
-import { useState ,useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   useFollowUserMutation,
   useUnfollowUserMutation,
+  useGetFollowersQuery,
 } from "@/app/redux/services/connectionApi";
+import { useGetCurrentUserQuery } from "@/app/redux/services/userApi";
+import Button from "./Button";
 
 type FollowButtonProps = {
   followingId: number;
   followingType: "User" | "Business";
-  isInitiallyFollowing: boolean;
   className?: string;
   onToggle?: (newState: boolean) => void;
 };
@@ -17,20 +19,34 @@ type FollowButtonProps = {
 export default function FollowButton({
   followingId,
   followingType,
-  isInitiallyFollowing,
   className,
   onToggle,
 }: FollowButtonProps) {
-  const [isFollowing, setIsFollowing] = useState(isInitiallyFollowing);
+  const { data: currentUser } = useGetCurrentUserQuery();
+  const {
+    data: followers = [],
+    isLoading: followersLoading,
+    refetch,
+  } = useGetFollowersQuery(
+    { id: followingId, type: followingType },
+    { skip: !followingId }
+  );
+
+  const [isFollowing, setIsFollowing] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
-  const [followUser, { isLoading: isFollowingLoading }] = useFollowUserMutation();
-  const [unfollowUser, { isLoading: isUnfollowingLoading }] = useUnfollowUserMutation();
+  const [followUser, { isLoading: isFollowingLoading }] =
+    useFollowUserMutation();
+  const [unfollowUser, { isLoading: isUnfollowingLoading }] =
+    useUnfollowUserMutation();
 
-  // ✅ Sync with parent state when prop changes (important)
+  // ⏳ Sync isFollowing once followers are loaded
   useEffect(() => {
-    setIsFollowing(isInitiallyFollowing);
-  }, [isInitiallyFollowing]);
+    if (currentUser && followers.length > 0) {
+      const isFollowed = followers.some((f) => f.userId === currentUser.userId);
+      setIsFollowing(isFollowed);
+    }
+  }, [followers, currentUser]);
 
   const handleToggleFollow = async () => {
     try {
@@ -47,6 +63,7 @@ export default function FollowButton({
       }
 
       setTimeout(() => setFeedback(null), 2000);
+      refetch(); // ensure UI sync
     } catch (err) {
       console.error("Follow/unfollow failed:", err);
       setFeedback("Error");
@@ -55,9 +72,14 @@ export default function FollowButton({
   };
 
   return (
-    <button
-      onClick={handleToggleFollow}
-      disabled={isFollowingLoading || isUnfollowingLoading}
+    <Button
+      onClick={(e) => {
+        e.stopPropagation();
+        handleToggleFollow();
+      }}
+      disabled={isFollowingLoading || isUnfollowingLoading || followersLoading}
+      size="md"
+      variant="secondary"
       className={`relative ${className ?? ""}`}
       type="button"
     >
@@ -67,6 +89,6 @@ export default function FollowButton({
           {feedback}
         </span>
       )}
-    </button>
+    </Button>
   );
 }
