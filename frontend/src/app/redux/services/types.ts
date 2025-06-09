@@ -7,7 +7,7 @@ export interface RegisterData {
   email: string;
   password: string;
   userName: string;
-  type?: 'User' | 'Business';
+  type?: "User" | "Business";
   businessName?: string;
   businessCategory?: string;
   businessDescription?: string;
@@ -48,16 +48,14 @@ export interface UpdateUserType {
   profilePic?: string | null;
 }
 
-export interface ConnectionType
-{
-    connectionId: number; 
-    userId: number;
-    connectedUserId : number;
-    createdAt: string;
-    user : UserType;
-    connectedUser: UserType;
+export interface ConnectionType {
+  connectionId: number;
+  userId: number;
+  connectedUserId: number;
+  createdAt: string;
+  user: UserType;
+  connectedUser: UserType;
 }
-
 
 export interface BusinessLocationCreateType {
   locationId?: number;
@@ -151,13 +149,18 @@ export interface CommentType {
   commenterId: number;
   reviewId: number;
   content: string;
+  isDeleted?: boolean;
   createdAt: string;
+  parentCommentId?: number | null;
   commenter: UserType;
+  replies?: CommentType[];
+  reactions?: CommentReactionType[];
 }
 
 export interface CreateCommentType {
   reviewId: number;
   content: string;
+  parentCommentId?: number | null;
 }
 
 export interface ReactionType {
@@ -171,6 +174,18 @@ export interface ReactionType {
 
 export interface CreateReactionType {
   reviewId: number;
+  reactionType: string;
+}
+
+export interface CommentReactionType {
+  commentReactionId: number;
+  userId: number;
+  reactionType: string;
+  createdAt: string | null;
+}
+
+export interface CreateCommentReactionType {
+  commentId: number;
   reactionType: string;
 }
 
@@ -199,5 +214,3 @@ export interface MediaType {
   uploadedAt: string;
   user: UserType;
 }
-
-
