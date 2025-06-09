@@ -12,8 +12,8 @@ using Taqyim.Api.Data;
 namespace Taqyim.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250608202257_Init")]
-    partial class Init
+    [Migration("20250609024407_ReviewMediaUpload")]
+    partial class ReviewMediaUpload
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -296,6 +296,9 @@ namespace Taqyim.Api.Migrations
                     b.Property<string>("FileType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ReviewId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("UploadedAt")
                         .HasColumnType("datetime2");

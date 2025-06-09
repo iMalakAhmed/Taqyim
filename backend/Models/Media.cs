@@ -8,6 +8,7 @@ public class Media
     [Key]
     public int MediaId { get; set; }
     public int UserId { get; set; }
+     public int? ReviewId { get; set; } 
     public string FileName { get; set; } = string.Empty;
     public string FilePath { get; set; } = string.Empty;
     public string FileType { get; set; } = string.Empty;

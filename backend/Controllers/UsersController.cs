@@ -50,10 +50,10 @@ namespace Taqyim.Api.Controllers
                                 LocationId = bl.LocationId,
                                 Label = bl.Label,
                                 Address = bl.Address,
-                                Latitude = bl.Latitude,
-                                Longitude = bl.Longitude,
-                                CreatedAt = bl.CreatedAt
-                            }).ToList()
+                                Latitude = bl.Latitude != null ? (decimal?)bl.Latitude : null,
+                                Longitude = bl.Longitude != null ? (decimal?)bl.Longitude : null,
+                                CreatedAt = bl.CreatedAt ?? DateTime.MinValue
+                            }).ToList(),
 
                     }).ToList()
                 })
@@ -68,15 +68,21 @@ namespace Taqyim.Api.Controllers
         public async Task<ActionResult<UserDTO>> GetUser(int id)
         {
             var user = await _context.Users
-                .Include(u => u.BusinessUsers)
-                .ThenInclude(b => b.BusinessLocations)
+                .Include(u => u.BusinessUsers).ThenInclude(b => b.BusinessLocations)
+                .Include(u => u.ConnectionFollowers).ThenInclude(cf => cf.Follower)
+                .Include(u => u.ConnectionFollowers).ThenInclude(cf => cf.BusinessFollower)
+                .Include(u => u.ConnectionFollowings).ThenInclude(cf => cf.Following)
+                .Include(u => u.ConnectionFollowings).ThenInclude(cf => cf.BusinessFollowing)
                 .Where(u => u.Type != "Deleted")
                 .FirstOrDefaultAsync(u => u.UserId == id);
 
             if (user == null || user.Type == "Deleted")
-            {
                 return NotFound();
-            }
+            var followerCount = await _context.Connections
+                .CountAsync(c => c.FollowingType == "User" && c.FollowingId == user.UserId);
+
+            var followingCount = await _context.Connections
+                .CountAsync(c => c.FollowerType == "User" && c.FollowerId == user.UserId);
 
             return new UserDTO
             {
@@ -89,6 +95,8 @@ namespace Taqyim.Api.Controllers
                 Bio = user.Bio,
                 CreatedAt = user.CreatedAt,
                 ReputationPoints = user.ReputationPoints,
+                FollowerCount = followerCount,
+                FollowingCount = followingCount,
                 UsersBusinesses = user.BusinessUsers
                     .Where(b => !b.IsDeleted)
                     .Select(b => new Business
@@ -102,13 +110,86 @@ namespace Taqyim.Api.Controllers
                                 LocationId = bl.LocationId,
                                 Label = bl.Label,
                                 Address = bl.Address,
-                                Latitude = bl.Latitude,
-                                Longitude = bl.Longitude,
-                                CreatedAt = bl.CreatedAt
+                                Latitude = bl.Latitude != null ? (decimal?)bl.Latitude : null,
+                                Longitude = bl.Longitude != null ? (decimal?)bl.Longitude : null,
+                                CreatedAt = bl.CreatedAt ?? DateTime.MinValue
                             }).ToList()
-                    }).ToList()
+                    }).ToList(),
+                ConnectionFollowers = user.ConnectionFollowers.Select(cf => new ConnectionDTO
+                {
+                    ConnectionId = cf.ConnectionId,
+                    FollowerType = cf.FollowerType,
+                    FollowingType = cf.FollowingType,
+                    UserId = cf.FollowerId ?? 0,
+                    ConnectedUserId = cf.FollowingId ?? 0,
+                    BusinessFollowerId = cf.BusinessFollowerId,
+                    BusinessFollowingId = cf.BusinessFollowingId,
+                    CreatedAt = cf.CreatedAt,
+                    User = cf.Follower != null ? new UserDTO
+                    {
+                        UserId = cf.Follower.UserId,
+                        UserName = cf.Follower.UserName,
+                        ProfilePic = cf.Follower.ProfilePic
+                    } : null,
+                    UserBusiness = cf.BusinessFollower != null ? new BusinessDTO
+                    {
+                        BusinessId = cf.BusinessFollower.BusinessId,
+                        Name = cf.BusinessFollower.Name,
+                        Logo = cf.BusinessFollower.Logo,
+                        Category = cf.BusinessFollower.Category,
+                        Description = cf.BusinessFollower.Description,
+                        CreatedAt = cf.BusinessFollower.CreatedAt,
+                        BusinessLocations = cf.BusinessFollower.BusinessLocations.Select(bl => new BusinessLocationDTO
+                        {
+                            LocationId = bl.LocationId,
+                            Label = bl.Label,
+                            Address = bl.Address,
+                            Latitude = (double?)bl.Latitude,
+                            Longitude = (double?)bl.Longitude,
+                            CreatedAt = bl.CreatedAt ?? DateTime.MinValue
+                        }).ToList()
+
+                    } : null
+                }).ToList(),
+                ConnectionFollowings = user.ConnectionFollowings.Select(cf => new ConnectionDTO
+                {
+                    ConnectionId = cf.ConnectionId,
+                    FollowerType = cf.FollowerType,
+                    FollowingType = cf.FollowingType,
+                    UserId = cf.FollowerId ?? 0,
+                    ConnectedUserId = cf.FollowingId ?? 0,
+                    BusinessFollowerId = cf.BusinessFollowerId,
+                    BusinessFollowingId = cf.BusinessFollowingId,
+                    CreatedAt = cf.CreatedAt,
+                    User = cf.Following != null ? new UserDTO
+                    {
+                        UserId = cf.Following.UserId,
+                        UserName = cf.Following.UserName,
+                        ProfilePic = cf.Following.ProfilePic,
+
+                    } : null,
+                    UserBusiness = cf.BusinessFollowing != null ? new BusinessDTO
+                    {
+                        BusinessId = cf.BusinessFollowing.BusinessId,
+                        Name = cf.BusinessFollowing.Name,
+                        Logo = cf.BusinessFollowing.Logo,
+                        Category = cf.BusinessFollowing.Category,
+                        Description = cf.BusinessFollowing.Description,
+                        CreatedAt = cf.BusinessFollowing.CreatedAt,
+                        BusinessLocations = cf.BusinessFollowing.BusinessLocations.Select(bl => new BusinessLocationDTO
+                        {
+                            LocationId = bl.LocationId,
+                            Label = bl.Label,
+                            Address = bl.Address,
+                            Latitude = (double?)bl.Latitude,
+                            Longitude = (double?)bl.Longitude,
+                            CreatedAt = bl.CreatedAt ?? DateTime.MinValue
+                        }).ToList()
+                    } : null
+                }).ToList()
             };
         }
+
 
         // PUT: /api/users/{id}
         [Authorize]
@@ -162,13 +243,23 @@ namespace Taqyim.Api.Controllers
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var user = await _context.Users
-                .Include(u => u.BusinessUsers)
+                .Include(u => u.BusinessUsers).ThenInclude(b => b.BusinessLocations)
+                .Include(u => u.ConnectionFollowers).ThenInclude(cf => cf.Follower)
+                .Include(u => u.ConnectionFollowers).ThenInclude(cf => cf.BusinessFollower)
+                .Include(u => u.ConnectionFollowings).ThenInclude(cf => cf.Following)
+                .Include(u => u.ConnectionFollowings).ThenInclude(cf => cf.BusinessFollowing)
+                .Where(u => u.Type != "Deleted")
                 .FirstOrDefaultAsync(u => u.UserId == userId);
 
             if (user == null || user.Type == "Deleted")
             {
                 return NotFound();
             }
+            var followerCount = await _context.Connections
+                .CountAsync(c => c.FollowingType == "User" && c.FollowingId == user.UserId);
+
+            var followingCount = await _context.Connections
+                .CountAsync(c => c.FollowerType == "User" && c.FollowerId == user.UserId);
 
             return new UserDTO
             {
@@ -181,6 +272,8 @@ namespace Taqyim.Api.Controllers
                 Bio = user.Bio,
                 CreatedAt = user.CreatedAt,
                 ReputationPoints = user.ReputationPoints,
+                FollowerCount = followerCount,
+                FollowingCount = followingCount,
                 UsersBusinesses = user.BusinessUsers
                     .Where(b => !b.IsDeleted)
                     .Select(b => new Business
@@ -198,7 +291,78 @@ namespace Taqyim.Api.Controllers
                                 Longitude = bl.Longitude,
                                 CreatedAt = bl.CreatedAt
                             }).ToList()
-                    }).ToList()
+                    }).ToList(),
+                ConnectionFollowers = user.ConnectionFollowers.Select(cf => new ConnectionDTO
+                {
+                    ConnectionId = cf.ConnectionId,
+                    FollowerType = cf.FollowerType,
+                    FollowingType = cf.FollowingType,
+                    UserId = cf.FollowerId ?? 0,
+                    ConnectedUserId = cf.FollowingId ?? 0,
+                    BusinessFollowerId = cf.BusinessFollowerId,
+                    BusinessFollowingId = cf.BusinessFollowingId,
+                    CreatedAt = cf.CreatedAt,
+                    User = cf.Follower != null ? new UserDTO
+                    {
+                        UserId = cf.Follower.UserId,
+                        UserName = cf.Follower.UserName,
+                        ProfilePic = cf.Follower.ProfilePic
+                    } : null,
+                    UserBusiness = cf.BusinessFollower != null ? new BusinessDTO
+                    {
+                        BusinessId = cf.BusinessFollower.BusinessId,
+                        Name = cf.BusinessFollower.Name,
+                        Logo = cf.BusinessFollower.Logo,
+                        Category = cf.BusinessFollower.Category,
+                        Description = cf.BusinessFollower.Description,
+                        CreatedAt = cf.BusinessFollower.CreatedAt,
+                        BusinessLocations = cf.BusinessFollower.BusinessLocations.Select(bl => new BusinessLocationDTO
+                        {
+                            LocationId = bl.LocationId,
+                            Label = bl.Label,
+                            Address = bl.Address,
+                            Latitude = (double?)bl.Latitude,
+                            Longitude = (double?)bl.Longitude,
+                            CreatedAt = bl.CreatedAt ?? DateTime.MinValue
+                        }).ToList()
+
+                    } : null
+                }).ToList(),
+                ConnectionFollowings = user.ConnectionFollowings.Select(cf => new ConnectionDTO
+                {
+                    ConnectionId = cf.ConnectionId,
+                    FollowerType = cf.FollowerType,
+                    FollowingType = cf.FollowingType,
+                    UserId = cf.FollowerId ?? 0,
+                    ConnectedUserId = cf.FollowingId ?? 0,
+                    BusinessFollowerId = cf.BusinessFollowerId,
+                    BusinessFollowingId = cf.BusinessFollowingId,
+                    CreatedAt = cf.CreatedAt,
+                    User = cf.Following != null ? new UserDTO
+                    {
+                        UserId = cf.Following.UserId,
+                        UserName = cf.Following.UserName,
+                        ProfilePic = cf.Following.ProfilePic
+                    } : null,
+                    UserBusiness = cf.BusinessFollowing != null ? new BusinessDTO
+                    {
+                        BusinessId = cf.BusinessFollowing.BusinessId,
+                        Name = cf.BusinessFollowing.Name,
+                        Logo = cf.BusinessFollowing.Logo,
+                        Category = cf.BusinessFollowing.Category,
+                        Description = cf.BusinessFollowing.Description,
+                        CreatedAt = cf.BusinessFollowing.CreatedAt,
+                        BusinessLocations = cf.BusinessFollowing.BusinessLocations.Select(bl => new BusinessLocationDTO
+                        {
+                            LocationId = bl.LocationId,
+                            Label = bl.Label,
+                            Address = bl.Address,
+                            Latitude = (double?)bl.Latitude,
+                            Longitude = (double?)bl.Longitude,
+                            CreatedAt = bl.CreatedAt ?? DateTime.MinValue
+                        }).ToList()
+                    } : null
+                }).ToList()
             };
         }
     }

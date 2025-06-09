@@ -159,20 +159,29 @@ namespace Taqyim.Api.Data
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity<Connection>(entity =>
-            {
-                entity.HasKey(e => e.ConnectionId);
+            modelBuilder.Entity<Connection>()
+            .HasOne(c => c.Follower)
+            .WithMany(u => u.ConnectionFollowings)
+            .HasForeignKey(c => c.FollowerId)
+            .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne(d => d.Follower)
-                    .WithMany(p => p.ConnectionFollowers)
-                    .HasForeignKey(d => d.FollowerId)
-                    .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Connection>()
+                .HasOne(c => c.Following)
+                .WithMany(u => u.ConnectionFollowers)
+                .HasForeignKey(c => c.FollowingId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne(d => d.Following)
-                    .WithMany(p => p.ConnectionFollowings)
-                    .HasForeignKey(d => d.FollowingId)
-                    .OnDelete(DeleteBehavior.Restrict);
-            });
+            modelBuilder.Entity<Connection>()
+                .HasOne(c => c.BusinessFollower)
+                .WithMany(b => b.ConnectionFollowings)
+                .HasForeignKey(c => c.BusinessFollowerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Connection>()
+                .HasOne(c => c.BusinessFollowing)
+                .WithMany(b => b.ConnectionFollowers)
+                .HasForeignKey(c => c.BusinessFollowingId)
+                .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Notification>(entity =>
             {
                 entity.HasKey(e => e.NotificationId);
