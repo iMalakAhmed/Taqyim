@@ -1,14 +1,14 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { toast } from "react-hot-toast";
 import {
   useGetBusinessByIdQuery,
   useDeleteBusinessMutation,
 } from "@/app/redux/services/BusinessApi";
 import { useGetCurrentUserQuery } from "@/app/redux/services/userApi";
-import EditBusinessModal from "@/app/components/EditBusinessModal";
+import EditBusinessModal from "@/app/components/ui/EditBusinessModal";
 import Button from "@/app/components/ui/Button";
 import CopyToClipboardButton from "@/app/components/ui/ShareButton";
 import FollowButton from "@/app/components/ui/FollowButton";
@@ -17,28 +17,40 @@ import {
   useGetFollowingQuery,
 } from "@/app/redux/services/connectionApi";
 import { IconEdit, IconShare, IconTrash } from "@tabler/icons-react";
+import MapView from './ui/MapView';
 
 const BusinessProfile = () => {
-  const params = useParams();
-  const businessId = Number(params.id);
+  const businessId = 1;
   const router = useRouter();
 
+  // 🔄 All hooks come first (no conditionals above)
   const { data: business, isLoading, error, refetch } = useGetBusinessByIdQuery(businessId);
   const { data: currentUser } = useGetCurrentUserQuery();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteBusiness] = useDeleteBusinessMutation();
+  const { data: followers = [], refetch: refetchFollowers } = useGetFollowersQuery({ id: businessId, type: "Business" });
+  const { data: following = [], refetch: refetchFollowings } = useGetFollowingQuery({ id: businessId, type: "Business" });
 
-  const { data: followers = [] , refetch: refetchFollowers} = useGetFollowersQuery({ id: businessId, type: "Business" });
-  const { data: following = [] ,refetch:refetchFollowings} = useGetFollowingQuery({ id: businessId, type: "Business"});
+  const canEdit = useMemo(() => {
+    return (
+      currentUser?.type === "Admin" ||
+      currentUser?.type === "Moderator" ||
+      currentUser?.userId === business?.userId
+    );
+  }, [currentUser, business]);
 
-  const isFollowing = followers.some(f =>
-  f.userId === currentUser?.userId || f.userId === (currentUser as any)?.businessId
-);
+  const isFollowing = useMemo(() => {
+    return followers.some(
+      (f) =>
+        f.userId === currentUser?.userId ||
+        f.userId === (currentUser as any)?.businessId
+    );
+  }, [followers, currentUser]);
 
-  const canEdit =
-    currentUser?.type === "Admin" ||
-    currentUser?.type === "Moderator" ||
-    currentUser?.userId === business?.userId;
+  // ✅ Only return after all hooks are declared
+  if (isLoading || !business || !currentUser) {
+    return <div>Loading...</div>;
+  }
 
   const handleDelete = async () => {
     if (confirm("Are you sure you want to delete this business?")) {
@@ -52,9 +64,6 @@ const BusinessProfile = () => {
       }
     }
   };
-
-  if (isLoading) return <div>Loading...</div>;
-  if (error || !business) return <div>Error loading business data.</div>;
 
   return (
     <div className="w-full h-full flex flex-col text-text justify-center py-10 ml-16">
@@ -78,25 +87,25 @@ const BusinessProfile = () => {
             <p><strong>Following:</strong> {following.length}</p>
           </div>
 
-          {currentUser?.userId !== business?.userId && (
+          {/* ✅ Show Follow only if user is NOT the owner */}
+          {!canEdit && (
             <div className="mt-4">
               <FollowButton
                 followingId={businessId}
                 followingType="Business"
                 isInitiallyFollowing={isFollowing}
-                onToggle={(newState) => {
-                refetchFollowers();
-              }}
+                onToggle={() => refetchFollowers()}
               />
             </div>
           )}
         </div>
 
+        {/* ✅ Only show Edit modal if user can edit */}
         {canEdit && (
           <EditBusinessModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
-            onSave={(data) => {
+            onSave={() => {
               setIsModalOpen(false);
               refetch();
             }}
@@ -105,21 +114,19 @@ const BusinessProfile = () => {
         )}
       </div>
 
-      <div className="flex flex-row items-center justify-between">
-        <div className="text-left w-full ml-2">
-          <h1 className="mb-3 font-heading font-bold text-xl">Locations:</h1>
-          {business.businessLocations?.map((loc) => (
-            <p key={loc.locationId}>
-              📍 {loc.label}: {loc.address} ({loc.latitude}, {loc.longitude})
-            </p>
-          ))}
-        </div>
-
-        <div className="flex flex-row mt-3">
+      <div className="flex flex-row items-center justify-between mt-3">
+        <div className="flex flex-row">
+          {/* ✅ Only show Edit/Delete if user can edit */}
           {canEdit && (
-            <Button onClick={() => setIsModalOpen(true)} variant="primary" className="mr-3 p-6">
-              <IconEdit stroke={2} /> Edit Business
-            </Button>
+            <>
+              <Button onClick={() => setIsModalOpen(true)} variant="primary" className="mr-3 p-6">
+                <IconEdit stroke={2} /> Edit Business
+              </Button>
+
+              <Button variant="primary" className="ml-2 p-6" onClick={handleDelete}>
+                <IconTrash stroke={2} /> Delete Business
+              </Button>
+            </>
           )}
 
           <CopyToClipboardButton
@@ -129,13 +136,12 @@ const BusinessProfile = () => {
           >
             <IconShare stroke={2} /> Share profile
           </CopyToClipboardButton>
-
-          {canEdit && (
-            <Button variant="primary" className="ml-2 p-6" onClick={handleDelete}>
-              <IconTrash stroke={2} /> Delete Business
-            </Button>
-          )}
         </div>
+      </div>
+
+      <div className="w-full max-w-5xl mt-6 mx-auto px-4">
+        <h2 className="font-heading font-bold text-xl mb-2">Business Locations</h2>
+        <MapView locations={business.businessLocations} />
       </div>
     </div>
   );

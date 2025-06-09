@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import EditProfileModal from "@/app/components/EditProfileModal";
+import EditProfileModal from "@/app/components/ui/EditProfileModal";
 import Button from "@/app/components/ui/Button";
 import {useGetCurrentUserQuery, useGetUserQuery, useUpdateUserMutation, useDeleteUserMutation,} from "@/app/redux/services/userApi";
 import { useFollowUserMutation, useUnfollowUserMutation, useGetFollowersQuery, useGetFollowingQuery } from "@/app/redux/services/connectionApi";
