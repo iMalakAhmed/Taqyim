@@ -3,10 +3,20 @@
 import { useEffect, useState } from "react";
 import EditProfileModal from "@/app/components/ui/EditProfileModal";
 import Button from "@/app/components/ui/Button";
-import {useGetCurrentUserQuery, useGetUserQuery, useUpdateUserMutation, useDeleteUserMutation,} from "@/app/redux/services/userApi";
-import { useFollowUserMutation, useUnfollowUserMutation, useGetFollowersQuery, useGetFollowingQuery } from "@/app/redux/services/connectionApi";
+import {
+  useGetCurrentUserQuery,
+  useGetUserQuery,
+  useUpdateUserMutation,
+  useDeleteUserMutation,
+} from "@/app/redux/services/userApi";
+import {
+  useFollowUserMutation,
+  useUnfollowUserMutation,
+  useGetFollowersQuery,
+  useGetFollowingQuery,
+} from "@/app/redux/services/connectionApi";
 import { IconEdit, IconShare, IconTrash } from "@tabler/icons-react";
-import { useParams, useRouter,notFound } from "next/navigation";
+import { useParams, useRouter, notFound } from "next/navigation";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { authApi } from "@/app/redux/services/authApi";
@@ -33,21 +43,18 @@ const UserProfile = () => {
     skip: !viewedId || viewedId === "me",
   });
 
-  const user =
-      viewedId && viewedId !== "me" ? viewedUser : currentUser;
-    
-  const { data: followers = [], refetch: refetchFollowers } = useGetFollowersQuery(
-    { id: Number(user?.userId ?? 0), type: "User" },
-    { skip: !user?.userId }
-  );
-  const { data: followings = [], refetch: refetchFollowings } = useGetFollowingQuery(
-    { id: Number(user?.userId ?? 0), type: "User" },
-    { skip: !user?.userId }
-  );
+  const user = viewedId && viewedId !== "me" ? viewedUser : currentUser;
 
-  
-
-
+  const { data: followers = [], refetch: refetchFollowers } =
+    useGetFollowersQuery(
+      { id: Number(user?.userId ?? 0), type: "User" },
+      { skip: !user?.userId }
+    );
+  const { data: followings = [], refetch: refetchFollowings } =
+    useGetFollowingQuery(
+      { id: Number(user?.userId ?? 0), type: "User" },
+      { skip: !user?.userId }
+    );
 
   const [updateUser] = useUpdateUserMutation();
   const [deleteUser] = useDeleteUserMutation();
@@ -55,14 +62,13 @@ const UserProfile = () => {
   const dispatch = useDispatch();
   const router = useRouter();
 
-
-  
   const isLoading =
     viewedId && viewedId !== "me" ? isUserLoading : isCurrentLoading;
-  const error =
-    viewedId && viewedId !== "me" ? userError : currentError;
+  const error = viewedId && viewedId !== "me" ? userError : currentError;
   const isSelf =
-    !viewedId || viewedId === "me" || (currentUser && Number(viewedId) === currentUser.userId);
+    !viewedId ||
+    viewedId === "me" ||
+    (currentUser && Number(viewedId) === currentUser.userId);
 
   const [isFollowing, setIsFollowing] = useState(
     followers?.some((f) => f.userId === currentUser?.userId) ?? false
@@ -75,7 +81,9 @@ const UserProfile = () => {
   }, [viewedId]);
 
   useEffect(() => {
-    setIsFollowing(followers?.some((f) => f.userId === currentUser?.userId) ?? false);
+    setIsFollowing(
+      followers?.some((f) => f.userId === currentUser?.userId) ?? false
+    );
   }, [followers, currentUser]);
 
   const handleDelete = async () => {
@@ -98,13 +106,8 @@ const UserProfile = () => {
     }
   };
 
-
-
   if (isLoading) return <div>Loading...</div>;
   if (error || !user) return notFound();
-
-    
-
 
   return (
     <div className="W-full h-full flex flex-row text-text justify-center py-10 ml-16">
@@ -125,9 +128,9 @@ const UserProfile = () => {
       </div>
 
       <div className="w-2/3 py-8 px-6 font-body">
-          <div className="flex flex-row items-center justify-between">
-            <h2 className="text-xl font-heading font-bold">{user.userName}</h2>
-            {!isSelf && currentUser && (
+        <div className="flex flex-row items-center justify-between">
+          <h2 className="text-xl font-heading font-bold">{user.userName}</h2>
+          {!isSelf && currentUser && (
             <FollowButton
               followingId={user.userId}
               followingType="User"
@@ -139,7 +142,7 @@ const UserProfile = () => {
               className="ml-2 p-6"
             />
           )}
-          </div>
+        </div>
         <p className="mb-4 py-3">{user.bio}</p>
         <div className="flex flex-row items-center space-x-2">
           <p className="text-sm text-gray-500 mt-1">
@@ -148,11 +151,8 @@ const UserProfile = () => {
           <p className="text-sm text-gray-500 mt-1">
             {followings?.length ?? 0} followings
           </p>
-          <p className="text-sm text-gray-500 mt-1">
-            reviews
-          </p>
+          <p className="text-sm text-gray-500 mt-1">reviews</p>
         </div>
-
 
         <div className="flex flex-row mt-3">
           {isSelf && (
@@ -170,7 +170,6 @@ const UserProfile = () => {
             variant="primary"
           >
             <IconShare stroke={2} /> Share profile
-
           </CopyToClipboardButton>
           {isSelf && (
             <Button

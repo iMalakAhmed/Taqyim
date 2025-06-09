@@ -131,7 +131,7 @@ export default function ReactionButtons({
       }}
       style={{
         paddingTop: 0,
-        paddingBottom: 5,
+        paddingBottom: 0,
         paddingLeft: 0,
         paddingRight: 0,
       }}

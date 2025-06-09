@@ -50,14 +50,18 @@ export default function AddComment({
         disabled={isLoading}
       />
       <div className="mt-2 flex justify-end gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onCancel}
-          disabled={isLoading}
-        >
-          Cancel
-        </Button>
+        {parentCommentId ? (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onCancel}
+            disabled={isLoading}
+          >
+            Cancel
+          </Button>
+        ) : (
+          <div />
+        )}
         <Button
           variant="primary"
           size="sm"
