@@ -19,7 +19,7 @@ namespace Taqyim.Api.Controllers
         }
 
         // GET: /api/users (Admin or Moderator only)
-        [Authorize(Roles = "Admin,Moderator")]
+        //[Authorize(Roles = "Admin,Moderator")]
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
