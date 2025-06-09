@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Taqyim.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class FixBusinessProductRelation : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -134,30 +134,6 @@ namespace Taqyim.Api.Migrations
                     table.ForeignKey(
                         name: "FK_ConversationUser_Users_UsersUserId",
                         column: x => x.UsersUserId,
-                        principalTable: "Users",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Media",
-                columns: table => new
-                {
-                    MediaId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FileType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FileSize = table.Column<long>(type: "bigint", nullable: false),
-                    UploadedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Media", x => x.MediaId);
-                    table.ForeignKey(
-                        name: "FK_Media_Users_UserId",
-                        column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
@@ -422,6 +398,36 @@ namespace Taqyim.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Media",
+                columns: table => new
+                {
+                    MediaId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    ReviewId = table.Column<int>(type: "int", nullable: true),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FileType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FileSize = table.Column<long>(type: "bigint", nullable: false),
+                    UploadedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Media", x => x.MediaId);
+                    table.ForeignKey(
+                        name: "FK_Media_Reviews_ReviewId",
+                        column: x => x.ReviewId,
+                        principalTable: "Reviews",
+                        principalColumn: "ReviewId");
+                    table.ForeignKey(
+                        name: "FK_Media_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Reactions",
                 columns: table => new
                 {
@@ -447,29 +453,6 @@ namespace Taqyim.Api.Migrations
                         principalTable: "Users",
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ReviewImages",
-                columns: table => new
-                {
-                    ReviewImageId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ReviewId = table.Column<int>(type: "int", nullable: false),
-                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Caption = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "GETUTCDATE()"),
-                    Order = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ReviewImages", x => x.ReviewImageId);
-                    table.ForeignKey(
-                        name: "FK_ReviewImages_Reviews_ReviewId",
-                        column: x => x.ReviewId,
-                        principalTable: "Reviews",
-                        principalColumn: "ReviewId",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -623,6 +606,11 @@ namespace Taqyim.Api.Migrations
                 column: "UsersUserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Media_ReviewId",
+                table: "Media",
+                column: "ReviewId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Media_UserId",
                 table: "Media",
                 column: "UserId");
@@ -666,11 +654,6 @@ namespace Taqyim.Api.Migrations
                 name: "IX_Reactions_UserId",
                 table: "Reactions",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ReviewImages_ReviewId",
-                table: "ReviewImages",
-                column: "ReviewId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reviews_BusinessId",
@@ -749,9 +732,6 @@ namespace Taqyim.Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "Reactions");
-
-            migrationBuilder.DropTable(
-                name: "ReviewImages");
 
             migrationBuilder.DropTable(
                 name: "SavedReviews");

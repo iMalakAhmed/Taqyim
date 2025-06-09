@@ -323,6 +323,8 @@ namespace Taqyim.Api.Migrations
 
                     b.HasKey("MediaId");
 
+                    b.HasIndex("ReviewId");
+
                     b.HasIndex("UserId");
 
                     b.ToTable("Media");
@@ -488,39 +490,6 @@ namespace Taqyim.Api.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Reviews");
-                });
-
-            modelBuilder.Entity("Taqyim.Api.Models.ReviewImage", b =>
-                {
-                    b.Property<int>("ReviewImageId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReviewImageId"));
-
-                    b.Property<string>("Caption")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ReviewId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ReviewImageId");
-
-                    b.HasIndex("ReviewId");
-
-                    b.ToTable("ReviewImages");
                 });
 
             modelBuilder.Entity("Taqyim.Api.Models.SavedReview", b =>
@@ -788,11 +757,17 @@ namespace Taqyim.Api.Migrations
 
             modelBuilder.Entity("Taqyim.Api.Models.Media", b =>
                 {
+                    b.HasOne("Taqyim.Api.Models.Review", "Review")
+                        .WithMany("Media")
+                        .HasForeignKey("ReviewId");
+
                     b.HasOne("Taqyim.Api.Models.User", "User")
                         .WithMany("Media")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Review");
 
                     b.Navigation("User");
                 });
@@ -891,17 +866,6 @@ namespace Taqyim.Api.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Taqyim.Api.Models.ReviewImage", b =>
-                {
-                    b.HasOne("Taqyim.Api.Models.Review", "Review")
-                        .WithMany("ReviewImages")
-                        .HasForeignKey("ReviewId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Review");
                 });
 
             modelBuilder.Entity("Taqyim.Api.Models.SavedReview", b =>
@@ -1007,9 +971,9 @@ namespace Taqyim.Api.Migrations
                 {
                     b.Navigation("Comments");
 
-                    b.Navigation("Reactions");
+                    b.Navigation("Media");
 
-                    b.Navigation("ReviewImages");
+                    b.Navigation("Reactions");
 
                     b.Navigation("SavedByUsers");
 

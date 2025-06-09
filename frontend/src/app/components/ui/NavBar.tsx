@@ -14,6 +14,7 @@ import { useGetCurrentUserQuery, authApi } from "../../redux/services/authApi";
 import { useRouter } from "next/navigation";
 import { removeAuthCookie } from "../../actions/auth";
 import Button from "./Button";
+import React from "react";
 
 export default function NavBar() {
   const pathname = usePathname();
@@ -21,12 +22,24 @@ export default function NavBar() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const { data: user, isLoading, refetch } = useGetCurrentUserQuery(undefined, {
+
+  const {
+    data: user,
+    isLoading,
+    refetch,
+  } = useGetCurrentUserQuery(undefined, {
     pollingInterval: 1000, // Optional auto-refresh
     refetchOnMountOrArgChange: true,
   });
 
 
+  // Temporarily commented out for debugging signup redirect issue
+  // React.useEffect(() => {
+  //   if (isError && !isLoading) {
+  //     removeAuthCookie();
+  //     router.push("/auth/login");
+  //   }
+  // }, [isError, isLoading, router]);
   const handleSignOut = async () => {
     try {
       // Call the backend signout API
@@ -38,7 +51,8 @@ export default function NavBar() {
       // Continue with client-side signout even if API call fails
     }
 
-    await removeAuthCookie(); // Remove the cookie
+    sessionStorage.removeItem('token'); // Clear token from session storage
+    await removeAuthCookie(); // Remove the cookie (for httpOnly token if any)
     // Invalidate RTK Query cache related to the user
     dispatch(authApi.util.resetApiState());
     router.push("/auth/login"); // Redirect to login page
@@ -51,9 +65,15 @@ export default function NavBar() {
       }`}
     >
       <div className="mx-24 flex flex-row justify-between items-center h-full">
-        <Link href="/">
-          <h1 className="font-heading text-text">TAQYIM</h1>
-        </Link>
+        {user ? (
+          <Link href="/home">
+            <h1 className="font-heading text-text">TAQYIM</h1>
+          </Link>
+        ) : (
+          <Link href="/">
+            <h1 className="font-heading text-text">TAQYIM</h1>
+          </Link>
+        )}
 
         <input />
 
@@ -71,7 +91,7 @@ export default function NavBar() {
             <>
               <div className="relative group inline-block">
                 <Link
-                  href="/profile"
+                  href={`/profile/${user.userId}`}
                   className="text-text hover:text-secondary flex items-center space-x-2"
                 >
                   <IconUserCircle size={24} />
@@ -103,6 +123,9 @@ export default function NavBar() {
             <div className="flex flex-row items-center gap-x-5">
               <Link href="/auth/login" className="text-text hover:text-accent">
                 Login
+              </Link>
+              <Link href="/auth/signup" className="text-text hover:text-accent">
+                Sign Up
               </Link>
               <ThemeToggle />
             </div>

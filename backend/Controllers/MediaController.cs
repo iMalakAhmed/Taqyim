@@ -23,14 +23,23 @@ public class MediaController : ControllerBase
 
     // GET: api/media
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<MediaDTO>>> GetAllMedia()
+    public async Task<ActionResult<IEnumerable<MediaDTO>>> GetAllMedia([FromQuery] int? reviewId)
     {
-        var mediaList = await _context.Media
+        var query = _context.Media
             .Include(m => m.User)
+            .AsQueryable();
+
+        if (reviewId.HasValue)
+        {
+            query = query.Where(m => m.ReviewId == reviewId.Value);
+        }
+
+        var mediaList = await query
             .Select(m => new MediaDTO
             {
                 MediaId = m.MediaId,
                 UserId = m.UserId,
+                ReviewId = m.ReviewId,
                 FileName = m.FileName,
                 FilePath = m.FilePath,
                 FileType = m.FileType,
@@ -65,6 +74,7 @@ public class MediaController : ControllerBase
             {
                 MediaId = m.MediaId,
                 UserId = m.UserId,
+                ReviewId = m.ReviewId,
                 FileName = m.FileName,
                 FilePath = m.FilePath,
                 FileType = m.FileType,
@@ -72,7 +82,15 @@ public class MediaController : ControllerBase
                 UploadedAt = m.UploadedAt,
                 User = new UserDTO
                 {
-                    // TODO: Map User properties here
+                    UserId = m.User.UserId,
+                    Email = m.User.Email,
+                    UserName = m.User.UserName,
+                    Type = m.User.Type,
+                    IsVerified = m.User.IsVerified,
+                    ProfilePic = m.User.ProfilePic,
+                    Bio = m.User.Bio,
+                    CreatedAt = m.User.CreatedAt,
+                    ReputationPoints = m.User.ReputationPoints
                 }
             })
             .FirstOrDefaultAsync();
@@ -99,6 +117,14 @@ public class MediaController : ControllerBase
         if (!int.TryParse(userIdClaim.Value, out int userId))
             return Unauthorized();
 
+        // Validate review exists if reviewId is provided
+        if (createMediaDto.ReviewId.HasValue)
+        {
+            var reviewExists = await _context.Reviews.AnyAsync(r => r.ReviewId == createMediaDto.ReviewId.Value);
+            if (!reviewExists)
+                return BadRequest("Specified review does not exist");
+        }
+
         // Prepare uploads folder
         var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
         if (!Directory.Exists(uploadsFolder))
@@ -120,6 +146,7 @@ public class MediaController : ControllerBase
         {
             UserId = userId,
             User = user,
+            ReviewId = createMediaDto.ReviewId,
             FileName = createMediaDto.File.FileName,
             FilePath = "/uploads/" + uniqueFileName, 
             FileType = createMediaDto.File.ContentType,
@@ -134,6 +161,7 @@ public class MediaController : ControllerBase
         {
             MediaId = media.MediaId,
             UserId = media.UserId,
+            ReviewId = media.ReviewId,
             FileName = media.FileName,
             FilePath = media.FilePath,
             FileType = media.FileType,
@@ -141,7 +169,7 @@ public class MediaController : ControllerBase
             UploadedAt = media.UploadedAt,
             User = new UserDTO
             {
-               UserId = media.User.UserId,
+                UserId = media.User.UserId,
                 Email = media.User.Email,
                 UserName = media.User.UserName,
                 Type = media.User.Type,

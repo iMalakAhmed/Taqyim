@@ -21,14 +21,14 @@ export default function ReviewDetailsPage() {
   if (!review || !user) return <div>Review not found.</div>;
 
   return (
-    <div className="w-full min-h-screen pt-24 p-96">
+    <div className="w-full min-h-screen bg-background text-text pt-24 p-96">
       <ReviewCard reviewId={reviewId} />
       <div className="px-8 border">
         <AddComment reviewId={reviewId} onCancel={() => {}} />
 
         <div className="pt-4">
           <h2 className="text-xl pb-2 font-heading font-bold">Comments</h2>
-          <HorizontalLine />
+          <HorizontalLine className="mb-3" />
           <CommentList
             reviewId={reviewId}
             commentCount={review.comments.length}

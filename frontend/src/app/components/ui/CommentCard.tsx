@@ -10,12 +10,22 @@ import { useDispatch, useSelector } from "react-redux";
 import { decrementCommentCount } from "@/app/redux/slices/commentCounterSlice";
 import { useGetCurrentUserQuery } from "@/app/redux/services/authApi";
 import { setReactionCount } from "@/app/redux/slices/commentReactionCounterSlice";
-import { IconEdit, IconTrash } from "@tabler/icons-react";
+import {
+  IconEdit,
+  IconMessage,
+  IconMessageFilled,
+  IconShare3,
+  IconTrash,
+} from "@tabler/icons-react";
 import Button from "./Button";
 import CommentReactionButtons from "../CommentReactionButtons";
 import AddComment from "../AddComment";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import CopyToClipboardButton from "./ShareButton";
+import Image from "next/image";
+import { formatTimestamp } from "./FormatTimeStamp";
+import FollowButton from "./FollowButton";
 
 type CommentProps = {
   reviewId: number;
@@ -83,107 +93,104 @@ export default function CommentCard({ reviewId, comment }: CommentProps) {
 
   return (
     <li
-      className="mb-6 border-b border-gray-200 pb-4"
+      className="mb-6 border-b pb-4 text-text list-none"
       onClick={() => router.push(`/comments/${comment.commentId}`)}
     >
       <div className="flex justify-between items-start mb-2">
-        <div>
+        <div className="flex flex-row py-2">
           {!deleted && (
             <Link
+              className="flex flex-row"
               href={`/profile?id=${comment.commenterId}`}
               onClick={(e) => {
                 stopPropagation(e);
               }}
             >
-              <strong className="text-gray-900">
-                {comment.commenter.userName}
-              </strong>{" "}
-              <span className="text-gray-500 text-xs ml-2">
-                {new Date(comment.createdAt).toLocaleString()}
-              </span>
-            </Link>
-          )}
-
-          {!deleted && (
-            <div
-              className="mt-1 flex items-center space-x-4 text-gray-600 text-sm"
-              onClick={(e) => {
-                stopPropagation(e);
-              }}
-            >
-              <CommentReactionButtons
-                commentId={comment.commentId}
-                reactionCount={comment.reactions?.length ?? 0}
+              <Image
+                src={comment.commenter.profilePic || "/default-profile.jpg"}
+                width={64}
+                height={64}
+                alt="user profile"
+                className="w-12 h-12"
               />
-              <span>
-                {reactionCount} reaction{reactionCount !== 1 ? "s" : ""}
-              </span>
-              <span>
-                {replyCount} repl{replyCount !== 1 ? "ies" : "y"}
-              </span>
-            </div>
+              <div className="flex flex-col justify-center px-5">
+                <strong className="">{comment.commenter.userName}</strong>{" "}
+                <span className="font-body text-xs text-">
+                  {formatTimestamp(comment.createdAt)}
+                </span>
+              </div>
+            </Link>
           )}
         </div>
 
-        {isOwner && !deleted && (
-          <div className="space-x-2 flex items-center">
-            {editing ? (
-              <>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={(e) => {
-                    stopPropagation(e);
-                    handleSave();
-                  }}
-                  disabled={isUpdating}
-                >
-                  Save
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => {
-                    stopPropagation(e);
-                    setContent(comment.content);
-                    setEditing(false);
-                  }}
-                  disabled={isUpdating}
-                >
-                  Cancel
-                </Button>
-              </>
+        {!deleted && (
+          <>
+            {isOwner ? (
+              <div className="space-x-2 flex items-center">
+                {editing ? (
+                  <>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={(e) => {
+                        stopPropagation(e);
+                        handleSave();
+                      }}
+                      disabled={isUpdating}
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        stopPropagation(e);
+                        setContent(comment.content);
+                        setEditing(false);
+                      }}
+                      disabled={isUpdating}
+                    >
+                      Cancel
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      variant="none"
+                      className="hover:text-primary"
+                      size="sm"
+                      onClick={(e) => {
+                        stopPropagation(e);
+                        setContent(comment.content);
+                        setEditing(true);
+                      }}
+                      aria-label="Edit comment"
+                    >
+                      <IconEdit size={20} />
+                    </Button>
+                    <Button
+                      variant="none"
+                      size="sm"
+                      className="hover:text-accent"
+                      onClick={(e) => {
+                        stopPropagation(e);
+                        handleDelete();
+                      }}
+                      disabled={isDeleting}
+                      aria-label="Delete comment"
+                    >
+                      <IconTrash size={20} />
+                    </Button>
+                  </>
+                )}
+              </div>
             ) : (
-              <>
-                <Button
-                  variant="none"
-                  className="hover:text-primary"
-                  size="sm"
-                  onClick={(e) => {
-                    stopPropagation(e);
-                    setContent(comment.content);
-                    setEditing(true);
-                  }}
-                  aria-label="Edit comment"
-                >
-                  <IconEdit size={20} />
-                </Button>
-                <Button
-                  variant="none"
-                  size="sm"
-                  className="hover:text-accent"
-                  onClick={(e) => {
-                    stopPropagation(e);
-                    handleDelete();
-                  }}
-                  disabled={isDeleting}
-                  aria-label="Delete comment"
-                >
-                  <IconTrash size={20} />
-                </Button>
-              </>
+              <FollowButton
+                followingId={comment.commenterId}
+                followingType="User"
+              />
             )}
-          </div>
+          </>
         )}
       </div>
 
@@ -200,29 +207,56 @@ export default function CommentCard({ reviewId, comment }: CommentProps) {
         />
       ) : (
         <p
-          className={
-            deleted
-              ? "italic text-gray-400"
-              : "text-gray-800 whitespace-pre-wrap"
-          }
+          className={deleted ? "italic text-gray-400" : " whitespace-pre-wrap"}
         >
           {content}
         </p>
       )}
 
       {!deleted && (
-        <div className="mt-2">
-          <button
-            className="text-sm text-primary hover:underline focus:outline-none"
-            onClick={(e) => {
-              stopPropagation(e);
-              setReplying(!replying);
-            }}
-            aria-expanded={replying}
-            aria-controls={`reply-form-${comment.commentId}`}
-          >
-            {replying ? "Cancel Reply" : "Reply"}
-          </button>
+        <div
+          className="mt-1 flex flex-row items-center justify-between space-x-4 text-sm"
+          onClick={(e) => {
+            stopPropagation(e);
+          }}
+        >
+          <div className="flex flex-row items-center">
+            <CommentReactionButtons
+              commentId={comment.commentId}
+              reactionCount={comment.reactions?.length ?? 0}
+            />
+
+            <Button
+              size="sm"
+              variant="none"
+              className="hover:text-secondary"
+              onClick={(e) => {
+                stopPropagation(e);
+                setReplying(!replying);
+              }}
+              aria-expanded={replying}
+              aria-controls={`reply-form-${comment.commentId}`}
+            >
+              {replying ? (
+                <IconMessageFilled size={20} />
+              ) : (
+                <IconMessage size={20} />
+              )}
+            </Button>
+            <CopyToClipboardButton
+              copyText={`https://localhost:3000/comments/${comment.commentId}`}
+            >
+              <IconShare3 size={20} className="hover:text-secondary" />
+            </CopyToClipboardButton>
+          </div>
+          <div className="flex flex-row gap-x-5 hover:cursor-pointer">
+            <span>
+              {reactionCount} reaction{reactionCount !== 1 ? "s" : ""}
+            </span>
+            <span>
+              {replyCount} repl{replyCount !== 1 ? "ies" : "y"}
+            </span>
+          </div>
         </div>
       )}
 
@@ -243,13 +277,18 @@ export default function CommentCard({ reviewId, comment }: CommentProps) {
       )}
 
       {comment.replies && comment.replies.length > 0 && (
-        <ul className="ml-6 border-l border-gray-300 pl-4 mt-4 space-y-4">
+        <ul className="ml-6 border-l pl-4 mt-4 space-y-4">
           {comment.replies.map((reply) => (
-            <CommentCard
+            <li
               key={reply.commentId}
-              reviewId={reviewId}
-              comment={reply}
-            />
+              onClick={(e) => {
+                stopPropagation(e);
+                router.push(`/comments/${reply.commentId}`);
+              }}
+              className="cursor-pointer"
+            >
+              <CommentCard reviewId={reviewId} comment={reply} />
+            </li>
           ))}
         </ul>
       )}
