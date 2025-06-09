@@ -44,20 +44,22 @@ export const mediaApi = createApi({
       providesTags: (result, error, id) => [{ type: "Media", id }],
     }),
 
-    uploadMedia: builder.mutation<MediaType, { file: File }>({
-      query: ({ file }) => {
-        const formData = new FormData();
-        formData.append("File", file);
-
-        return {
-          url: "/media",
-          method: "POST",
-          body: formData,
-          // Do not set content-type; browser will set multipart/form-data boundary
-        };
-      },
-      invalidatesTags: [{ type: "Media", id: "LIST" }],
-    }),
+    uploadMedia: builder.mutation<MediaType, { file: File; reviewId?: number }>(
+      {
+        query: ({ file, reviewId }) => {
+          const formData = new FormData();
+          formData.append("file", file);
+          if (reviewId) {
+            formData.append("reviewId", reviewId.toString());
+          }
+          return {
+            url: "/media",
+            method: "POST",
+            body: formData,
+          };
+        },
+      }
+    ),
 
     deleteMedia: builder.mutation<void, number>({
       query: (id) => ({

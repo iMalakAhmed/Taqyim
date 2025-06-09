@@ -110,6 +110,8 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
     user?.ConnectionFollowings?.some((f) => f.userId === review.user.userId)
   );
 
+  const getFullMediaUrl = (path: string) => `http://localhost:5273${path}`;
+
   return (
     <div
       className="w-full flex flex-col gap-3 pt-5 px-8 text-text border hover:cursor-pointer"
@@ -245,7 +247,7 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
 
         {isEditing ? (
           <textarea
-            className="w-full h-full border  p-2 my-2 text-sm"
+            className="w-full h-full border p-2 my-2 text-sm"
             value={comment}
             onClick={(e) => {
               stopPropagation(e);
@@ -254,7 +256,27 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
             rows={3}
           />
         ) : (
-          <p className="text-sm font-body pt-2 pb-3">{review.comment}</p>
+          <>
+            <p className="text-sm font-body pt-2 pb-3">{review.comment}</p>
+
+            {review.media && review.media.length > 0 && (
+              <div className="flex flex-wrap gap-2 pb-3">
+                {review.media.map((mediaItem) => (
+                  <div
+                    key={mediaItem.mediaId}
+                    className="relative z-0 w-32 h-32 rounded overflow-hidden border"
+                  >
+                    <Image
+                      src={getFullMediaUrl(mediaItem.filePath)}
+                      alt={mediaItem.fileName}
+                      layout="fill"
+                      objectFit="cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
 
         <HorizontalLine />

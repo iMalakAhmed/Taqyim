@@ -24,7 +24,6 @@ namespace Taqyim.Api.Data
         public DbSet<UserBadge> UserBadges { get; set; }
         public DbSet<Media> Media { get; set; }
         public DbSet<SavedReview> SavedReviews { get; set; }
-        public DbSet<ReviewImage> ReviewImages { get; set; }
         public DbSet<Product> Products { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -257,17 +256,6 @@ namespace Taqyim.Api.Data
 
                 entity.HasOne(d => d.Review)
                     .WithMany(p => p.SavedByUsers)
-                    .HasForeignKey(d => d.ReviewId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
-            modelBuilder.Entity<ReviewImage>(entity =>
-            {
-                entity.HasKey(e => e.ReviewImageId);
-                entity.Property(e => e.ImageUrl).IsRequired();
-                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
-
-                entity.HasOne(d => d.Review)
-                    .WithMany(p => p.ReviewImages)
                     .HasForeignKey(d => d.ReviewId)
                     .OnDelete(DeleteBehavior.Cascade);
             });

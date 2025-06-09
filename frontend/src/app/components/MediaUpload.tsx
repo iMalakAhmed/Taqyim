@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { useUploadMediaMutation } from "../redux/services/mediaApi";
 
-export default function MediaUpload() {
+type MediaUploadProps = {
+  onUploadSuccess?: (mediaId: number) => void;
+};
+
+export default function MediaUpload({ onUploadSuccess }: MediaUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [uploadMedia, { isLoading, data, error }] = useUploadMediaMutation();
 
@@ -16,9 +20,10 @@ export default function MediaUpload() {
   const handleUpload = async () => {
     if (!file) return;
     try {
-      await uploadMedia({ file }).unwrap();
+      const response = await uploadMedia({ file }).unwrap();
       alert("Upload successful!");
       setFile(null);
+      onUploadSuccess?.(response.mediaId); // Ensure your response includes `mediaId`
     } catch {
       alert("Upload failed!");
     }
@@ -30,8 +35,10 @@ export default function MediaUpload() {
       <button onClick={handleUpload} disabled={!file || isLoading}>
         Upload
       </button>
-      {error && <p>Error uploading file</p>}
-      {data && <p>Uploaded: {data.fileName}</p>}
+      {error && <p className="text-sm text-accent">Error uploading file</p>}
+      {data && (
+        <p className="text-sm text-secondary">Uploaded: {data.fileName}</p>
+      )}
     </div>
   );
 }

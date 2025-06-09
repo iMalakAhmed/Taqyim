@@ -132,7 +132,8 @@ export interface ReviewType {
   comments: CommentType[];
   reactions: ReactionType[];
   tags: TagType[];
-  images: ReviewImageType[];
+  mediaIds?: number[];
+  media?: MediaType[];
 }
 
 export interface CreateReviewType {
@@ -141,6 +142,7 @@ export interface CreateReviewType {
   rating: number;
   comment: string;
   tags?: string[] | null;
+  mediaIds?: number[];
 }
 
 export interface UpdateReviewType {
@@ -200,18 +202,10 @@ export interface TagType {
   reviewId: number;
 }
 
-export interface ReviewImageType {
-  reviewImageId: number;
-  reviewId: number;
-  imageUrl: string;
-  caption?: string | null;
-  createdAt: string;
-  order: number;
-}
-
 export interface MediaType {
   mediaId: number;
   userId: number;
+  reviewId?: number;
   fileName: string;
   filePath: string;
   fileType: string;
