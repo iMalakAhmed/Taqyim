@@ -23,6 +23,7 @@ import { authApi } from "@/app/redux/services/authApi";
 import { removeAuthCookie } from "@/app/actions/auth";
 import CopyToClipboardButton from "@/app/components/ui/ShareButton";
 import FollowButton from "@/app/components/ui/FollowButton";
+import HorizontalLine from "./ui/HorizontalLine";
 
 const UserProfile = () => {
   const params = useParams();
@@ -110,8 +111,9 @@ const UserProfile = () => {
   if (error || !user) return notFound();
 
   return (
-    <div className="W-full h-full flex flex-row text-text justify-center py-10 ml-16">
-      <div className="w-1/3 p-3">
+    <div className="w-full h-full flex flex-row bg-background text-text justify-center py-10">
+      {/* Left: Profile Image */}
+      <div className="w-1/3 flex justify-center items-start">
         <img
           src={
             user.profilePic && user.profilePic.trim() !== ""
@@ -119,7 +121,7 @@ const UserProfile = () => {
               : "/default-profile.jpg"
           }
           alt={user.userName}
-          className="w-60 h-40 rounded-sm mb-4 object-cover"
+          className="w-36 h-48 object-cover"
           onError={(e) => {
             e.currentTarget.onerror = null;
             e.currentTarget.src = "/default-profile.jpg";
@@ -127,62 +129,66 @@ const UserProfile = () => {
         />
       </div>
 
-      <div className="w-2/3 py-8 px-6 font-body">
-        <div className="flex flex-row items-center justify-between">
-          <h2 className="text-xl font-heading font-bold">{user.userName}</h2>
+      {/* Right: Details */}
+      <div className="w-2/3 flex flex-col font-body py-2">
+        {/* Username and Follow button */}
+        <div className="flex items-center justify-between">
+          <h2 className="text-3xl font-heading font-bold">{user.userName}</h2>
           {!isSelf && currentUser && (
             <FollowButton
               followingId={user.userId}
               followingType="User"
-              isInitiallyFollowing={isFollowing}
-              onToggle={(newState) => {
-                setIsFollowing(newState);
-                refetchFollowers();
-              }}
-              className="ml-2 p-6"
+              className="ml-2"
+              onToggle={refetchFollowers}
             />
           )}
         </div>
-        <p className="mb-4 py-3">{user.bio}</p>
-        <div className="flex flex-row items-center space-x-2">
-          <p className="text-sm text-gray-500 mt-1">
-            {followers?.length ?? 0} followers
-          </p>
-          <p className="text-sm text-gray-500 mt-1">
-            {followings?.length ?? 0} followings
-          </p>
-          <p className="text-sm text-gray-500 mt-1">reviews</p>
+
+        {/* Counts: followers, following, reviews */}
+        <div className="flex flex-row space-x-4 mt-2 text-sm text-text">
+          <p>{followers?.length ?? 0} followers</p>
+          <p>{followings?.length ?? 0} following</p>
+          <p>{user.reviews?.length ?? 0} reviews</p>
         </div>
 
-        <div className="flex flex-row mt-3">
+        {/* Buttons: Edit, Share, Delete */}
+        <div className="flex flex-row flex-wrap items-center mt-4 space-x-2">
           {isSelf && (
             <Button
               onClick={() => setIsModalOpen(true)}
               variant="primary"
-              className="ml-2 p-6"
+              size="sm"
+              className="flex items-center space-x-1"
             >
-              <IconEdit stroke={2} /> Edit profile
+              <IconEdit stroke={2} />
+              <span>Edit profile</span>
+            </Button>
+          )}
+
+          {isSelf && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center space-x-1"
+              onClick={handleDelete}
+            >
+              <IconTrash stroke={2} />
+              <span>Delete profile</span>
             </Button>
           )}
           <CopyToClipboardButton
             copyText={`https://localhost:3000/profile/${user.userId}`}
-            className="ml-2 p-6"
-            variant="primary"
+            className="hover:cursor-pointer"
           >
-            <IconShare stroke={2} /> Share profile
+            <IconShare stroke={2} className="hover:text-primary" />
           </CopyToClipboardButton>
-          {isSelf && (
-            <Button
-              variant="primary"
-              className="ml-2 p-6"
-              onClick={handleDelete}
-            >
-              <IconTrash stroke={2} /> Delete profile
-            </Button>
-          )}
         </div>
+
+        {/* Bio */}
+        <p className="mt-3 text-base">{user.bio}</p>
       </div>
 
+      {/* Edit Modal */}
       {isSelf && (
         <EditProfileModal
           isOpen={isModalOpen}

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import HorizontalLine from "./HorizontalLine";
-import { useGetCurrentUserQuery } from "../../redux/services/authApi";
+import { useGetCurrentUserQuery } from "../../redux/services/userApi";
 import {
   useGetReviewQuery,
   useDeleteReviewMutation,
@@ -29,6 +29,7 @@ import StarRating from "./StarRating";
 import Link from "next/link";
 import CopyToClipboardButton from "./ShareButton";
 import { formatTimestamp } from "./FormatTimeStamp";
+import FollowButton from "./FollowButton";
 
 type ReviewCardProps = {
   reviewId: number;
@@ -102,6 +103,12 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
   if (!user || !review) return null;
 
   const isOwner = user.userId === review.userId;
+  console.log("Following list:", user?.ConnectionFollowings);
+  console.log("Checking if following user:", review.user.userId);
+  console.log(
+    "Result:",
+    user?.ConnectionFollowings?.some((f) => f.userId === review.user.userId)
+  );
 
   return (
     <div
@@ -196,15 +203,10 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
           </div>
         ) : (
           <div className="ml-auto">
-            <Button
-              size="md"
-              variant="secondary"
-              onClick={(e) => {
-                stopPropagation(e);
-              }}
-            >
-              Follow
-            </Button>
+            <FollowButton
+              followingId={review.user.userId}
+              followingType="User"
+            />
           </div>
         )}
       </div>

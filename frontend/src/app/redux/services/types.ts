@@ -40,6 +40,9 @@ export interface UserType {
   bio?: string | null;
   createdAt: string;
   reputationPoints: number;
+  reviews: ReviewType[];
+  ConnectionFollowers?: UserType[];
+  ConnectionFollowings?: UserType[];
 }
 
 export interface UpdateUserType {
