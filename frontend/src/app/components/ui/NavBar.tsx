@@ -54,9 +54,15 @@ export default function NavBar() {
       }`}
     >
       <div className="mx-24 flex flex-row justify-between items-center h-full">
-        <Link href="/">
-          <h1 className="font-heading text-text">TAQYIM</h1>
-        </Link>
+        {user ? (
+          <Link href="/home">
+            <h1 className="font-heading text-text">TAQYIM</h1>
+          </Link>
+        ) : (
+          <Link href="/">
+            <h1 className="font-heading text-text">TAQYIM</h1>
+          </Link>
+        )}
 
         <input />
 
