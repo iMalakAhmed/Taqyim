@@ -41,8 +41,7 @@ public class UserBadgeController : ControllerBase
                 {
                     UserId = ub.User.UserId,
                     Email = ub.User.Email,
-                    FirstName = ub.User.FirstName,
-                    LastName = ub.User.LastName,
+                    UserName = ub.User.UserName,
                     Type = ub.User.Type,
                     IsVerified = ub.User.IsVerified,
                     ProfilePic = ub.User.ProfilePic,
@@ -106,8 +105,7 @@ public class UserBadgeController : ControllerBase
             {
                 UserId = user.UserId,
                 Email = user.Email,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
+                UserName = user.UserName,
                 Type = user.Type,
                 IsVerified = user.IsVerified,
                 ProfilePic = user.ProfilePic,

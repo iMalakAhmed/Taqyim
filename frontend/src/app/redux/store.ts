@@ -6,6 +6,13 @@ import businessReducer from "./slices/businessSlice";
 import { authApi } from "./services/authApi";
 import { reviewApi } from "./services/reviewApi";
 import { reactionApi } from "./services/reactionApi";
+import { mediaApi } from "./services/mediaApi";
+import { commentApi } from "./services/commentApi";
+import reactionCounterReducer from "./slices/reactionCounterSlice";
+import commentCounterReducer from "./slices/commentCounterSlice";
+import commentReactionCounterReducer from "./slices/commentReactionCounterSlice";
+import { commentReactionApi } from "./services/commentReactionApi";
+import replyCounterReducer from "./slices/replyCounterSlice";
 
 export const store = configureStore({
   reducer: {
@@ -14,8 +21,15 @@ export const store = configureStore({
     [authApi.reducerPath]: authApi.reducer,
     [reviewApi.reducerPath]: reviewApi.reducer,
     [reactionApi.reducerPath]: reactionApi.reducer,
+    [mediaApi.reducerPath]: mediaApi.reducer,
+    [commentApi.reducerPath]: commentApi.reducer,
+    [commentReactionApi.reducerPath]: commentReactionApi.reducer,
     user: userReducer,
     business: businessReducer,
+    reactionCounter: reactionCounterReducer,
+    commentCounter: commentCounterReducer,
+    commentReactionCounter: commentReactionCounterReducer,
+    replyCounter: replyCounterReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -23,7 +37,10 @@ export const store = configureStore({
       authApi.middleware,
       businessApi.middleware,
       reviewApi.middleware,
-      reactionApi.middleware
+      reactionApi.middleware,
+      mediaApi.middleware,
+      commentApi.middleware,
+      commentReactionApi.middleware
     ),
 });
 

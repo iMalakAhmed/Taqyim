@@ -4,10 +4,14 @@ export interface LoginCredentials {
 }
 
 export interface RegisterData {
-  firstName: string;
-  lastName: string;
   email: string;
   password: string;
+  userName: string;
+  type?: 'User' | 'Business';
+  businessName?: string;
+  businessCategory?: string;
+  businessDescription?: string;
+  businessAddress?: string;
 }
 
 export interface AuthResponse {
@@ -15,16 +19,15 @@ export interface AuthResponse {
   user: {
     id: string;
     email: string;
-    firstName: string;
-    lastName: string;
+    userName: string;
   };
+  redirectUrl?: string;
 }
 
 export interface UserType {
   userId: number;
   email: string;
-  firstName: string;
-  lastName: string;
+  userName: string;
   type: string;
   businessName?: string | null;
   businessCategory?: string | null;
@@ -40,8 +43,7 @@ export interface UserType {
 }
 
 export interface UpdateUserType {
-  firstName?: string | null;
-  lastName?: string | null;
+  userName?: string | null;
   bio?: string | null;
   profilePic?: string | null;
 }
@@ -174,4 +176,15 @@ export interface ReviewImageType {
   caption?: string | null;
   createdAt: string;
   order: number;
+}
+
+export interface MediaType {
+  mediaId: number;
+  userId: number;
+  fileName: string;
+  filePath: string;
+  fileType: string;
+  fileSize: number;
+  uploadedAt: string;
+  user: UserType;
 }

@@ -1,10 +1,10 @@
 "use client";
+import { IconMoon, IconSun } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 
 export default function ThemeToggle() {
   const [dark, setDark] = useState(false);
 
-  // Load theme preference on mount
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme === "dark") {
@@ -16,7 +16,6 @@ export default function ThemeToggle() {
     }
   }, []);
 
-  // Apply theme and save preference when toggled
   useEffect(() => {
     if (dark) {
       document.documentElement.classList.add("dark");
@@ -29,13 +28,18 @@ export default function ThemeToggle() {
 
   return (
     <button
-      onClick={() => {
-        const newState = !dark;
-        setDark(newState);
-      }}
-      style={{ color: dark ? "white" : "black" }}
+      onClick={() => setDark(!dark)}
+      className={`
+        p-2 rounded-full
+        text-text bg-background
+        flex items-center justify-center
+        transition-transform duration-500 ease-in-out
+        transform hover:text-secondary
+        ${dark ? "rotate-180" : "rotate-0"}
+      `}
+      aria-label="Toggle theme"
     >
-      Toggle {dark ? "Light" : "Dark"} Mode
+      {dark ? <IconSun size={24} /> : <IconMoon size={24} />}
     </button>
   );
 }

@@ -33,8 +33,7 @@ namespace Taqyim.Api.Controllers
             var user = new User
             {
                 Email = request.Email,
-                FirstName = request.FirstName,
-                LastName = request.LastName,
+                UserName = request.UserName,
                 PasswordHash = HashPassword(request.Password),
                 Type = "User",
                 CreatedAt = DateTime.UtcNow
@@ -72,8 +71,7 @@ namespace Taqyim.Api.Controllers
             {
                 user.UserId,
                 user.Email,
-                user.FirstName,
-                user.LastName,
+                user.UserName,
                 user.Type
             });
         }
@@ -104,12 +102,10 @@ namespace Taqyim.Api.Controllers
         
         [Required]
         public string Password { get; set; }=string.Empty;
-        
+
         [Required]
-        public string FirstName { get; set; }=string.Empty;
+        public string UserName { get; set; }=string.Empty;
         
-        [Required]
-        public string LastName { get; set; }=string.Empty;
     }
 
     public class LoginRequest

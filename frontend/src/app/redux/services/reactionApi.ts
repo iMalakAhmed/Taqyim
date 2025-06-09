@@ -18,6 +18,7 @@ export const reactionApi = createApi({
       return headers;
     },
   }),
+  tagTypes: ["Reaction"],
   endpoints: (builder) => ({
     reactToReview: builder.mutation<ReactionType | null, CreateReactionType>({
       query: (body) => ({
@@ -25,8 +26,25 @@ export const reactionApi = createApi({
         method: "POST",
         body,
       }),
+      invalidatesTags: [{ type: "Reaction", id: "LIST" }],
+    }),
+    getUserReactionForReview: builder.query<ReactionType | null, number>({
+      query: (reviewId) => `/reaction/review/${reviewId}/user`,
+      providesTags: [{ type: "Reaction", id: "LIST" }],
+    }),
+
+    deleteReaction: builder.mutation<void, number>({
+      query: (id) => ({
+        url: `/reaction/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: [{ type: "Reaction", id: "LIST" }],
     }),
   }),
 });
 
-export const { useReactToReviewMutation } = reactionApi;
+export const {
+  useReactToReviewMutation,
+  useGetUserReactionForReviewQuery,
+  useDeleteReactionMutation,
+} = reactionApi;

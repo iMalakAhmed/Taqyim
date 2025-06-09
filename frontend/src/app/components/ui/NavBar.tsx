@@ -3,11 +3,17 @@
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
 import { usePathname } from "next/navigation";
-import { IconUser } from "@tabler/icons-react";
-import { useDispatch } from 'react-redux';
+import {
+  IconBellRinging2,
+  IconMail,
+  IconUser,
+  IconUserCircle,
+} from "@tabler/icons-react";
+import { useDispatch } from "react-redux";
 import { useGetCurrentUserQuery, authApi } from "../../redux/services/authApi";
 import { useRouter } from "next/navigation";
 import { removeAuthCookie } from "../../actions/auth";
+import Button from "./Button";
 
 export default function NavBar() {
   const pathname = usePathname();
@@ -27,7 +33,7 @@ export default function NavBar() {
       console.error("Error calling signout API:", err);
       // Continue with client-side signout even if API call fails
     }
-    
+
     await removeAuthCookie(); // Remove the cookie
     // Invalidate RTK Query cache related to the user
     dispatch(authApi.util.resetApiState());
@@ -36,7 +42,7 @@ export default function NavBar() {
 
   return (
     <div
-      className={`top-0 w-full z-[999] bg-background h-24 ${
+      className={`top-0 w-full z-[999] bg-background h-24 text-text ${
         isFixed ? "fixed" : "relative"
       }`}
     >
@@ -59,27 +65,44 @@ export default function NavBar() {
         <div className="flex items-center space-x-4">
           {!isLoading && user && (
             <>
-              <Link
-                href="/profile"
-                className="text-text hover:text-accent flex items-center space-x-2"
-              >
-                <IconUser size={24} />
-                <span>{user.firstName}</span>
-              </Link>
-              <button
-                onClick={handleSignOut}
-                className="text-red-500 hover:text-red-700 cursor-pointer"
-              >
-                Sign Out
-              </button>
+              <div className="relative group inline-block">
+                <Link
+                  href="/profile"
+                  className="text-text hover:text-secondary flex items-center space-x-2"
+                >
+                  <IconUserCircle size={24} />
+                  <span>{user.userName}</span>
+                </Link>
+
+                <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-32 bg-background border shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-opacity duration-200 z-10 rounded">
+                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-background border-l border-t rotate-45"></div>
+
+                  <button
+                    onClick={handleSignOut}
+                    className="block w-full px-4 py-2 text-text hover:text-accent cursor-pointer rounded text-center"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+
+              <Button variant="none" size="sm" className="hover:text-secondary">
+                <IconBellRinging2 />
+              </Button>
+              <Button variant="none" size="sm" className="hover:text-secondary">
+                <IconMail />
+              </Button>
+              <ThemeToggle />
             </>
           )}
-          {!isLoading && !user && !error && (
-            <Link href="/auth/login" className="text-text hover:text-accent">
-              Login
-            </Link>
+          {!isLoading && !user && (
+            <div className="flex flex-row items-center gap-x-5">
+              <Link href="/auth/login" className="text-text hover:text-accent">
+                Login
+              </Link>
+              <ThemeToggle />
+            </div>
           )}
-          <ThemeToggle />
         </div>
       </div>
     </div>

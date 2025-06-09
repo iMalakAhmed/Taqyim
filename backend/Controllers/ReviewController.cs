@@ -27,6 +27,7 @@ public class ReviewController : ControllerBase
         var query = _context.Reviews
             .Include(r => r.User)
             .Include(r => r.Business)
+            .Include(r => r.Product)
             .Include(r => r.Comments)
                 .ThenInclude(c => c.Commenter)
             .Include(r => r.Reactions)
@@ -43,6 +44,7 @@ public class ReviewController : ControllerBase
         var reviews = await query
             .Select(r => new ReviewDTO
             {
+                ProductId = r.ProductId,
                 ReviewId = r.ReviewId,
                 UserId = r.UserId,
                 BusinessId = r.BusinessId,
@@ -53,8 +55,7 @@ public class ReviewController : ControllerBase
                 {
                     UserId = r.User.UserId,
                     Email = r.User.Email,
-                    FirstName = r.User.FirstName,
-                    LastName = r.User.LastName,
+                    UserName = r.User.UserName,
                     Type = r.User.Type,
                     IsVerified = r.User.IsVerified,
                     ProfilePic = r.User.ProfilePic,
@@ -68,7 +69,6 @@ public class ReviewController : ControllerBase
                     Name = r.Business.Name,
                     Category = r.Business.Category,
                     Description = r.Business.Description,
-                    Location = r.Business.Location,
                     CreatedAt = r.Business.CreatedAt,
                     BusinessLocations = new List<BusinessLocationDTO>()
                 },
@@ -83,8 +83,7 @@ public class ReviewController : ControllerBase
                     {
                         UserId = c.Commenter.UserId,
                         Email = c.Commenter.Email,
-                        FirstName = c.Commenter.FirstName,
-                        LastName = c.Commenter.LastName,
+                        UserName = c.Commenter.UserName,
                         Type = c.Commenter.Type,
                         IsVerified = c.Commenter.IsVerified,
                         ProfilePic = c.Commenter.ProfilePic,
@@ -104,8 +103,7 @@ public class ReviewController : ControllerBase
                     {
                         UserId = re.User.UserId,
                         Email = re.User.Email,
-                        FirstName = re.User.FirstName,
-                        LastName = re.User.LastName,
+                        UserName = re.User.UserName,
                         Type = re.User.Type,
                         IsVerified = re.User.IsVerified,
                         ProfilePic = re.User.ProfilePic,
@@ -119,7 +117,15 @@ public class ReviewController : ControllerBase
                     TagId = t.TagId,
                     TagType = t.TagType,
                     ReviewId = t.ReviewId
-                }).ToList()
+                }).ToList(),
+                Product = r.Product == null ? null : new ProductDTO
+                {
+                    ProductId = r.Product.ProductId,
+                    Name = r.Product.Name,
+                    Description = r.Product.Description,
+                    IsDeleted = r.Product.IsDeleted,
+                    BusinessId = r.Product.BusinessId??0
+                },
             })
             .ToListAsync();
 
@@ -132,6 +138,7 @@ public class ReviewController : ControllerBase
     {
         var review = await _context.Reviews
             .Include(r => r.User)
+            .Include(r => r.Product)
             .Include(r => r.Business)
             .Include(r => r.Comments)
                 .ThenInclude(c => c.Commenter)
@@ -145,6 +152,7 @@ public class ReviewController : ControllerBase
 
         return new ReviewDTO
         {
+            ProductId = review.ProductId,
             ReviewId = review.ReviewId,
             UserId = review.UserId,
             BusinessId = review.BusinessId,
@@ -155,8 +163,7 @@ public class ReviewController : ControllerBase
             {
                 UserId = review.User.UserId,
                 Email = review.User.Email,
-                FirstName = review.User.FirstName,
-                LastName = review.User.LastName,
+                UserName = review.User.UserName,
                 Type = review.User.Type,
                 IsVerified = review.User.IsVerified,
                 ProfilePic = review.User.ProfilePic,
@@ -170,7 +177,6 @@ public class ReviewController : ControllerBase
                 Name = review.Business.Name,
                 Category = review.Business.Category,
                 Description = review.Business.Description,
-                Location = review.Business.Location,
                 CreatedAt = review.Business.CreatedAt,
                 BusinessLocations = new List<BusinessLocationDTO>()
             },
@@ -185,8 +191,7 @@ public class ReviewController : ControllerBase
                 {
                     UserId = c.Commenter.UserId,
                     Email = c.Commenter.Email,
-                    FirstName = c.Commenter.FirstName,
-                    LastName = c.Commenter.LastName,
+                    UserName = c.Commenter.UserName,
                     Type = c.Commenter.Type,
                     IsVerified = c.Commenter.IsVerified,
                     ProfilePic = c.Commenter.ProfilePic,
@@ -206,8 +211,7 @@ public class ReviewController : ControllerBase
                 {
                     UserId = re.User.UserId,
                     Email = re.User.Email,
-                    FirstName = re.User.FirstName,
-                    LastName = re.User.LastName,
+                    UserName = re.User.UserName,
                     Type = re.User.Type,
                     IsVerified = re.User.IsVerified,
                     ProfilePic = re.User.ProfilePic,
@@ -221,7 +225,15 @@ public class ReviewController : ControllerBase
                 TagId = t.TagId,
                 TagType = t.TagType,
                 ReviewId = t.ReviewId
-            }).ToList()
+            }).ToList(),
+            Product = review.Product == null ? null : new ProductDTO
+            {
+                ProductId = review.Product.ProductId,
+                Name = review.Product.Name,
+                Description = review.Product.Description,
+                IsDeleted = review.Product.IsDeleted,
+                BusinessId = review.Product.BusinessId??0
+            },
         };
     }
 
@@ -242,7 +254,8 @@ public class ReviewController : ControllerBase
             BusinessId = createReviewDTO.BusinessId,
             Rating = createReviewDTO.Rating,
             Comment = createReviewDTO.Comment,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            ProductId = createReviewDTO.ProductId,
         };
 
         _context.Reviews.Add(review);
@@ -355,8 +368,7 @@ public class ReviewController : ControllerBase
             {
                 UserId = createdComment.Commenter.UserId,
                 Email = createdComment.Commenter.Email,
-                FirstName = createdComment.Commenter.FirstName,
-                LastName = createdComment.Commenter.LastName,
+                UserName = createdComment.Commenter.UserName,
                 Type = createdComment.Commenter.Type,
                 IsVerified = createdComment.Commenter.IsVerified,
                 ProfilePic = createdComment.Commenter.ProfilePic,
@@ -420,8 +432,7 @@ public class ReviewController : ControllerBase
             {
                 UserId = createdReaction.User.UserId,
                 Email = createdReaction.User.Email,
-                FirstName = createdReaction.User.FirstName,
-                LastName = createdReaction.User.LastName,
+                UserName = createdReaction.User.UserName,
                 Type = createdReaction.User.Type,
                 IsVerified = createdReaction.User.IsVerified,
                 ProfilePic = createdReaction.User.ProfilePic,

@@ -2,9 +2,19 @@
 
 import { useState } from "react";
 import { useCreateReviewMutation } from "../redux/services/reviewApi";
+import MediaUpload from "./MediaUpload";
+import Button from "./ui/Button";
+import { IconX } from "@tabler/icons-react";
+import HorizontalLine from "./ui/HorizontalLine";
+import StarRating from "./ui/StarRating";
 
-export default function CreateReview() {
-  const [businessId, setBusinessId] = useState("");
+type CreateReviewProps = {
+  onCancel: () => void;
+};
+
+export default function CreateReview({ onCancel }: CreateReviewProps) {
+  const [businessId, setBusinessId] = useState<number | "">("");
+  const [productId, setProductId] = useState<number | "">("");
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [tags, setTags] = useState("");
@@ -14,7 +24,6 @@ export default function CreateReview() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Prepare tags array if tags input is filled
     const tagsArray = tags
       .split(",")
       .map((t) => t.trim())
@@ -28,6 +37,7 @@ export default function CreateReview() {
     try {
       await createReview({
         businessId: Number(businessId),
+        productId: productId ? Number(productId) : undefined,
         rating,
         comment,
         tags: tagsArray.length > 0 ? tagsArray : undefined,
@@ -35,97 +45,122 @@ export default function CreateReview() {
 
       // Reset form on success
       setBusinessId("");
+      setProductId("");
       setRating(5);
       setComment("");
       setTags("");
+      onCancel();
     } catch (err) {
       console.error("Failed to create review:", err);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded shadow-md">
-      <h2 className="text-2xl font-semibold mb-6">Create Review</h2>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="businessId" className="block font-medium mb-1">
-            Business ID <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="businessId"
-            type="number"
-            value={businessId}
-            onChange={(e) => setBusinessId(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-            min={1}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="rating" className="block font-medium mb-1">
-            Rating (1-5) <span className="text-red-500">*</span>
-          </label>
-          <input
-            id="rating"
-            type="number"
-            min={1}
-            max={5}
-            value={rating}
-            onChange={(e) => setRating(Number(e.target.value))}
-            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="comment" className="block font-medium mb-1">
-            Comment <span className="text-red-500">*</span>
-          </label>
-          <textarea
-            id="comment"
-            rows={4}
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-        </div>
-
-        <div>
-          <label htmlFor="tags" className="block font-medium mb-1">
-            Tags (comma separated)
-          </label>
-          <input
-            id="tags"
-            type="text"
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            placeholder="e.g. friendly, quick, clean"
-            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded disabled:opacity-50"
+    <div
+      className="fixed inset-0 flex justify-center items-center z-50 bg-black/30 backdrop-invert-25"
+      onClick={onCancel}
+    >
+      <div
+        className="bg-background shadow-lg p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto relative"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Button
+          onClick={onCancel}
+          aria-label="Close modal"
+          variant="none"
+          size="sm"
+          className="absolute top-2 right-2 hover:text-accent"
         >
-          {isLoading ? "Submitting..." : "Submit Review"}
-        </button>
-      </form>
+          <IconX />
+        </Button>
 
-      {isSuccess && (
-        <p className="mt-4 text-green-600 font-medium">
-          Review created successfully!
-        </p>
-      )}
-      {error && (
-        <p className="mt-4 text-red-600 font-medium">
-          Failed to create review. Please try again.
-        </p>
-      )}
+        <h2 className="text-xl font-semibold mb-2">Create Review</h2>
+        <HorizontalLine />
+
+        <form onSubmit={handleSubmit} className="space-y-3 text-base mt-3">
+          <div>
+            <label htmlFor="businessId" className="block font-medium mb-1">
+              Business ID <span className="text-accent">*</span>
+            </label>
+            <input
+              id="businessId"
+              type="number"
+              value={businessId}
+              onChange={(e) =>
+                setBusinessId(
+                  e.target.value === "" ? "" : Number(e.target.value)
+                )
+              }
+              className="w-full px-2 py-1 focus:outline-none"
+              required
+              min={1}
+            />
+            <HorizontalLine />
+          </div>
+
+          <div>
+            <label htmlFor="productId" className="block font-medium mb-1">
+              Product ID (optional)
+            </label>
+            <input
+              id="productId"
+              type="number"
+              value={productId}
+              onChange={(e) =>
+                setProductId(
+                  e.target.value === "" ? "" : Number(e.target.value)
+                )
+              }
+              className="w-full px-2 py-1 focus:outline-none"
+              min={1}
+            />
+            <HorizontalLine />
+          </div>
+
+          <div>
+            <label className="block font-medium mb-1">
+              Rating (1–5) <span className="text-accent">*</span>
+            </label>
+            <StarRating rating={rating} onChange={setRating} />
+            <HorizontalLine className="mt-3" />
+          </div>
+
+          <div>
+            <label htmlFor="comment" className="block font-medium mb-1">
+              Comment <span className="text-red-500">*</span>
+            </label>
+            <textarea
+              id="comment"
+              rows={2}
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              className="w-full px-2 py-1 focus:outline-none resize-none"
+              required
+            />
+            <HorizontalLine />
+          </div>
+
+          <Button
+            type="submit"
+            disabled={isLoading}
+            variant="primary"
+            size="md"
+          >
+            {isLoading ? "Submitting..." : "Submit Review"}
+          </Button>
+        </form>
+
+        {isSuccess && (
+          <p className="mt-3 text-secondary font-medium text-sm">
+            Review created successfully!
+          </p>
+        )}
+        {error && (
+          <p className="mt-3 text-accent font-medium text-sm">
+            Failed to create review. Please try again.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
