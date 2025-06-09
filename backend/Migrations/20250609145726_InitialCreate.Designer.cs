@@ -12,8 +12,8 @@ using Taqyim.Api.Data;
 namespace Taqyim.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250609174229_Init")]
-    partial class Init
+    [Migration("20250609145726_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

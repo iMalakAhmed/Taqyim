@@ -17,17 +17,12 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
   const [productId, setProductId] = useState<number | "">("");
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
-  const [tags, setTags] = useState("");
+  const [uploadedMediaIds, setUploadedMediaIds] = useState<number[]>([]);
   const [createReview, { isLoading, error, isSuccess }] =
     useCreateReviewMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const tagsArray = tags
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
 
     if (!businessId || !rating || !comment) {
       alert("Please fill in all required fields.");
@@ -40,7 +35,7 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
         productId: productId ? Number(productId) : undefined,
         rating,
         comment,
-        tags: tagsArray.length > 0 ? tagsArray : undefined,
+        mediaIds: uploadedMediaIds.length > 0 ? uploadedMediaIds : undefined,
       }).unwrap();
 
       // Reset form on success
@@ -48,7 +43,7 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
       setProductId("");
       setRating(5);
       setComment("");
-      setTags("");
+      setUploadedMediaIds([]);
       onCancel();
     } catch (err) {
       console.error("Failed to create review:", err);
@@ -57,7 +52,7 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
 
   return (
     <div
-      className="fixed inset-0 flex justify-center items-center z-999 bg-black/30 backdrop-invert-25"
+      className="fixed inset-0 flex justify-center items-center z-[9999] bg-black/30 backdrop-invert-25"
       onClick={onCancel}
     >
       <div
@@ -137,6 +132,21 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
               className="w-full px-2 py-1 focus:outline-none resize-none"
               required
             />
+            <HorizontalLine />
+          </div>
+
+          <div>
+            <label className="block font-medium mb-1">Upload Media</label>
+            <MediaUpload
+              onUploadSuccess={(mediaId) =>
+                setUploadedMediaIds((prev) => [...prev, mediaId])
+              }
+            />
+            {uploadedMediaIds.length > 0 && (
+              <p className="text-sm mt-2 text-secondary">
+                Uploaded Media IDs: {uploadedMediaIds.join(", ")}
+              </p>
+            )}
             <HorizontalLine />
           </div>
 

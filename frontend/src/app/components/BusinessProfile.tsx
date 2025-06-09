@@ -20,11 +20,14 @@ import { IconEdit, IconShare, IconTrash } from "@tabler/icons-react";
 import MapView from './ui/MapView';
 
 const BusinessProfile = () => {
-  const businessId = 1;
+  const params = useParams();
+  const businessId = Number(params?.id);
   const router = useRouter();
 
   // 🔄 All hooks come first (no conditionals above)
-  const { data: business, isLoading, error, refetch } = useGetBusinessByIdQuery(businessId);
+  const { data: business, isLoading, error, refetch } = useGetBusinessByIdQuery(businessId, {
+    skip: !businessId || isNaN(businessId),
+  });
   const { data: currentUser } = useGetCurrentUserQuery();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteBusiness] = useDeleteBusinessMutation();
@@ -48,8 +51,13 @@ const BusinessProfile = () => {
   }, [followers, currentUser]);
 
   // ✅ Only return after all hooks are declared
-  if (isLoading || !business || !currentUser) {
+  if (isLoading) {
     return <div>Loading...</div>;
+  }
+  if (error || !business) {
+    // Redirect to a 404 page or display an error message if business not found
+    router.replace('/404'); // Or a custom not-found page
+    return null;
   }
 
   const handleDelete = async () => {
@@ -119,10 +127,6 @@ const BusinessProfile = () => {
           {/* ✅ Only show Edit/Delete if user can edit */}
           {canEdit && (
             <>
-              <Button onClick={() => setIsModalOpen(true)} variant="primary" className="mr-3 p-6">
-                <IconEdit stroke={2} /> Edit Business
-              </Button>
-
               <Button variant="primary" className="ml-2 p-6" onClick={handleDelete}>
                 <IconTrash stroke={2} /> Delete Business
               </Button>
@@ -136,6 +140,11 @@ const BusinessProfile = () => {
           >
             <IconShare stroke={2} /> Share profile
           </CopyToClipboardButton>
+          {canEdit && (
+            <Button onClick={() => router.push("/createBusiness")} variant="primary" className="ml-2 p-6">
+              <IconEdit stroke={2} /> Edit Business
+            </Button>
+          )}
         </div>
       </div>
 

@@ -20,9 +20,114 @@ public class ReviewController : ControllerBase
         _context = context;
     }
 
+    private static ReviewDTO MapReviewToDto(Review review)
+    {
+        return new ReviewDTO
+        {
+            ProductId = review.ProductId,
+            ReviewId = review.ReviewId,
+            UserId = review.UserId,
+            BusinessId = review.BusinessId,
+            Rating = review.Rating,
+            Comment = review.Comment,
+            CreatedAt = review.CreatedAt,
+            UpdatedAt = review.UpdatedAt,
+            User = review.User == null ? null : new UserDTO
+            {
+                UserId = review.User.UserId,
+                Email = review.User.Email,
+                UserName = review.User.UserName,
+                Type = review.User.Type,
+                IsVerified = review.User.IsVerified,
+                ProfilePic = review.User.ProfilePic,
+                Bio = review.User.Bio,
+                CreatedAt = review.User.CreatedAt,
+                ReputationPoints = review.User.ReputationPoints
+            },
+            Business = review.Business == null ? null : new BusinessDTO
+            {
+                BusinessId = review.Business.BusinessId,
+                Name = review.Business.Name,
+                Category = review.Business.Category,
+                Description = review.Business.Description,
+                CreatedAt = review.Business.CreatedAt,
+                BusinessLocations = new List<BusinessLocationDTO>()
+            },
+            Comments = review.Comments?.Select(c => new CommentDTO
+            {
+                CommentId = c.CommentId,
+                CommenterId = c.CommenterId,
+                ReviewId = c.ReviewId,
+                Content = c.Content,
+                CreatedAt = c.CreatedAt ?? DateTime.UtcNow,
+                Commenter = c.Commenter == null ? null : new UserDTO
+                {
+                    UserId = c.Commenter.UserId,
+                    Email = c.Commenter.Email,
+                    UserName = c.Commenter.UserName,
+                    Type = c.Commenter.Type,
+                    IsVerified = c.Commenter.IsVerified,
+                    ProfilePic = c.Commenter.ProfilePic,
+                    Bio = c.Commenter.Bio,
+                    CreatedAt = c.Commenter.CreatedAt,
+                    ReputationPoints = c.Commenter.ReputationPoints
+                }
+            }).ToList() ?? new List<CommentDTO>(),
+            Reactions = review.Reactions?.Select(re => new ReactionDTO
+            {
+                ReactionId = re.ReactionId,
+                ReviewId = re.ReviewId,
+                UserId = re.UserId,
+                ReactionType = re.ReactionType ?? string.Empty,
+                CreatedAt = re.CreatedAt ?? DateTime.UtcNow,
+                User = re.User == null ? null : new UserDTO
+                {
+                    UserId = re.User.UserId,
+                    Email = re.User.Email,
+                    UserName = re.User.UserName,
+                    Type = re.User.Type,
+                    IsVerified = re.User.IsVerified,
+                    ProfilePic = re.User.ProfilePic,
+                    Bio = re.User.Bio,
+                    CreatedAt = re.User.CreatedAt,
+                    ReputationPoints = re.User.ReputationPoints
+                }
+            }).ToList() ?? new List<ReactionDTO>(),
+            Tags = review.Tags?.Select(t => new TagDTO
+            {
+                TagId = t.TagId,
+                TagType = t.TagType,
+                ReviewId = t.ReviewId
+            }).ToList() ?? new List<TagDTO>(),
+            Product = review.Product == null ? null : new ProductDTO
+            {
+                ProductId = review.Product.ProductId,
+                Name = review.Product.Name,
+                Description = review.Product.Description,
+                IsDeleted = review.Product.IsDeleted,
+                BusinessId = review.Product.BusinessId ?? 0
+            },
+            Media = review.Media?.Select(m => new MediaDTO
+            {
+                MediaId = m.MediaId,
+                UserId = m.UserId,
+                FileName = m.FileName,
+                FilePath = m.FilePath,
+                FileType = m.FileType,
+                FileSize = m.FileSize,
+                UploadedAt = m.UploadedAt,
+                ReviewId = m.ReviewId
+            }).ToList() ?? new List<MediaDTO>()
+        };
+    }
+
     // GET: /api/review
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ReviewDTO>>> GetReviews([FromQuery] int? businessId, [FromQuery] int? userId)
+    public async Task<ActionResult<IEnumerable<ReviewDTO>>> GetReviews(
+        [FromQuery] int? businessId, 
+        [FromQuery] int? userId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
     {
         var query = _context.Reviews
             .Include(r => r.User)
@@ -33,6 +138,7 @@ public class ReviewController : ControllerBase
             .Include(r => r.Reactions)
                 .ThenInclude(re => re.User)
             .Include(r => r.Tags)
+            .Include(r => r.Media)
             .AsQueryable();
 
         if (businessId.HasValue)
@@ -42,94 +148,13 @@ public class ReviewController : ControllerBase
             query = query.Where(r => r.UserId == userId.Value);
 
         var reviews = await query
-            .Select(r => new ReviewDTO
-            {
-                ProductId = r.ProductId,
-                ReviewId = r.ReviewId,
-                UserId = r.UserId,
-                BusinessId = r.BusinessId,
-                Rating = r.Rating,
-                Comment = r.Comment,
-                CreatedAt = r.CreatedAt,
-                User = new UserDTO
-                {
-                    UserId = r.User.UserId,
-                    Email = r.User.Email,
-                    UserName = r.User.UserName,
-                    Type = r.User.Type,
-                    IsVerified = r.User.IsVerified,
-                    ProfilePic = r.User.ProfilePic,
-                    Bio = r.User.Bio,
-                    CreatedAt = r.User.CreatedAt,
-                    ReputationPoints = r.User.ReputationPoints
-                },
-                Business = new BusinessDTO
-                {
-                    BusinessId = r.Business.BusinessId,
-                    Name = r.Business.Name,
-                    Category = r.Business.Category,
-                    Description = r.Business.Description,
-                    CreatedAt = r.Business.CreatedAt,
-                    BusinessLocations = new List<BusinessLocationDTO>()
-                },
-                Comments = r.Comments.Select(c => new CommentDTO
-                {
-                    CommentId = c.CommentId,
-                    CommenterId = c.CommenterId,
-                    ReviewId = c.ReviewId,
-                    Content = c.Content,
-                    CreatedAt = c.CreatedAt ?? DateTime.UtcNow,
-                    Commenter = new UserDTO
-                    {
-                        UserId = c.Commenter.UserId,
-                        Email = c.Commenter.Email,
-                        UserName = c.Commenter.UserName,
-                        Type = c.Commenter.Type,
-                        IsVerified = c.Commenter.IsVerified,
-                        ProfilePic = c.Commenter.ProfilePic,
-                        Bio = c.Commenter.Bio,
-                        CreatedAt = c.Commenter.CreatedAt,
-                        ReputationPoints = c.Commenter.ReputationPoints
-                    }
-                }).ToList(),
-                Reactions = r.Reactions.Select(re => new ReactionDTO
-                {
-                    ReactionId = re.ReactionId,
-                    ReviewId = re.ReviewId,
-                    UserId = re.UserId,
-                    ReactionType = re.ReactionType ?? string.Empty,
-                    CreatedAt = re.CreatedAt ?? DateTime.UtcNow,
-                    User = new UserDTO
-                    {
-                        UserId = re.User.UserId,
-                        Email = re.User.Email,
-                        UserName = re.User.UserName,
-                        Type = re.User.Type,
-                        IsVerified = re.User.IsVerified,
-                        ProfilePic = re.User.ProfilePic,
-                        Bio = re.User.Bio,
-                        CreatedAt = re.User.CreatedAt,
-                        ReputationPoints = re.User.ReputationPoints
-                    }
-                }).ToList(),
-                Tags = r.Tags.Select(t => new TagDTO
-                {
-                    TagId = t.TagId,
-                    TagType = t.TagType,
-                    ReviewId = t.ReviewId
-                }).ToList(),
-                Product = r.Product == null ? null : new ProductDTO
-                {
-                    ProductId = r.Product.ProductId,
-                    Name = r.Product.Name,
-                    Description = r.Product.Description,
-                    IsDeleted = r.Product.IsDeleted,
-                    BusinessId = r.Product.BusinessId??0
-                },
-            })
+            .OrderByDescending(r => r.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(r => MapReviewToDto(r))
             .ToListAsync();
 
-        return reviews;
+        return Ok(reviews);
     }
 
     // GET: /api/review/{id}
@@ -145,96 +170,13 @@ public class ReviewController : ControllerBase
             .Include(r => r.Reactions)
                 .ThenInclude(re => re.User)
             .Include(r => r.Tags)
+            .Include(r => r.Media)
             .FirstOrDefaultAsync(r => r.ReviewId == id);
 
         if (review == null)
             return NotFound();
 
-        return new ReviewDTO
-        {
-            ProductId = review.ProductId,
-            ReviewId = review.ReviewId,
-            UserId = review.UserId,
-            BusinessId = review.BusinessId,
-            Rating = review.Rating,
-            Comment = review.Comment,
-            CreatedAt = review.CreatedAt,
-            User = new UserDTO
-            {
-                UserId = review.User.UserId,
-                Email = review.User.Email,
-                UserName = review.User.UserName,
-                Type = review.User.Type,
-                IsVerified = review.User.IsVerified,
-                ProfilePic = review.User.ProfilePic,
-                Bio = review.User.Bio,
-                CreatedAt = review.User.CreatedAt,
-                ReputationPoints = review.User.ReputationPoints
-            },
-            Business = new BusinessDTO
-            {
-                BusinessId = review.Business.BusinessId,
-                Name = review.Business.Name,
-                Category = review.Business.Category,
-                Description = review.Business.Description,
-                CreatedAt = review.Business.CreatedAt,
-                BusinessLocations = new List<BusinessLocationDTO>()
-            },
-            Comments = review.Comments.Select(c => new CommentDTO
-            {
-                CommentId = c.CommentId,
-                CommenterId = c.CommenterId,
-                ReviewId = c.ReviewId,
-                Content = c.Content,
-                CreatedAt = c.CreatedAt ?? DateTime.UtcNow,
-                Commenter = new UserDTO
-                {
-                    UserId = c.Commenter.UserId,
-                    Email = c.Commenter.Email,
-                    UserName = c.Commenter.UserName,
-                    Type = c.Commenter.Type,
-                    IsVerified = c.Commenter.IsVerified,
-                    ProfilePic = c.Commenter.ProfilePic,
-                    Bio = c.Commenter.Bio,
-                    CreatedAt = c.Commenter.CreatedAt,
-                    ReputationPoints = c.Commenter.ReputationPoints
-                }
-            }).ToList(),
-            Reactions = review.Reactions.Select(re => new ReactionDTO
-            {
-                ReactionId = re.ReactionId,
-                ReviewId = re.ReviewId,
-                UserId = re.UserId,
-                ReactionType = re.ReactionType ?? string.Empty,
-                CreatedAt = re.CreatedAt ?? DateTime.UtcNow,
-                User = new UserDTO
-                {
-                    UserId = re.User.UserId,
-                    Email = re.User.Email,
-                    UserName = re.User.UserName,
-                    Type = re.User.Type,
-                    IsVerified = re.User.IsVerified,
-                    ProfilePic = re.User.ProfilePic,
-                    Bio = re.User.Bio,
-                    CreatedAt = re.User.CreatedAt,
-                    ReputationPoints = re.User.ReputationPoints
-                }
-            }).ToList(),
-            Tags = review.Tags.Select(t => new TagDTO
-            {
-                TagId = t.TagId,
-                TagType = t.TagType,
-                ReviewId = t.ReviewId
-            }).ToList(),
-            Product = review.Product == null ? null : new ProductDTO
-            {
-                ProductId = review.Product.ProductId,
-                Name = review.Product.Name,
-                Description = review.Product.Description,
-                IsDeleted = review.Product.IsDeleted,
-                BusinessId = review.Product.BusinessId??0
-            },
-        };
+        return Ok(MapReviewToDto(review));
     }
 
     // POST: /api/review
@@ -293,6 +235,7 @@ public class ReviewController : ControllerBase
 
         review.Rating = updateReviewDTO.Rating;
         review.Comment = updateReviewDTO.Comment;
+        review.UpdatedAt = DateTime.UtcNow;
 
         if (updateReviewDTO.Tags != null)
         {
@@ -357,7 +300,7 @@ public class ReviewController : ControllerBase
             .Include(c => c.Commenter)
             .FirstOrDefaultAsync(c => c.CommentId == comment.CommentId);
 
-        return new CommentDTO
+        return Ok(new CommentDTO
         {
             CommentId = createdComment!.CommentId,
             CommenterId = createdComment.CommenterId,
@@ -376,7 +319,7 @@ public class ReviewController : ControllerBase
                 CreatedAt = createdComment.Commenter.CreatedAt,
                 ReputationPoints = createdComment.Commenter.ReputationPoints
             }
-        };
+        });
     }
 
     // POST: /api/review/{id}/reaction
@@ -421,7 +364,7 @@ public class ReviewController : ControllerBase
             .Include(r => r.User)
             .FirstOrDefaultAsync(r => r.ReviewId == id && r.UserId == userId);
 
-        return new ReactionDTO
+        return Ok(new ReactionDTO
         {
             ReactionId = createdReaction!.ReactionId,
             ReviewId = createdReaction.ReviewId,
@@ -440,6 +383,6 @@ public class ReviewController : ControllerBase
                 CreatedAt = createdReaction.User.CreatedAt,
                 ReputationPoints = createdReaction.User.ReputationPoints
             }
-        };
+        });
     }
-} 
+}

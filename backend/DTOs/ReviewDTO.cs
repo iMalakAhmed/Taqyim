@@ -23,7 +23,8 @@ public class ReviewDTO
     public ICollection<CommentDTO> Comments { get; set; } = new List<CommentDTO>();
     public ICollection<ReactionDTO> Reactions { get; set; } = new List<ReactionDTO>();
     public ICollection<TagDTO> Tags { get; set; } = new List<TagDTO>();
-    public ICollection<ReviewImageDTO> Images { get; set; } = new List<ReviewImageDTO>();
+    public ICollection<MediaDTO> Media { get; set; } = new List<MediaDTO>();
+
 }
 
 public class CreateReviewDTO
@@ -40,6 +41,9 @@ public class CreateReviewDTO
 
     public List<string>? Tags { get; set; }
     public int? ProductId { get; set; }
+
+    public ICollection<MediaDTO> Media { get; set; } = new List<MediaDTO>();
+
 }
 
 public class UpdateReviewDTO
@@ -52,6 +56,9 @@ public class UpdateReviewDTO
     public string Comment { get; set; } = string.Empty;
 
     public List<string>? Tags { get; set; }
+
+    public ICollection<MediaDTO> Media { get; set; } = new List<MediaDTO>();
+
 }
 
 public class CommentDTO

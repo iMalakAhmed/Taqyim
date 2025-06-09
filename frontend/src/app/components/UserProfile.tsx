@@ -134,14 +134,6 @@ const UserProfile = () => {
         {/* Username and Follow button */}
         <div className="flex items-center justify-between">
           <h2 className="text-3xl font-heading font-bold">{user.userName}</h2>
-          {!isSelf && currentUser && (
-            <FollowButton
-              followingId={user.userId}
-              followingType="User"
-              className="ml-2"
-              onToggle={refetchFollowers}
-            />
-          )}
         </div>
 
         {/* Counts: followers, following, reviews */}
@@ -150,38 +142,69 @@ const UserProfile = () => {
           <p>{followings?.length ?? 0} following</p>
           <p>{user.reviews?.length ?? 0} reviews</p>
         </div>
-
-        {/* Buttons: Edit, Share, Delete */}
         <div className="flex flex-row flex-wrap items-center mt-4 space-x-2">
-          {isSelf && (
-            <Button
-              onClick={() => setIsModalOpen(true)}
-              variant="primary"
-              size="sm"
-              className="flex items-center space-x-1"
-            >
-              <IconEdit stroke={2} />
-              <span>Edit profile</span>
-            </Button>
+          {/* Show Follow if NOT self */}
+          {!isSelf && currentUser && (
+            <FollowButton
+              followingId={user.userId}
+              followingType="User"
+              onToggle={refetchFollowers}
+            />
           )}
 
+          {/* Show Edit and Delete if self */}
           {isSelf && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center space-x-1"
-              onClick={handleDelete}
-            >
-              <IconTrash stroke={2} />
-              <span>Delete profile</span>
-            </Button>
+            <>
+              <Button
+                onClick={() => setIsModalOpen(true)}
+                variant="primary"
+                size="sm"
+                className="flex items-center space-x-1"
+              >
+                <IconEdit stroke={2} />
+                <span>Edit profile</span>
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center space-x-1"
+                onClick={handleDelete}
+              >
+                <IconTrash stroke={2} />
+                <span>Delete profile</span>
+              </Button>
+            </>
           )}
+
+          {/* Always show Share */}
           <CopyToClipboardButton
             copyText={`https://localhost:3000/profile/${user.userId}`}
-            className="hover:cursor-pointer"
+            className="hover:cursor-pointer relative"
           >
             <IconShare stroke={2} className="hover:text-primary" />
           </CopyToClipboardButton>
+
+
+          {isSelf && user.type === "BusinessOwner" && user.usersBusinesses && user.usersBusinesses.length > 0 && (
+            <Button
+              onClick={() => router.push(`/Business/${user.usersBusinesses[0].BusinessId}`)}
+              variant="primary"
+              className="ml-2 p-6"
+            >
+              <IconEdit stroke={2} /> View Business Profile
+            </Button>
+          )}
+          {isSelf && (
+            <Button
+              variant="primary"
+              className="ml-2 p-6"
+              onClick={handleDelete}
+            >
+              <IconTrash stroke={2} /> Delete profile
+            </Button>
+          )}
+
         </div>
 
         {/* Bio */}

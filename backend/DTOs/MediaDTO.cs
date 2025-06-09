@@ -13,10 +13,14 @@ public class MediaDTO
     public long FileSize { get; set; }
     public DateTime UploadedAt { get; set; }
     public UserDTO User { get; set; } = null!;
+
+     public int? ReviewId { get; set; }
 }
 
 public class CreateMediaDTO
 {
     [Required]
     public IFormFile File { get; set; } = null!;
+
+     public int? ReviewId { get; set; }
 } 
