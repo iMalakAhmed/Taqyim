@@ -57,6 +57,13 @@ export interface ConnectionType {
   connectedUser: UserType;
 }
 
+export interface ProductType {
+  productId: number;
+  businessId: number;
+  name: string;
+  description?: string | null;
+}
+
 export interface BusinessLocationCreateType {
   locationId?: number;
   address?: string | null;
@@ -86,14 +93,14 @@ export interface BusinessLocationType {
 export interface BusinessCreateType {
   name: string;
   location?: string | null;
-  category?: string | null;
+  category?: string[] | null;
   description?: string | null;
   logo?: string | null;
 }
 
 export interface BusinessUpdateType {
   name?: string | null;
-  category?: string | null;
+  category?: string[] | null;
   description?: string | null;
   logo?: string | null;
 }
@@ -102,16 +109,17 @@ export interface BusinessType {
   businessId: number;
   userId: number;
   name: string;
-  category: string;
+  category: string[];
   description: string;
   logo?: string | null;
   location?: string | null;
   createdAt: string;
   isVerified: boolean;
   verifiedByUserId?: number | null;
-  user: UserType;
+  owner: UserType;
   verifiedByUser?: UserType | null;
   businessLocations: BusinessLocationType[];
+  products?: ProductType[] | null;
 }
 
 export interface ReviewType {
