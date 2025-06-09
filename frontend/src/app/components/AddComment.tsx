@@ -38,9 +38,9 @@ export default function AddComment({
   };
 
   return (
-    <div className="mt-4 p-4 bg-background rounded">
+    <div className="mt-4 p-4 bg-background">
       <textarea
-        className="w-full p-2 resize-none text-sm border rounded"
+        className="w-full p-2 resize-none text-sm border hover:outline-none outline-none"
         placeholder={
           parentCommentId ? "Add your reply..." : "Add your comment..."
         }

@@ -83,7 +83,7 @@ export default function CommentCard({ reviewId, comment }: CommentProps) {
           {!deleted && (
             <>
               <strong className="text-gray-900">
-                {comment.commenter.UserName}
+                {comment.commenter.userName}
               </strong>{" "}
               <span className="text-gray-500 text-xs ml-2">
                 {new Date(comment.createdAt).toLocaleString()}
