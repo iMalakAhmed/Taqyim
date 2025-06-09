@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Taqyim.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class FixBusinessProductRelation : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -113,39 +113,6 @@ namespace Taqyim.Api.Migrations
                         principalTable: "Users",
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.SetNull);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Connections",
-                columns: table => new
-                {
-                    ConnectionId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    FollowerId = table.Column<int>(type: "int", nullable: false),
-                    FollowingId = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Connections", x => x.ConnectionId);
-                    table.ForeignKey(
-                        name: "FK_Connections_Users_FollowerId",
-                        column: x => x.FollowerId,
-                        principalTable: "Users",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Connections_Users_FollowingId",
-                        column: x => x.FollowingId,
-                        principalTable: "Users",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Connections_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "UserId");
                 });
 
             migrationBuilder.CreateTable(
@@ -308,6 +275,55 @@ namespace Taqyim.Api.Migrations
                         principalTable: "Businesses",
                         principalColumn: "BusinessId",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Connections",
+                columns: table => new
+                {
+                    ConnectionId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FollowerId = table.Column<int>(type: "int", nullable: true),
+                    FollowingId = table.Column<int>(type: "int", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    FollowerType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FollowingType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    BusinessFollowingId = table.Column<int>(type: "int", nullable: true),
+                    BusinessFollowerId = table.Column<int>(type: "int", nullable: true),
+                    UserId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Connections", x => x.ConnectionId);
+                    table.ForeignKey(
+                        name: "FK_Connections_Businesses_BusinessFollowerId",
+                        column: x => x.BusinessFollowerId,
+                        principalTable: "Businesses",
+                        principalColumn: "BusinessId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Connections_Businesses_BusinessFollowingId",
+                        column: x => x.BusinessFollowingId,
+                        principalTable: "Businesses",
+                        principalColumn: "BusinessId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Connections_Users_FollowerId",
+                        column: x => x.FollowerId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Connections_Users_FollowingId",
+                        column: x => x.FollowingId,
+                        principalTable: "Users",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Connections_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId");
                 });
 
             migrationBuilder.CreateTable(
@@ -575,6 +591,16 @@ namespace Taqyim.Api.Migrations
                 name: "IX_Comments_ReviewId",
                 table: "Comments",
                 column: "ReviewId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Connections_BusinessFollowerId",
+                table: "Connections",
+                column: "BusinessFollowerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Connections_BusinessFollowingId",
+                table: "Connections",
+                column: "BusinessFollowingId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Connections_FollowerId",

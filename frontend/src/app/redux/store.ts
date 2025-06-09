@@ -8,6 +8,7 @@ import { reviewApi } from "./services/reviewApi";
 import { reactionApi } from "./services/reactionApi";
 import { mediaApi } from "./services/mediaApi";
 import { commentApi } from "./services/commentApi";
+import { connectionApi } from "./services/connectionApi";
 import reactionCounterReducer from "./slices/reactionCounterSlice";
 import commentCounterReducer from "./slices/commentCounterSlice";
 import commentReactionCounterReducer from "./slices/commentReactionCounterSlice";
@@ -25,6 +26,7 @@ export const store = configureStore({
     [mediaApi.reducerPath]: mediaApi.reducer,
     [commentApi.reducerPath]: commentApi.reducer,
     [commentReactionApi.reducerPath]: commentReactionApi.reducer,
+    [connectionApi.reducerPath]: connectionApi.reducer,
     auth: authReducer,
     user: userReducer,
     business: businessReducer,
@@ -42,7 +44,8 @@ export const store = configureStore({
       reactionApi.middleware,
       mediaApi.middleware,
       commentApi.middleware,
-      commentReactionApi.middleware
+      commentReactionApi.middleware,
+      connectionApi.middleware
     ),
 });
 
