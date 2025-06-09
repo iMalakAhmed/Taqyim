@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./redux/provider";
 import NavBar from "./components/ui/NavBar";
+import 'leaflet/dist/leaflet.css';
 
 export const metadata: Metadata = {
   title: "Taqyim",
