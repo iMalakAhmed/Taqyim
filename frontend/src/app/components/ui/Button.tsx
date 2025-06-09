@@ -4,7 +4,7 @@ type ButtonProps = {
   children: React.ReactNode;
   variant?: "primary" | "secondary" | "outline" | "none";
   size?: "sm" | "md" | "lg" | "xl";
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   className?: string;
   disabled?: boolean;
   type?: "button" | "submit";
