@@ -20,7 +20,7 @@ public class MessageController : ControllerBase
     }
 
     // GET: /api/message/conversations
-    // [Authorize]
+    [Authorize]
     [HttpGet("conversations")]
     public async Task<ActionResult<IEnumerable<ConversationDTO>>> GetConversations()
     {
@@ -76,7 +76,7 @@ public class MessageController : ControllerBase
     }
 
     // GET: /api/message/conversations/{id}
-    //[Authorize]
+    [Authorize]
     [HttpGet("conversations/{id}")]
     public async Task<ActionResult<ConversationDTO>> GetConversation(int id)
     {
@@ -133,7 +133,7 @@ public class MessageController : ControllerBase
     }
 
     // POST: /api/message/conversations
-    //[Authorize]
+    [Authorize]
     [HttpPost("conversations")]
     public async Task<ActionResult<ConversationDTO>> CreateConversation(CreateConversationDTO createConversationDTO)
     {
@@ -161,7 +161,7 @@ public class MessageController : ControllerBase
     }
 
     // PUT: /api/message/conversations/{id}
-    //[Authorize]
+    [Authorize]
     [HttpPut("conversations/{id}")]
     public async Task<IActionResult> UpdateConversation(int id, UpdateConversationDTO updateConversationDTO)
     {
@@ -213,7 +213,7 @@ public class MessageController : ControllerBase
   }
 
     // POST: /api/message
-    //[Authorize]
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<MessageDTO>> SendMessage(CreateMessageDTO createMessageDTO)
     {

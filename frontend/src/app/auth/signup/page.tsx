@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authApi } from '../../utils/api';
 import { useRegisterMutation, useLoginMutation, useGetCurrentUserQuery } from '../../redux/services/authApi';
-import UserTypeSelection from './UserTypeSelection';
+import UserTypeSelection from '../../../components/UserTypeSelection';
 import { motion } from 'framer-motion';
 
 export default function SignupPage() {

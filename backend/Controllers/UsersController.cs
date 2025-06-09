@@ -63,7 +63,7 @@ namespace Taqyim.Api.Controllers
         }
 
         // GET: /api/users/{id}
-        [Authorize]
+        //[Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDTO>> GetUser(int id)
         {
@@ -156,7 +156,7 @@ namespace Taqyim.Api.Controllers
         }
 
         // GET: /api/users/me
-        [Authorize]
+        //[Authorize]
         [HttpGet("me")]
         public async Task<ActionResult<UserDTO>> GetCurrentUser()
         {
