@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./redux/provider";
 import NavBar from "./components/ui/NavBar";
+import "leaflet/dist/leaflet.css";
 import SideNav from "./components/ui/SideNav";
 import HorizontalLine from "./components/ui/HorizontalLine";
 

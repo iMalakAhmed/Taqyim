@@ -19,6 +19,7 @@ export const authApi = createApi({
     baseUrl: API_BASE_URL,
     credentials: "include",
   }),
+  tagTypes: ["Auth"],
   endpoints: (builder) => ({
     login: builder.mutation<AuthResponse, LoginCredentials>({
       query: (credentials) => ({

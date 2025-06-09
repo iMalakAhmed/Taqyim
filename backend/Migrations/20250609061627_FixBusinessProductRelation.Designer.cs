@@ -12,8 +12,8 @@ using Taqyim.Api.Data;
 namespace Taqyim.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250608202257_Init")]
-    partial class Init
+    [Migration("20250609061627_FixBusinessProductRelation")]
+    partial class FixBusinessProductRelation
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -226,19 +226,37 @@ namespace Taqyim.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ConnectionId"));
 
+                    b.Property<int?>("BusinessFollowerId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("BusinessFollowingId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("FollowerId")
+                    b.Property<int?>("FollowerId")
                         .HasColumnType("int");
 
-                    b.Property<int>("FollowingId")
+                    b.Property<string>("FollowerType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("FollowingId")
                         .HasColumnType("int");
+
+                    b.Property<string>("FollowingType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("ConnectionId");
+
+                    b.HasIndex("BusinessFollowerId");
+
+                    b.HasIndex("BusinessFollowingId");
 
                     b.HasIndex("FollowerId");
 
@@ -735,21 +753,33 @@ namespace Taqyim.Api.Migrations
 
             modelBuilder.Entity("Taqyim.Api.Models.Connection", b =>
                 {
-                    b.HasOne("Taqyim.Api.Models.User", "Follower")
+                    b.HasOne("Taqyim.Api.Models.Business", "BusinessFollower")
+                        .WithMany("ConnectionFollowings")
+                        .HasForeignKey("BusinessFollowerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Taqyim.Api.Models.Business", "BusinessFollowing")
                         .WithMany("ConnectionFollowers")
+                        .HasForeignKey("BusinessFollowingId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Taqyim.Api.Models.User", "Follower")
+                        .WithMany("ConnectionFollowings")
                         .HasForeignKey("FollowerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Taqyim.Api.Models.User", "Following")
-                        .WithMany("ConnectionFollowings")
+                        .WithMany("ConnectionFollowers")
                         .HasForeignKey("FollowingId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Taqyim.Api.Models.User", null)
                         .WithMany("Connections")
                         .HasForeignKey("UserId");
+
+                    b.Navigation("BusinessFollower");
+
+                    b.Navigation("BusinessFollowing");
 
                     b.Navigation("Follower");
 
@@ -946,6 +976,10 @@ namespace Taqyim.Api.Migrations
             modelBuilder.Entity("Taqyim.Api.Models.Business", b =>
                 {
                     b.Navigation("BusinessLocations");
+
+                    b.Navigation("ConnectionFollowers");
+
+                    b.Navigation("ConnectionFollowings");
 
                     b.Navigation("Products");
 

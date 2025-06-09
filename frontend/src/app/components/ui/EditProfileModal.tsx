@@ -17,12 +17,7 @@ interface Props {
   };
 }
 
-const EditProfileModal: React.FC<Props> = ({
-  isOpen,
-  onClose,
-  onSave,
-  initialData,
-}) => {
+const EditProfileModal: React.FC<Props> = ({ isOpen, onClose, onSave, initialData }) => {
   const [userName, setUserName] = useState(initialData.userName);
   const [bio, setBio] = useState(initialData.bio || "");
   const [profilePic, setProfilePic] = useState(initialData.profilePic || "");
@@ -41,7 +36,7 @@ const EditProfileModal: React.FC<Props> = ({
 
         <input
           type="text"
-          placeholder="First Name"
+          placeholder="User Name"
           value={userName}
           onChange={(e) => setUserName(e.target.value)}
           className="w-full mb-3 p-2 border rounded"
