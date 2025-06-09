@@ -24,10 +24,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { setReactionCount } from "@/app/redux/slices/reactionCounterSlice";
 import { setCommentCount } from "@/app/redux/slices/commentCounterSlice";
 import { RootState } from "../../redux/store";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import StarRating from "./StarRating";
 import Link from "next/link";
 import CopyToClipboardButton from "./ShareButton";
+import { formatTimestamp } from "./FormatTimeStamp";
 
 type ReviewCardProps = {
   reviewId: number;
@@ -37,6 +38,7 @@ const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
 
 export default function ReviewCard({ reviewId }: ReviewCardProps) {
   const router = useRouter();
+  const pathname = usePathname();
 
   const {
     data: user,
@@ -63,7 +65,6 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
   const [deleteReview, { isLoading: isDeleting }] = useDeleteReviewMutation();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [showAddComment, setShowAddComment] = useState(false);
 
   const [rating, setRating] = useState<number>(review?.rating || 0);
   const [comment, setComment] = useState<string>(review?.comment || "");
@@ -80,6 +81,9 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
   const handleReviewDelete = async () => {
     try {
       await deleteReview(reviewId).unwrap();
+      if (pathname.startsWith("/reviews/")) {
+        router.push("/home");
+      }
     } catch (error) {
       console.error("Failed to delete review", error);
     }
@@ -106,14 +110,14 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
     >
       <div className="flex flex-row items-center">
         <Link
-          href={`/profile?id=${review.user.userId}`}
+          href={`/profile/${review.user.userId}`}
           className="flex flex-row items-center"
           onClick={(e) => {
             stopPropagation(e);
           }}
         >
           <Image
-            src="/default-profile.jpg"
+            src={review.user.profilePic || "/default-profile.jpg"}
             width={80}
             height={80}
             alt="user profile"
@@ -123,14 +127,8 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
             <h1 className="font-heading font-bold text-xl">
               {review.user.userName}
             </h1>
-            <span className="text-xs text-text font-inter">
-              {new Date(review.createdAt)
-                .toLocaleDateString("en-UK", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                })
-                .toUpperCase()}
+            <span className="text-xs text-text font-body">
+              {formatTimestamp(review.createdAt)}
             </span>
           </div>
         </Link>
@@ -139,18 +137,6 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
           <div className="flex gap-2 ml-auto">
             {isEditing ? (
               <>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={(e) => {
-                    stopPropagation(e);
-                    setIsEditing(false);
-                    setRating(review.rating);
-                    setComment(review.comment);
-                  }}
-                >
-                  Cancel
-                </Button>
                 <Button
                   size="sm"
                   variant="primary"
@@ -163,9 +149,32 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
                 >
                   {isUpdating ? "Saving..." : "Save"}
                 </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={(e) => {
+                    stopPropagation(e);
+                    setIsEditing(false);
+                    setRating(review.rating);
+                    setComment(review.comment);
+                  }}
+                >
+                  Cancel
+                </Button>
               </>
             ) : (
               <>
+                <Button
+                  size="sm"
+                  variant="none"
+                  className="hover:text-primary"
+                  onClick={(e) => {
+                    stopPropagation(e);
+                    setIsEditing(true);
+                  }}
+                >
+                  <IconEdit size={20} />
+                </Button>
                 <Button
                   size="sm"
                   variant="none"
@@ -181,17 +190,6 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
                   ) : (
                     <IconTrash size={20} />
                   )}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="none"
-                  className="hover:text-primary"
-                  onClick={(e) => {
-                    stopPropagation(e);
-                    setIsEditing(true);
-                  }}
-                >
-                  <IconEdit size={20} />
                 </Button>
               </>
             )}
@@ -260,7 +258,7 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
         <HorizontalLine />
       </div>
 
-      <div className="flex flex-row items-center justify-between">
+      <div className="flex flex-row items-center justify-between pb-2">
         <div
           className="flex flex-row items-center gap-x-2"
           onClick={(e) => {
@@ -271,6 +269,7 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
             reviewId={reviewId}
             reactionCount={review.reactions.length}
           />
+
           <Button
             variant="none"
             size="sm"
@@ -286,7 +285,7 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
           <CopyToClipboardButton
             copyText={`https://localhost:3000/reviews/${reviewId}`}
           >
-            <IconShare3 size={20} />
+            <IconShare3 size={20} className="hover:text-secondary" />
           </CopyToClipboardButton>
         </div>
         <div className="flex flex-row items-center font-body text-sm gap-2">

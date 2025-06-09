@@ -31,7 +31,7 @@ export default function CopyToClipboardButton({
   return (
     <button
       onClick={handleCopy}
-      className={`relative ${className ?? ""}`}
+      className={` ${className ?? ""}`}
       type="button"
       aria-label="Copy URL"
     >
