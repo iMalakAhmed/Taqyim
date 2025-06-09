@@ -13,6 +13,7 @@ import commentCounterReducer from "./slices/commentCounterSlice";
 import commentReactionCounterReducer from "./slices/commentReactionCounterSlice";
 import { commentReactionApi } from "./services/commentReactionApi";
 import replyCounterReducer from "./slices/replyCounterSlice";
+import authReducer from "./slices/authSlice";
 
 export const store = configureStore({
   reducer: {
@@ -24,6 +25,7 @@ export const store = configureStore({
     [mediaApi.reducerPath]: mediaApi.reducer,
     [commentApi.reducerPath]: commentApi.reducer,
     [commentReactionApi.reducerPath]: commentReactionApi.reducer,
+    auth: authReducer,
     user: userReducer,
     business: businessReducer,
     reactionCounter: reactionCounterReducer,

@@ -9,13 +9,14 @@ import {
 } from "../redux/services/reactionApi";
 import Button from "./ui/Button"; // adjust path if needed
 import clsx from "clsx";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   setReactionCount,
   incrementReactionCount,
   decrementReactionCount,
 } from "./../redux/slices/reactionCounterSlice";
 import { reactionsList } from "../utils/reactionList";
+import { RootState } from "../redux/store";
 
 export default function ReactionButtons({
   reviewId,
@@ -24,8 +25,17 @@ export default function ReactionButtons({
   reviewId: number;
   reactionCount: number;
 }) {
-  const { data: reactionData, isLoading: isReactionLoading } =
-    useGetUserReactionForReviewQuery(reviewId);
+  const userId = useSelector((state: RootState) => state.auth.userId);
+  const {
+    data: reactionData,
+    isLoading: isReactionLoading,
+    refetch,
+  } = useGetUserReactionForReviewQuery(reviewId);
+
+  useEffect(() => {
+    refetch();
+    setSelectedReaction(null);
+  }, [userId, refetch]);
 
   const [selectedReaction, setSelectedReaction] = useState<string | null>(null);
   const [reactToReview, { isLoading: isReacting }] = useReactToReviewMutation();
