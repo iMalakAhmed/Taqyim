@@ -13,14 +13,16 @@ type ButtonProps = {
 };
 
 const baseStyles =
-  "inline-flex items-center justify-center rounded-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2  font-body";
+  "inline-flex items-center justify-center rounded-sm transition-colors duration-200 focus:outline-none  font-body";
 
 const variants = {
-  primary: "text-white bg-primary hover:bg-accent/90",
-  secondary: "text-white bg-secondary hover:bg-accent/90 focus:ring-accent",
+  primary:
+    "text-white bg-primary hover:bg-accent/90 focus:ring-2 focus:ring-offset-2 ",
+  secondary:
+    "text-white bg-secondary hover:bg-accent/90 focus:ring-accent focus:ring-2 focus:ring-offset-2 ",
   outline:
-    "border border-accent text-accent hover:bg-accent hover:text-white bg-transparent focus:ring-accent text-accent",
-  none: "bg-transparent ",
+    "border border-accent text-accent hover:bg-accent hover:text-white bg-transparent focus:ring-accent text-accent focus:ring-2 focus:ring-offset-2 ",
+  none: "bg-transparent focus:ring-0 focus:outline-none",
 };
 
 const sizes = {

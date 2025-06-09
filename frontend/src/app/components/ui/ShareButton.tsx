@@ -31,13 +31,13 @@ export default function CopyToClipboardButton({
   return (
     <button
       onClick={handleCopy}
-      className={`relative ${className ?? ""}`}
+      className={`relative  ${className ?? ""}`}
       type="button"
       aria-label="Copy URL"
     >
       {children}
       {copySuccess && (
-        <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs rounded px-2 py-1 select-none pointer-events-none">
+        <span className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-text text-background text-xs rounded px-2 py-1 select-none pointer-events-none z-50 transition-opacity duration-300 opacity-100">
           Copied!
         </span>
       )}

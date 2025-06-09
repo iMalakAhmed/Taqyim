@@ -31,7 +31,7 @@ public class SavedController : ControllerBase
             .Include(s => s.Review)
                 .ThenInclude(r => r!.Business)
             .Include(s => s.Review)
-                .ThenInclude(r => r!.ReviewImages)
+    
             .Where(s => s.UserId == userId);
 
         if (includeDetails)
@@ -81,15 +81,6 @@ public class SavedController : ControllerBase
                     CreatedAt = s.Review.Business.CreatedAt,
                     BusinessLocations = new List<BusinessLocationDTO>()
                 },
-                Images = s.Review.ReviewImages.Select(i => new ReviewImageDTO
-                {
-                    ReviewImageId = i.ReviewImageId,
-                    ReviewId = i.ReviewId,
-                    ImageUrl = i.ImageUrl,
-                    Caption = i.Caption,
-                    CreatedAt = i.CreatedAt,
-                    Order = i.Order
-                }).ToList(),
                 Comments = includeDetails ? s.Review.Comments.Select(c => new CommentDTO
                 {
                     CommentId = c.CommentId,

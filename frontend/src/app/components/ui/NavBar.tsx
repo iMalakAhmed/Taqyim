@@ -22,9 +22,16 @@ export default function NavBar() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const { data: user, isLoading, isError } = useGetCurrentUserQuery(undefined, {
+
+  const {
+    data: user,
+    isLoading,
+    refetch,
+  } = useGetCurrentUserQuery(undefined, {
+    pollingInterval: 1000, // Optional auto-refresh
     refetchOnMountOrArgChange: true,
   });
+
 
   // Temporarily commented out for debugging signup redirect issue
   // React.useEffect(() => {
@@ -33,7 +40,6 @@ export default function NavBar() {
   //     router.push("/auth/login");
   //   }
   // }, [isError, isLoading, router]);
-
   const handleSignOut = async () => {
     try {
       // Call the backend signout API
@@ -59,9 +65,15 @@ export default function NavBar() {
       }`}
     >
       <div className="mx-24 flex flex-row justify-between items-center h-full">
-        <Link href="/">
-          <h1 className="font-heading text-text">TAQYIM</h1>
-        </Link>
+        {user ? (
+          <Link href="/home">
+            <h1 className="font-heading text-text">TAQYIM</h1>
+          </Link>
+        ) : (
+          <Link href="/">
+            <h1 className="font-heading text-text">TAQYIM</h1>
+          </Link>
+        )}
 
         <input />
 
@@ -79,7 +91,7 @@ export default function NavBar() {
             <>
               <div className="relative group inline-block">
                 <Link
-                  href="/profile"
+                  href={`/profile/${user.userId}`}
                   className="text-text hover:text-secondary flex items-center space-x-2"
                 >
                   <IconUserCircle size={24} />

@@ -40,6 +40,9 @@ export interface UserType {
   bio?: string | null;
   createdAt: string;
   reputationPoints: number;
+  reviews: ReviewType[];
+  ConnectionFollowers?: UserType[];
+  ConnectionFollowings?: UserType[];
 }
 
 export interface UpdateUserType {
@@ -118,6 +121,7 @@ export interface ReviewType {
   reviewId: number;
   userId: number;
   businessId: number;
+  productId?: number;
   rating: number;
   comment: string;
   createdAt: string;
@@ -128,14 +132,17 @@ export interface ReviewType {
   comments: CommentType[];
   reactions: ReactionType[];
   tags: TagType[];
-  images: ReviewImageType[];
+  mediaIds?: number[];
+  media?: MediaType[];
 }
 
 export interface CreateReviewType {
   businessId: number;
+  productId?: number;
   rating: number;
   comment: string;
   tags?: string[] | null;
+  mediaIds?: number[];
 }
 
 export interface UpdateReviewType {
@@ -195,18 +202,10 @@ export interface TagType {
   reviewId: number;
 }
 
-export interface ReviewImageType {
-  reviewImageId: number;
-  reviewId: number;
-  imageUrl: string;
-  caption?: string | null;
-  createdAt: string;
-  order: number;
-}
-
 export interface MediaType {
   mediaId: number;
   userId: number;
+  reviewId?: number;
   fileName: string;
   filePath: string;
   fileType: string;
