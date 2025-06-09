@@ -5,21 +5,30 @@ namespace Taqyim.Api.Models;
 
 public class Connection
 {
-    [Key]
+
     public int ConnectionId { get; set; }
 
-    [Required]
-    public int FollowerId { get; set; }
 
-    [Required]
-    public int FollowingId { get; set; }
+    public int? FollowerId { get; set; }
 
-    [Required]
-    public DateTime CreatedAt { get; set; }
 
-    [ForeignKey("FollowerId")]
+    public int? FollowingId { get; set; }
+
     public User? Follower { get; set; }
 
-    [ForeignKey("FollowingId")]
     public User? Following { get; set; }
+
+
+    public DateTime CreatedAt { get; set; }
+
+    public string FollowerType { get; set; } = "User";     // "User" or "Business"
+    public string FollowingType { get; set; } = "User";    // "User" or "Business"
+
+
+    public int? BusinessFollowingId { get; set; }
+    public Business? BusinessFollowing { get; set; } = null!;
+
+    public int? BusinessFollowerId { get; set; }
+    public Business? BusinessFollower { get; set; } = null!;
+
 }

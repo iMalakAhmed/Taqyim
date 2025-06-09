@@ -33,5 +33,9 @@ namespace Taqyim.Api.DTOs
         public required ICollection<string> Category { get; set; }
         public required ICollection<BusinessLocationDTO> BusinessLocations { get; set; }
         public ICollection<ProductDTO> Products { get; set; } = new List<ProductDTO>();
+        public virtual ICollection<ConnectionDTO>? ConnectionFollowers { get; set; } = new List<ConnectionDTO>();
+        public virtual ICollection<ConnectionDTO> ConnectionFollowings { get; set; } = new List<ConnectionDTO>();
+        public int FollowerCount { get; set; }
+        public int FollowingCount { get; set; }
     }
 }

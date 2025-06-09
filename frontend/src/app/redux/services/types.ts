@@ -48,6 +48,17 @@ export interface UpdateUserType {
   profilePic?: string | null;
 }
 
+export interface ConnectionType
+{
+    connectionId: number; 
+    userId: number;
+    connectedUserId : number;
+    createdAt: string;
+    user : UserType;
+    connectedUser: UserType;
+}
+
+
 export interface BusinessLocationCreateType {
   locationId?: number;
   address?: string | null;
@@ -188,3 +199,5 @@ export interface MediaType {
   uploadedAt: string;
   user: UserType;
 }
+
+

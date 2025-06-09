@@ -20,118 +20,249 @@ public class ConnectionController : ControllerBase
     }
 
     [Authorize]
-    [HttpPost("follow/{userId}")]
-    public async Task<IActionResult> FollowUser(int userId)
+    [HttpPost("follow")]
+    public async Task<IActionResult> Follow([FromBody] FollowRequest request)
     {
         var followerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        
-        if (followerId == userId)
-            return BadRequest("You cannot follow yourself");
 
-        var existingConnection = await _context.Connections
-            .FirstOrDefaultAsync(c => c.FollowerId == followerId && c.FollowingId == userId);
+        // Try to find if the follower is a user
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == followerId && u.Type != "Deleted");
+        var business = await _context.Businesses.FirstOrDefaultAsync(b => b.Owner.UserId == followerId && !b.IsDeleted);
+
+        string followerType;
+        int? businessFollowerId = null;
+        int? userFollowerId = null;
+
+        if (user != null)
+        {
+            followerType = "User";
+            userFollowerId = followerId;
+        }
+        else if (business != null)
+        {
+            followerType = "Business";
+            businessFollowerId = business.BusinessId;
+        }
+        else
+        {
+            return Forbid("Unable to identify follower.");
+        }
+
+        // Prevent following oneself
+        if ((request.FollowingType == followerType) &&
+            ((request.FollowingType == "User" && request.FollowingId == followerId) ||
+            (request.FollowingType == "Business" && businessFollowerId == request.FollowingId)))
+        {
+            return BadRequest("You cannot follow yourself.");
+        }
+
+        // Check for existing connection
+        var existingConnection = await _context.Connections.FirstOrDefaultAsync(c =>
+            c.FollowerType == followerType &&
+            c.FollowingType == request.FollowingType &&
+            c.FollowerId == userFollowerId &&
+            c.BusinessFollowerId == businessFollowerId &&
+            c.FollowingId == (request.FollowingType == "User" || request.FollowingType == "Admin" || request.FollowingType == "Moderator" || request.FollowingType == "BusinessOwner"? request.FollowingId : null)
+            && c.BusinessFollowingId == (request.FollowingType == "Business" ? request.FollowingId : null)
+
+        );
 
         if (existingConnection != null)
-            return BadRequest("You are already following this user");
+        {
+            return BadRequest("You are already following this entity.");
+        }
 
         var connection = new Connection
         {
-            FollowerId = followerId,
-            FollowingId = userId,
-            CreatedAt = DateTime.UtcNow
+            FollowerType = followerType,
+            FollowingType = request.FollowingType,
+            CreatedAt = DateTime.UtcNow,
+            FollowerId = userFollowerId,
+            BusinessFollowerId = businessFollowerId,
+            FollowingId = request.FollowingType == "User" ? request.FollowingId : null,
+            BusinessFollowingId = request.FollowingType == "Business" ? request.FollowingId : null
         };
 
         _context.Connections.Add(connection);
         await _context.SaveChangesAsync();
 
-        return Ok(new { message = "User followed successfully" });
+        return Ok(new { message = "Followed successfully" });
     }
 
     [Authorize]
-    [HttpDelete("unfollow/{userId}")]
-    public async Task<IActionResult> UnfollowUser(int userId)
+    [HttpPost("unfollow")]
+    public async Task<IActionResult> Unfollow([FromBody] FollowRequest request)
     {
         var followerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        
+
+        // Normalize type input
+        var normalizedType = request.FollowingType.Trim().ToLower() switch
+        {
+            "user" => "User",
+            "business" => "Business",
+            _ => null
+        };
+
+        if (normalizedType == null)
+            return BadRequest("Invalid following type.");
+
         var connection = await _context.Connections
-            .FirstOrDefaultAsync(c => c.FollowerId == followerId && c.FollowingId == userId);
+            .FirstOrDefaultAsync(c =>
+                c.FollowerId == followerId &&
+                c.FollowingType == normalizedType &&
+                c.FollowingId == (normalizedType == "User" ? request.FollowingId : null) &&
+                c.BusinessFollowingId == (normalizedType == "Business" ? request.FollowingId : null)
+            );
 
         if (connection == null)
-            return NotFound("Connection not found");
+            return NotFound("Connection not found.");
 
         _context.Connections.Remove(connection);
         await _context.SaveChangesAsync();
 
-        return Ok(new { message = "User unfollowed successfully" });
+        return Ok(new { message = "Unfollowed successfully" });
     }
 
-    [HttpGet("followers/{userId}")]
-    public async Task<ActionResult<IEnumerable<ConnectionDTO>>> GetFollowers(int userId)
+
+    [HttpGet("followers/{entityId}")]
+    public async Task<ActionResult<IEnumerable<ConnectionDTO>>> GetFollowers(int entityId, [FromQuery] string type)
     {
         var connections = await _context.Connections
-            .Where(c => c.FollowingId == userId)
-            .Include(c => c.Follower)
-            .Select(c => new ConnectionDTO
-            {
-                ConnectionId = c.ConnectionId,
-                UserId = c.FollowerId,
-                ConnectedUserId = c.FollowingId,
-                CreatedAt = c.CreatedAt,
-                User = new UserDTO
-                {
-                    UserId = c.Follower.UserId,
-                    Email = c.Follower.Email,
-                    UserName = c.Follower.UserName,
-                    Type = c.Follower.Type,
-                    IsVerified = c.Follower.IsVerified,
-                    ProfilePic = c.Follower.ProfilePic,
-                    Bio = c.Follower.Bio,
-                    CreatedAt = c.Follower.CreatedAt,
-                    ReputationPoints = c.Follower.ReputationPoints
-                },
-                ConnectedUser = new UserDTO
-                {
-                    UserId = c.FollowingId,
-                    // Only ID is set for following, as navigation property is not needed here
-                }
-            })
+            .Where(c => c.FollowingId == entityId && c.FollowingType == type)
             .ToListAsync();
 
-        return connections;
+        var result = new List<ConnectionDTO>();
+
+        foreach (var conn in connections)
+        {
+            var dto = new ConnectionDTO
+            {
+                ConnectionId = conn.ConnectionId,
+                UserId = conn.FollowerId??0,
+                ConnectedUserId = conn.FollowingId??0,
+                CreatedAt = conn.CreatedAt,
+                FollowerType = conn.FollowerType,
+                FollowingType = conn.FollowingType
+            };
+
+            if (conn.FollowerType == "User")
+            {
+                var user = await _context.Users.FindAsync(conn.FollowerId);
+                if (user != null)
+                {
+                    dto.User = new UserDTO
+                    {
+                        UserId = user.UserId,
+                        Email = user.Email,
+                        UserName = user.UserName,
+                        Type = user.Type,
+                        IsVerified = user.IsVerified,
+                        ProfilePic = user.ProfilePic,
+                        Bio = user.Bio,
+                        CreatedAt = user.CreatedAt,
+                        ReputationPoints = user.ReputationPoints
+                    };
+                }
+            }
+            else if (conn.FollowerType == "Business")
+            {
+                var business = await _context.Businesses.FindAsync(conn.FollowerId);
+                if (business != null)
+                {
+                    dto.UserBusiness = new BusinessDTO
+                    {
+                        BusinessId = business.BusinessId,
+                        Name = business.Name,
+                        Description = business.Description,
+                        Category = business.Category,
+                        CreatedAt = business.CreatedAt,
+                        BusinessLocations = business.BusinessLocations.Select(bl => new BusinessLocationDTO
+                        {
+                            LocationId = bl.LocationId,
+                            Label = bl.Label,
+                            Address = bl.Address,
+                            Latitude = (double?)bl.Latitude,
+                            Longitude = (double?)bl.Longitude,
+                            CreatedAt = bl.CreatedAt ?? DateTime.UtcNow
+                        }).ToList()
+                    };
+                }
+            }
+
+            result.Add(dto);
+        }
+
+        return Ok(result);
     }
 
-    [HttpGet("following/{userId}")]
-    public async Task<ActionResult<IEnumerable<ConnectionDTO>>> GetFollowing(int userId)
+    [HttpGet("following/{entityId}")]
+    public async Task<ActionResult<IEnumerable<ConnectionDTO>>> GetFollowing(int entityId, [FromQuery] string type)
     {
         var connections = await _context.Connections
-            .Where(c => c.FollowerId == userId)
-            .Include(c => c.Following)
-            .Select(c => new ConnectionDTO
-            {
-                ConnectionId = c.ConnectionId,
-                UserId = c.FollowerId,
-                ConnectedUserId = c.FollowingId,
-                CreatedAt = c.CreatedAt,
-                User = new UserDTO
-                {
-                    UserId = c.FollowerId,
-                    // Only ID is set for follower, as navigation property is not needed here
-                },
-                ConnectedUser = new UserDTO
-                {
-                    UserId = c.Following.UserId,
-                    Email = c.Following.Email,
-                    UserName = c.Following.UserName,
-                    Type = c.Following.Type,
-                    IsVerified = c.Following.IsVerified,
-                    ProfilePic = c.Following.ProfilePic,
-                    Bio = c.Following.Bio,
-                    CreatedAt = c.Following.CreatedAt,
-                    ReputationPoints = c.Following.ReputationPoints
-                }
-            })
+            .Where(c => c.FollowerId == entityId && c.FollowerType == type)
             .ToListAsync();
 
-        return connections;
+        var result = new List<ConnectionDTO>();
+
+        foreach (var conn in connections)
+        {
+            var dto = new ConnectionDTO
+            {
+                ConnectionId = conn.ConnectionId,
+                UserId = conn.FollowerId??0,
+                ConnectedUserId = conn.FollowingId??0,
+                CreatedAt = conn.CreatedAt,
+                FollowerType = conn.FollowerType,
+                FollowingType = conn.FollowingType
+            };
+
+            if (conn.FollowingType == "User")
+            {
+                var user = await _context.Users.FindAsync(conn.FollowingId);
+                if (user != null)
+                {
+                    dto.ConnectedUser = new UserDTO
+                    {
+                        UserId = user.UserId,
+                        Email = user.Email,
+                        UserName = user.UserName,
+                        Type = user.Type,
+                        IsVerified = user.IsVerified,
+                        ProfilePic = user.ProfilePic,
+                        Bio = user.Bio,
+                        CreatedAt = user.CreatedAt,
+                        ReputationPoints = user.ReputationPoints
+                    };
+                }
+            }
+            else if (conn.FollowingType == "Business")
+            {
+                var business = await _context.Businesses.FindAsync(conn.FollowingId);
+                if (business != null)
+                {
+                    dto.connectedBusiness = new BusinessDTO
+                    {
+                        BusinessId = business.BusinessId,
+                        Name = business.Name,
+                        Description = business.Description,
+                        Category = business.Category,
+                        CreatedAt = business.CreatedAt,
+                        BusinessLocations = business.BusinessLocations.Select(bl => new BusinessLocationDTO
+                        {
+                            LocationId = bl.LocationId,
+                            Label = bl.Label,
+                            Address = bl.Address,
+                            Latitude = (double?)bl.Latitude,
+                            Longitude = (double?)bl.Longitude,
+                            CreatedAt = bl.CreatedAt ?? DateTime.UtcNow
+                        }).ToList()
+                    };
+                }
+            }
+
+            result.Add(dto);
+        }
+
+        return Ok(result);
     }
-} 
+}
