@@ -28,7 +28,7 @@ namespace Taqyim.Api.Controllers
         {
             if (await _context.Users.AnyAsync(u => u.Email == request.Email))
             {
-                return BadRequest("Email already exists");
+                return BadRequest(new { message = "Email already exists" });
             }
             var user = new User
             {
@@ -57,11 +57,12 @@ namespace Taqyim.Api.Controllers
         }
 
         [Authorize]
-        [HttpGet("me")]
+        [HttpGet("userinfo")]
         public async Task<IActionResult> GetCurrentUser()
         {
             var userId=int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
             var user = await _context.Users
+                .Include(u => u.UsersBusinesses)
                 .FirstOrDefaultAsync(u => u.UserId == userId);
             
             if (user==null)
@@ -72,7 +73,8 @@ namespace Taqyim.Api.Controllers
                 user.UserId,
                 user.Email,
                 user.UserName,
-                user.Type
+                user.Type,
+                UsersBusinesses = user.UsersBusinesses?.Select(b => new { b.BusinessId, b.Name }).ToList()
             });
         }
 

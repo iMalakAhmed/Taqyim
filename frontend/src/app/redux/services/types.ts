@@ -86,7 +86,7 @@ export interface BusinessLocationType {
 export interface BusinessCreateType {
   name: string;
   location?: string | null;
-  category?: string | null;
+  category?: string[] | null;
   description?: string | null;
   logo?: string | null;
 }
