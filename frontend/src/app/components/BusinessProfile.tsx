@@ -38,9 +38,10 @@ const BusinessProfile = () => {
     return (
       currentUser?.type === "Admin" ||
       currentUser?.type === "Moderator" ||
-      currentUser?.userId === business?.userId
+      currentUser?.userId === business?.owner?.userId
     );
   }, [currentUser, business]);
+    
 
   const isFollowing = useMemo(() => {
     return followers.some(
@@ -72,6 +73,7 @@ const BusinessProfile = () => {
       }
     }
   };
+
 
   return (
     <div className="w-full h-full flex flex-col text-text justify-center py-10 ml-16">
@@ -113,7 +115,8 @@ const BusinessProfile = () => {
           <EditBusinessModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
-            onSave={() => {
+            onSave={(data) => {
+              console.log("Saved:", data);
               setIsModalOpen(false);
               refetch();
             }}
@@ -148,7 +151,7 @@ const BusinessProfile = () => {
         </div>
       </div>
 
-      <div className="w-full max-w-5xl mt-6 mx-auto px-4">
+      <div className="w-full max-w-5xl mt-6 mx-auto px-4 z-0">
         <h2 className="font-heading font-bold text-xl mb-2">Business Locations</h2>
         <MapView locations={business.businessLocations} />
       </div>
