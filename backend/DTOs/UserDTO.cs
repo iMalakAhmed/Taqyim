@@ -18,6 +18,11 @@ public class UserDTO
     public int ReputationPoints { get; set; }
 
     public ICollection<Business> UsersBusinesses { get; set; } = new List<Business>();
+    public virtual ICollection<ConnectionDTO>? ConnectionFollowers { get; set; } = new List<ConnectionDTO>();
+    public virtual ICollection<ConnectionDTO> ConnectionFollowings { get; set; } = new List<ConnectionDTO>();
+    public int FollowerCount { get; set; }
+    public int FollowingCount { get; set; }
+
 }
 
 public class UpdateUserDto

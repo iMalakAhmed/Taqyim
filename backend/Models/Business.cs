@@ -16,11 +16,14 @@ public partial class Business
     public bool IsDeleted { get; set; }
     public string? Logo { get; set; }
     public int? UserId { get; set; }
-    public ICollection<string>? Category { get; set; }= new List<string>();
+    public ICollection<string>? Category { get; set; } = new List<string>();
     public virtual ICollection<BusinessLocation> BusinessLocations { get; set; } = new List<BusinessLocation>();
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
     public virtual User Owner { get; set; } = null!;
     public virtual User? VerifiedByUser { get; set; } = null!;
     public virtual ICollection<Product>? Products { get; set; } = new List<Product>();
+    public virtual ICollection<Connection>? ConnectionFollowers { get; set; } = new List<Connection>();
+    public virtual ICollection<Connection> ConnectionFollowings { get; set; } = new List<Connection>();
+
 }
 
