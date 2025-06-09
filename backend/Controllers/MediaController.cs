@@ -21,19 +21,12 @@ public class MediaController : ControllerBase
         _environment = environment;
     }
 
+    // GET: api/media
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<MediaDTO>>> GetMedia([FromQuery] int? userId)
+    public async Task<ActionResult<IEnumerable<MediaDTO>>> GetAllMedia()
     {
-        var query = _context.Media
+        var mediaList = await _context.Media
             .Include(m => m.User)
-            .AsQueryable();
-
-        if (userId.HasValue)
-        {
-            query = query.Where(m => m.UserId == userId);
-        }
-
-        var media = await query
             .Select(m => new MediaDTO
             {
                 MediaId = m.MediaId,
@@ -58,87 +51,79 @@ public class MediaController : ControllerBase
             })
             .ToListAsync();
 
-        return Ok(media);
+        return Ok(mediaList);
     }
 
+    // GET: api/media/{id}
     [HttpGet("{id}")]
     public async Task<ActionResult<MediaDTO>> GetMedia(int id)
     {
         var media = await _context.Media
             .Include(m => m.User)
-            .FirstOrDefaultAsync(m => m.MediaId == id);
+            .Where(m => m.MediaId == id)
+            .Select(m => new MediaDTO
+            {
+                MediaId = m.MediaId,
+                UserId = m.UserId,
+                FileName = m.FileName,
+                FilePath = m.FilePath,
+                FileType = m.FileType,
+                FileSize = m.FileSize,
+                UploadedAt = m.UploadedAt,
+                User = new UserDTO
+                {
+                    // TODO: Map User properties here
+                }
+            })
+            .FirstOrDefaultAsync();
 
         if (media == null)
-        {
             return NotFound();
-        }
 
-        var mediaDto = new MediaDTO
-        {
-            MediaId = media.MediaId,
-            UserId = media.UserId,
-            FileName = media.FileName,
-            FilePath = media.FilePath,
-            FileType = media.FileType,
-            FileSize = media.FileSize,
-            UploadedAt = media.UploadedAt,
-            User = new UserDTO
-            {
-                UserId = media.User.UserId,
-                Email = media.User.Email,
-                UserName = media.User.UserName,
-                Type = media.User.Type,
-                IsVerified = media.User.IsVerified,
-                ProfilePic = media.User.ProfilePic,
-                Bio = media.User.Bio,
-                CreatedAt = media.User.CreatedAt,
-                ReputationPoints = media.User.ReputationPoints
-            }
-        };
-
-        return Ok(mediaDto);
+        return Ok(media);
     }
 
-    [Authorize]
+    // POST: api/media
     [HttpPost]
-    public async Task<ActionResult<MediaDTO>> UploadMedia([FromForm] CreateMediaDTO createMediaDto)
+    [Authorize]
+    public async Task<ActionResult<MediaDTO>> CreateMedia([FromForm] CreateMediaDTO createMediaDto)
     {
-        var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
-        if (userId == 0)
-        {
+        if (createMediaDto.File == null || createMediaDto.File.Length == 0)
+            return BadRequest("No file uploaded.");
+
+        // Extract UserId from JWT claims
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
             return Unauthorized();
-        }
 
-        var file = createMediaDto.File;
-        if (file == null || file.Length == 0)
+        if (!int.TryParse(userIdClaim.Value, out int userId))
+            return Unauthorized();
+
+        // Prepare uploads folder
+        var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads");
+        if (!Directory.Exists(uploadsFolder))
+            Directory.CreateDirectory(uploadsFolder);
+
+        // Save file with unique filename
+        var uniqueFileName = Guid.NewGuid() + Path.GetExtension(createMediaDto.File.FileName);
+        var fullFilePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+        using (var stream = new FileStream(fullFilePath, FileMode.Create))
         {
-            return BadRequest("No file uploaded");
+            await createMediaDto.File.CopyToAsync(stream);
         }
 
-        // Create uploads directory if it doesn't exist
-        var uploadsDir = Path.Combine(_environment.WebRootPath, "uploads");
-        if (!Directory.Exists(uploadsDir))
-        {
-            Directory.CreateDirectory(uploadsDir);
-        }
-
-        // Generate unique filename
-        var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-        var filePath = Path.Combine(uploadsDir, fileName);
-
-        // Save file
-        using (var stream = new FileStream(filePath, FileMode.Create))
-        {
-            await file.CopyToAsync(stream);
-        }
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) return Unauthorized();
 
         var media = new Media
         {
-            User = await _context.Users.FindAsync(userId),
-            FileName = fileName,
-            FileType = file.ContentType,
-            FileSize = file.Length,
-            FilePath = $"/uploads/{fileName}",
+            UserId = userId,
+            User = user,
+            FileName = createMediaDto.File.FileName,
+            FilePath = "/uploads/" + uniqueFileName, 
+            FileType = createMediaDto.File.ContentType,
+            FileSize = createMediaDto.File.Length,
             UploadedAt = DateTime.UtcNow
         };
 
@@ -156,52 +141,42 @@ public class MediaController : ControllerBase
             UploadedAt = media.UploadedAt,
             User = new UserDTO
             {
-                UserId = userId,
-                Email = User.FindFirst("Email")?.Value ?? string.Empty,
-                UserName = User.FindFirst("UserName")?.Value ?? string.Empty,
-                Type = User.FindFirst("Type")?.Value ?? string.Empty,
-                IsVerified = bool.TryParse(User.FindFirst("IsVerified")?.Value, out var isVerified) && isVerified,
-                ProfilePic = User.FindFirst("ProfilePic")?.Value ?? string.Empty,
-                Bio = User.FindFirst("Bio")?.Value ?? string.Empty,
-                CreatedAt = DateTime.UtcNow,
-                ReputationPoints = 0 // Assuming default value
+               UserId = media.User.UserId,
+                Email = media.User.Email,
+                UserName = media.User.UserName,
+                Type = media.User.Type,
+                IsVerified = media.User.IsVerified,
+                ProfilePic = media.User.ProfilePic,
+                Bio = media.User.Bio,
+                CreatedAt = media.User.CreatedAt,
+                ReputationPoints = media.User.ReputationPoints
             }
         };
 
         return CreatedAtAction(nameof(GetMedia), new { id = media.MediaId }, mediaDto);
     }
 
-    [Authorize]
+    // DELETE: api/media/{id}
     [HttpDelete("{id}")]
+    [Authorize]
     public async Task<IActionResult> DeleteMedia(int id)
     {
-        var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
-        if (userId == 0)
-        {
-            return Unauthorized();
-        }
-
         var media = await _context.Media.FindAsync(id);
         if (media == null)
-        {
             return NotFound();
-        }
 
-        if (media.UserId != userId && !User.IsInRole("Admin"))
-        {
+        // Verify ownership before deletion
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId) || media.UserId != userId)
             return Forbid();
-        }
 
-        // Delete file from disk
-        var filePath = Path.Combine(_environment.WebRootPath, media.FilePath.TrimStart('/'));
-        if (System.IO.File.Exists(filePath))
-        {
-            System.IO.File.Delete(filePath);
-        }
+        var fullPath = Path.Combine(_environment.WebRootPath, media.FilePath.TrimStart('/'));
+        if (System.IO.File.Exists(fullPath))
+            System.IO.File.Delete(fullPath);
 
         _context.Media.Remove(media);
         await _context.SaveChangesAsync();
 
         return NoContent();
     }
-} 
+}
