@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
+import { useGetCurrentUserQuery } from "@/app/redux/services/authApi";
 import VerticalLine from "./VerticalLine";
 import {
   IconBallFootball,
@@ -21,6 +22,11 @@ export default function SideNav() {
   const pathname = usePathname();
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
+
+  const { data: currentUser, isLoading } = useGetCurrentUserQuery();
+
+  // Don't render if user is not logged in or loading
+  if (isLoading || !currentUser) return null;
 
   const mainNavItems = [
     { href: "/home", label: "Home", icon: IconHome },
@@ -57,16 +63,12 @@ export default function SideNav() {
                 isActive ? "font-bold text-accent" : "text-text"
               }`}
             >
-              {Icon && (
-                <Icon
-                  size={20}
-                  className={`transition-colors ${
-                    isActive
-                      ? "text-accent"
-                      : "text-text group-hover:text-accent"
-                  }`}
-                />
-              )}
+              <Icon
+                size={20}
+                className={`transition-colors ${
+                  isActive ? "text-accent" : "text-text group-hover:text-accent"
+                }`}
+              />
               <a
                 href={href}
                 className={`transition-colors flex-1 ${
@@ -79,7 +81,6 @@ export default function SideNav() {
           );
         })}
 
-        {/* Categories Accordion Header */}
         <li
           className="flex items-center space-x-2 font-bold text-primary cursor-pointer select-none"
           onClick={() => setCategoriesOpen((open) => !open)}
@@ -93,7 +94,6 @@ export default function SideNav() {
           />
         </li>
 
-        {/* Accordion Content */}
         {categoriesOpen && (
           <ul className="ml-6 space-y-4 mt-2">
             {categories.map(({ href, label, icon: Icon }) => {
@@ -105,16 +105,14 @@ export default function SideNav() {
                     isActive ? "font-bold text-accent" : "text-text"
                   }`}
                 >
-                  {Icon && (
-                    <Icon
-                      size={20}
-                      className={`transition-colors ${
-                        isActive
-                          ? "text-accent"
-                          : "text-text group-hover:text-accent"
-                      }`}
-                    />
-                  )}
+                  <Icon
+                    size={20}
+                    className={`transition-colors ${
+                      isActive
+                        ? "text-accent"
+                        : "text-text group-hover:text-accent"
+                    }`}
+                  />
                   <a
                     href={href}
                     className={`transition-colors flex-1 ${

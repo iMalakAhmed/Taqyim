@@ -34,6 +34,8 @@ type ReviewCardProps = {
   reviewId: number;
 };
 
+const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
+
 export default function ReviewCard({ reviewId }: ReviewCardProps) {
   const router = useRouter();
 
@@ -99,11 +101,17 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
   const isOwner = user.userId === review.userId;
 
   return (
-    <div className="w-full flex flex-col gap-3 pt-5 px-8 text-text border">
+    <div
+      className="w-full flex flex-col gap-3 pt-5 px-8 text-text border"
+      onClick={() => router.push(`/reviews/${reviewId}`)}
+    >
       <div className="flex flex-row items-center">
         <Link
           href={`/profile?id=${review.user.userId}`}
           className="flex flex-row items-center"
+          onClick={(e) => {
+            stopPropagation(e);
+          }}
         >
           <Image
             src="/default-profile.jpg"
@@ -135,7 +143,8 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => {
+                  onClick={(e) => {
+                    stopPropagation(e);
                     setIsEditing(false);
                     setRating(review.rating);
                     setComment(review.comment);
@@ -146,7 +155,8 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
                 <Button
                   size="sm"
                   variant="primary"
-                  onClick={async () => {
+                  onClick={async (e) => {
+                    stopPropagation(e);
                     await handleReviewUpdate();
                     setIsEditing(false);
                   }}
@@ -161,7 +171,10 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
                   size="sm"
                   variant="none"
                   className="hover:text-accent"
-                  onClick={handleReviewDelete}
+                  onClick={(e) => {
+                    stopPropagation(e);
+                    handleReviewDelete();
+                  }}
                   disabled={isDeleting}
                 >
                   {isDeleting ? (
@@ -174,7 +187,10 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
                   size="sm"
                   variant="none"
                   className="hover:text-primary"
-                  onClick={() => setIsEditing(true)}
+                  onClick={(e) => {
+                    stopPropagation(e);
+                    setIsEditing(true);
+                  }}
                 >
                   <IconEdit size={20} />
                 </Button>
@@ -183,7 +199,13 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
           </div>
         ) : (
           <div className="ml-auto">
-            <Button size="md" variant="secondary">
+            <Button
+              size="md"
+              variant="secondary"
+              onClick={(e) => {
+                stopPropagation(e);
+              }}
+            >
               Follow
             </Button>
           </div>
@@ -204,7 +226,10 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
                 <span
                   key={i}
                   className="text-xl"
-                  onClick={() => setRating(i + 1)}
+                  onClick={(e) => {
+                    stopPropagation(e);
+                    setRating(i + 1);
+                  }}
                 >
                   {i < rating ? (
                     <IconStarFilled className="text-primary" size={16} />
@@ -223,6 +248,9 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
           <textarea
             className="w-full h-full border  p-2 my-2 text-sm"
             value={comment}
+            onClick={(e) => {
+              stopPropagation(e);
+            }}
             onChange={(e) => setComment(e.target.value)}
             rows={3}
           />
@@ -234,7 +262,12 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
       </div>
 
       <div className="flex flex-row items-center justify-between">
-        <div className="flex flex-row items-center">
+        <div
+          className="flex flex-row items-center gap-x-2"
+          onClick={(e) => {
+            stopPropagation(e);
+          }}
+        >
           <ReactionButtons
             reviewId={reviewId}
             reactionCount={review.reactions.length}
@@ -243,14 +276,14 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
             variant="none"
             size="sm"
             className="hover:text-secondary"
-            onClick={() => router.push(`/reviews/${reviewId}`)}
+            onClick={(e) => {
+              stopPropagation(e);
+              router.push(`/reviews/${reviewId}`);
+            }}
           >
             <IconMessage size={20} />
           </Button>
 
-          {/* <Button variant="none" size="sm" className="hover:text-secondary">
-            <IconShare3 size={20} />
-          </Button> */}
           <CopyToClipboardButton
             copyText={`https://localhost:3000/reviews/${reviewId}`}
           >
