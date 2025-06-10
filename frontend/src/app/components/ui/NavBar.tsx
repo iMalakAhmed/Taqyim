@@ -20,15 +20,27 @@ import { useGetCurrentUserQuery, authApi } from "../../redux/services/authApi";
 import { useRouter } from "next/navigation";
 import { removeAuthCookie } from "../../actions/auth";
 import Button from "./Button";
-import React, { useState, useEffect } from "react";
-import { useSearchUsersQuery, useSearchBusinessesQuery, useSearchReviewsQuery } from "../../redux/services/searchApi";
+import { useState, useEffect } from "react";
+import HorizontalLine from "./HorizontalLine";
+import {
+  useSearchUsersQuery,
+  useSearchBusinessesQuery,
+  useSearchReviewsQuery,
+} from "../../redux/services/searchApi";
+import {
+  SearchBusinessDTO,
+  SearchReviewDTO,
+  SearchUserDTO,
+} from "@/app/redux/services/types";
 
 export default function NavBar() {
   const pathname = usePathname();
   const isFixed = pathname !== "/";
   const router = useRouter();
   const dispatch = useDispatch();
-
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -40,19 +52,31 @@ export default function NavBar() {
   const pageSize = 10; // Define your page size here
 
   // Accumulated results for infinite scrolling
-  const [allUsers, setAllUsers] = useState([]);
-  const [allBusinesses, setAllBusinesses] = useState([]);
-  const [allReviews, setAllReviews] = useState([]);
+  const [allUsers, setAllUsers] = useState<SearchUserDTO[]>([]);
+  const [allBusinesses, setAllBusinesses] = useState<SearchBusinessDTO[]>([]);
+  const [allReviews, setAllReviews] = useState<SearchReviewDTO[]>([]);
 
-  const { data: usersData, isLoading: isLoadingUsers, isFetching: isFetchingUsers } = useSearchUsersQuery(
+  const {
+    data: usersData,
+    isLoading: isLoadingUsers,
+    isFetching: isFetchingUsers,
+  } = useSearchUsersQuery(
     { query: debouncedSearchQuery, page: usersPage, pageSize },
     { skip: !debouncedSearchQuery }
   );
-  const { data: businessesData, isLoading: isLoadingBusinesses, isFetching: isFetchingBusinesses } = useSearchBusinessesQuery(
+  const {
+    data: businessesData,
+    isLoading: isLoadingBusinesses,
+    isFetching: isFetchingBusinesses,
+  } = useSearchBusinessesQuery(
     { query: debouncedSearchQuery, page: businessesPage, pageSize },
     { skip: !debouncedSearchQuery }
   );
-  const { data: reviewsData, isLoading: isLoadingReviews, isFetching: isFetchingReviews } = useSearchReviewsQuery(
+  const {
+    data: reviewsData,
+    isLoading: isLoadingReviews,
+    isFetching: isFetchingReviews,
+  } = useSearchReviewsQuery(
     { query: debouncedSearchQuery, page: reviewsPage, pageSize },
     { skip: !debouncedSearchQuery }
   );
@@ -107,14 +131,13 @@ export default function NavBar() {
     }
   }, [reviewsData, reviewsPage]); // Add reviewsPage to dependencies
 
-
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
     setShowSearchResults(e.target.value.length > 0);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault(); // Prevent form submission
       if (searchQuery.trim()) {
         router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
@@ -142,22 +165,21 @@ export default function NavBar() {
     }
   };
 
-  const {
-    data: user,
-    isLoading,
-    refetch,
-  } = useGetCurrentUserQuery();
+  const { data: user, isLoading, refetch } = useGetCurrentUserQuery();
 
-  /* = useGetCurrentUserQuery();*/
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      if (window.innerWidth >= 768) {
+        setMobileMenuOpen(false);
+        setSearchOpen(false);
+      }
+    };
 
-
-  // Temporarily commented out for debugging signup redirect issue
-  // React.useEffect(() => {
-  //   if (isError && !isLoading) {
-  //     removeAuthCookie();
-  //     router.push("/auth/login");
-  //   }
-  // }, [isError, isLoading, router]);
+    handleResize(); // Set initial value
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleSignOut = async () => {
     try {
@@ -211,8 +233,6 @@ export default function NavBar() {
             <input
               type="text"
               placeholder="Search Reviews..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full h-10 px-4 rounded-full text-text border border-text focus:outline-none focus:border-accent"
               value={searchQuery}
               onChange={handleSearchChange}
@@ -262,69 +282,203 @@ export default function NavBar() {
                         onClick={handleResultClick}
                         className="block p-2 hover:bg-gray-100 cursor-pointer"
                       >
-                        Review for {reviewResult.businessName} by {reviewResult.userName}: {reviewResult.comment.substring(0, 50)}...
+                        Review for {reviewResult.businessName} by{" "}
+                        {reviewResult.userName}:{" "}
+                        {reviewResult.comment.substring(0, 50)}...
                       </Link>
                     ))}
                   </div>
                 )}
-                {(allUsers.length === 0 && allBusinesses.length === 0 && allReviews.length === 0 && debouncedSearchQuery.length > 0 && !isLoadingUsers && !isLoadingBusinesses && !isLoadingReviews) && (
-                  <div className="p-2 text-center text-gray-500">
-                    No results found.
-                  </div>
-                )}
-                {(isLoadingUsers || isLoadingBusinesses || isLoadingReviews) && debouncedSearchQuery.length > 0 && (
-                  <div className="p-2 text-center text-gray-500">
-                    Loading...
-                  </div>
-                )}
+                {allUsers.length === 0 &&
+                  allBusinesses.length === 0 &&
+                  allReviews.length === 0 &&
+                  debouncedSearchQuery.length > 0 &&
+                  !isLoadingUsers &&
+                  !isLoadingBusinesses &&
+                  !isLoadingReviews && (
+                    <div className="p-2 text-center text-gray-500">
+                      No results found.
+                    </div>
+                  )}
+                {(isLoadingUsers || isLoadingBusinesses || isLoadingReviews) &&
+                  debouncedSearchQuery.length > 0 && (
+                    <div className="p-2 text-center text-gray-500">
+                      Loading...
+                    </div>
+                  )}
               </div>
             )}
           </form>
         </div>
-        {user && (
-          <>
-            <div className="relative group inline-block">
-              <Link
-                href={`/profile/${user.userId}`}
-                className="text-text hover:text-secondary flex items-center space-x-2"
-              >
-                <IconUserCircle size={24} />
-                <span>{user.userName}</span>
-              </Link>
 
-              <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-32 bg-background border shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-opacity duration-200 z-10 rounded">
-                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-background border-l border-t rotate-45"></div>
+        <div className="flex items-center space-x-4 min-w-[100px] justify-end">
+          {!isLoading && user && (
+            <>
+              <div className="relative group inline-block">
+                <Link
+                  href={`/profile/${user.userId}`}
+                  className="text-text hover:text-secondary flex items-center space-x-2"
+                >
+                  <IconUserCircle size={24} />
+                  <span className="hidden lg:inline">{user.userName}</span>
+                </Link>
+
+                <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-32 bg-background border shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-opacity duration-200 z-10 rounded">
+                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-background border-l border-t rotate-45"></div>
+                  <button
+                    onClick={handleSignOut}
+                    className="block w-full px-4 py-2 text-text hover:text-accent cursor-pointer rounded text-center"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+
+              <Button variant="none" size="sm" className="hover:text-secondary">
+                <IconBellRinging2 />
+              </Button>
+              <Button variant="none" size="sm" className="hover:text-secondary">
+                <IconMail />
+              </Button>
+              <ThemeToggle />
+            </>
+          )}
+          {!isLoading && !user && (
+            <div className="flex flex-row items-center gap-x-5">
+              <Link href="/auth/login" className="text-text hover:text-accent">
+                Login
+              </Link>
+              <Link href="/auth/signup" className="text-text hover:text-accent">
+                Sign Up
+              </Link>
+              <ThemeToggle />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Navbar */}
+      <div className="md:hidden flex flex-col">
+        <div className="flex justify-between items-center h-16 px-4">
+          <Link href={user ? "/home" : "/"}>
+            <h1 className="font-heading text-text text-sm">TAQYIM</h1>
+          </Link>
+
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="none"
+              size="sm"
+              onClick={() => setSearchOpen(!searchOpen)}
+              className="hover:text-secondary"
+            >
+              <IconSearch size={20} />
+            </Button>
+            <Button
+              variant="none"
+              size="sm"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="hover:text-secondary"
+            >
+              {mobileMenuOpen ? <IconX size={20} /> : <IconMenu2 size={20} />}
+            </Button>
+          </div>
+        </div>
+
+        {/* Mobile Search */}
+        {searchOpen && (
+          <div className="px-4 pb-4">
+            <form onSubmit={handleSearch} className="w-full">
+              <input
+                type="text"
+                placeholder="Search Reviews..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-10 px-4 rounded-full text-text border border-text focus:outline-none focus:border-accent"
+              />
+            </form>
+          </div>
+        )}
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="absolute top-full left-0 right-0 z-50 bg-background border-t border-gray-200 px-4 py-4 text-left space-y-3 shadow-lg md:hidden">
+            {!isLoading && user ? (
+              <>
+                <Link
+                  href={`/profile/${user.userId}`}
+                  className="flex items-center text-text hover:text-accent py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <IconUserCircle size={20} className="mr-2" />
+                  {user.userName}
+                </Link>
+
+                <Link
+                  href="/notifications"
+                  className="flex items-center text-text hover:text-accent py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <IconBellRinging2 size={20} className="mr-2" />
+                  Notifications
+                </Link>
+
+                <Link
+                  href="/messages"
+                  className="flex items-center text-text hover:text-accent py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <IconMail size={20} className="mr-2" />
+                  Messages
+                </Link>
 
                 <button
-                  onClick={handleSignOut}
-                  className="block w-full px-4 py-2 text-text hover:text-accent cursor-pointer rounded text-center"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleSignOut();
+                  }}
+                  className="flex items-center text-text hover:text-accent w-full py-2"
                 >
+                  <IconLogout size={20} className="mr-2" />
                   Sign Out
                 </button>
-              </div>
-            </div>
 
-            <Button variant="none" size="sm" className="hover:text-secondary">
-              <IconBellRinging2 />
-            </Button>
-            <Button variant="none" size="sm" className="hover:text-secondary">
-              <IconMail />
-            </Button>
-            <ThemeToggle />
-          </>
-        )}
-        {!user && (
-          <div className="flex flex-row items-center gap-x-5">
-            <Link href="/auth/login" className="text-text hover:text-accent">
-              Login
-            </Link>
-            <Link href="/auth/signup" className="text-text hover:text-accent">
-              Sign Up
-            </Link>
-            <ThemeToggle />
+                <div className="flex items-center justify-between pt-2 border-t border-gray-200 mt-2">
+                  <span className="text-sm text-text flex items-center">
+                    <ThemeToggle />
+                    Theme
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/auth/login"
+                  className="flex items-center text-text hover:text-accent py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <IconLogin size={20} className="mr-2" />
+                  Login
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  className="flex items-center text-text hover:text-accent py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <IconUserPlus size={20} className="mr-2" />
+                  Sign Up
+                </Link>
+
+                <div className="flex items-center justify-between pt-2 border-t border-gray-200 mt-2">
+                  <span className="text-sm text-text flex items-center">
+                    <ThemeToggle />
+                    Theme
+                  </span>
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>
+      <HorizontalLine />
     </div>
   );
 }
