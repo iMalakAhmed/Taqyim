@@ -1,3 +1,4 @@
+
 using Microsoft.EntityFrameworkCore;
 using Taqyim.Api.Data;
 using Taqyim.Api.DTOs;
@@ -49,15 +50,25 @@ namespace Taqyim.Api.Services
         {
             if (string.IsNullOrEmpty(query)) return new PaginatedResultDTO<SearchBusinessDTO>();
 
-            var queryable = _context.Businesses
-                .Where(b => b.Name.Contains(query) || b.Description.Contains(query) || (b.Category != null && b.Category.AsEnumerable().Any(c => c.Contains(query))));
+            // Stage 1: Initial database query for businesses based on name/description, including related data.
+            // Materialize to memory immediately.
+            var initialBusinessesFromDb = await _context.Businesses
+                .Where(b => b.Name.ToLower().Contains(query.ToLower()) || b.Description.ToLower().Contains(query.ToLower()))
+                .Include(b => b.Reviews)
+                .Include(b => b.BusinessLocations)
+                .ToListAsync();
 
-            var totalCount = await queryable.CountAsync();
+            // Temporarily removed Stage 2: In-memory filtering for Category.
+            // This part will be re-added once basic search is confirmed working.
+            var businessesToProcess = initialBusinessesFromDb; 
 
-            var businesses = await queryable
+            var totalCount = businessesToProcess.Count();
+
+            // Stage 3: In-memory pagination and final projection.
+            var paginatedAndProjectedBusinesses = businessesToProcess
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(b => new
+                .Select(b => new SearchBusinessDTO
                 {
                     BusinessId = b.BusinessId,
                     Name = b.Name,
@@ -77,22 +88,11 @@ namespace Taqyim.Api.Services
                         Label = bl.Label
                     }).ToList()
                 })
-                .ToListAsync();
+                .ToList();
 
             return new PaginatedResultDTO<SearchBusinessDTO>
             {
-                Items = businesses.Select(b => new SearchBusinessDTO
-                {
-                    BusinessId = b.BusinessId,
-                    Name = b.Name,
-                    Category = b.Category,
-                    Description = b.Description,
-                    Rating = b.Rating,
-                    PriceRange = b.PriceRange,
-                    CreatedAt = b.CreatedAt,
-                    ReviewCount = b.ReviewCount,
-                    BusinessLocations = b.BusinessLocations
-                }),
+                Items = paginatedAndProjectedBusinesses,
                 TotalCount = totalCount
             };
         }
@@ -104,6 +104,7 @@ namespace Taqyim.Api.Services
             var queryable = _context.Reviews
                 .Include(r => r.Business)
                 .Include(r => r.User)
+                .Include(r => r.Product)
                 .Where(r => r.Comment.Contains(query) || r.Business.Name.Contains(query) || r.User.UserName.Contains(query));
 
             var totalCount = await queryable.CountAsync();
@@ -132,6 +133,36 @@ namespace Taqyim.Api.Services
             return new PaginatedResultDTO<SearchReviewDTO>
             {
                 Items = reviews,
+                TotalCount = totalCount
+            };
+        }
+
+        public async Task<PaginatedResultDTO<SearchProductDTO>> SearchProductsAsync(string query, int page, int pageSize)
+        {
+            if (string.IsNullOrEmpty(query)) return new PaginatedResultDTO<SearchProductDTO>();
+
+            var queryable = _context.Products
+                .Where(p => p.Name.ToLower().Contains(query.ToLower()))
+                .Include(p => p.Business);
+
+            var totalCount = await queryable.CountAsync();
+
+            var products = await queryable
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(p => new SearchProductDTO
+                {
+                    ProductId = p.ProductId,
+                    Name = p.Name,
+                    Description = p.Description,
+                    BusinessId = p.BusinessId ?? 0,
+                    BusinessName = p.Business != null ? p.Business.Name : string.Empty
+                })
+                .ToListAsync();
+
+            return new PaginatedResultDTO<SearchProductDTO>
+            {
+                Items = products,
                 TotalCount = totalCount
             };
         }

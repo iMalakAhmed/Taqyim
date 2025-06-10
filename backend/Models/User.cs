@@ -43,5 +43,5 @@ public class User
     public virtual ICollection<Connection> Connections { get; set; } = new List<Connection>();
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
     public virtual ICollection<Media> Media { get; set; } = new List<Media>();
-    public virtual ICollection<SavedReview> SavedReviews { get; set; } = new List<SavedReview>();
+    //public virtual ICollection<SavedReview> SavedReviews { get; set; } = new List<SavedReview>();
 }

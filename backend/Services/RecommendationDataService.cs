@@ -84,10 +84,10 @@ namespace Taqyim.Api.Services
                 .Select(r => r.ReviewId)
                 .ToListAsync();
 
-            var saved = await _context.SavedReviews
-                .Where(s => s.UserId == userId)
-                .Select(s => s.ReviewId)
-                .ToListAsync();
+            // var saved = await _context.SavedReviews
+            //     .Where(s => s.UserId == userId)
+            //     .Select(s => s.ReviewId)
+            //     .ToListAsync();
 
             var comments = await _context.Comments
                 .Where(c => c.CommenterId == userId)
@@ -97,7 +97,7 @@ namespace Taqyim.Api.Services
             var rows = new List<RecommendationRow>();
 
             rows.AddRange(reactions.Select(rid => new RecommendationRow { UserId = userId, ItemId = rid, ItemType = "Review", Score = 0.8f }));
-            rows.AddRange(saved.Select(rid => new RecommendationRow { UserId = userId, ItemId = rid, ItemType = "Review", Score = 0.7f }));
+            // rows.AddRange(saved.Select(rid => new RecommendationRow { UserId = userId, ItemId = rid, ItemType = "Review", Score = 0.7f }));
             rows.AddRange(comments.Select(rid => new RecommendationRow { UserId = userId, ItemId = rid, ItemType = "Review", Score = 0.6f }));
 
             return rows;
