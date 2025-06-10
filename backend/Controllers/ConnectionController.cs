@@ -5,6 +5,7 @@ using System.Security.Claims;
 using Taqyim.Api.Data;
 using Taqyim.Api.DTOs;
 using Taqyim.Api.Models;
+using static Taqyim.Api.Models.NotificationTypes;
 
 namespace Taqyim.Api.Controllers;
 
@@ -13,10 +14,12 @@ namespace Taqyim.Api.Controllers;
 public class ConnectionController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
+    private readonly NotificationController _notificationController;
 
-    public ConnectionController(ApplicationDbContext context)
+    public ConnectionController(ApplicationDbContext context, NotificationController notificationController)
     {
         _context = context;
+        _notificationController = notificationController;
     }
 
     [Authorize]
@@ -85,6 +88,33 @@ public class ConnectionController : ControllerBase
 
         _context.Connections.Add(connection);
         await _context.SaveChangesAsync();
+
+        // Notify the followed entity about the new follower
+        if (request.FollowingType == "User")
+        {
+            await _notificationController.CreateNotification(new CreateNotificationDTO
+            {
+                UserId = request.FollowingId,
+                NotificationType = NewFollower,
+                SenderId = followerId
+            });
+        }
+        else if (request.FollowingType == "Business")
+        {
+            var followedBusiness = await _context.Businesses
+                .Include(b => b.Owner)
+                .FirstOrDefaultAsync(b => b.BusinessId == request.FollowingId);
+            
+            if (followedBusiness != null)
+            {
+                await _notificationController.CreateNotification(new CreateNotificationDTO
+                {
+                    UserId = followedBusiness.Owner.UserId,
+                    NotificationType = NewBusinessFollower,
+                    SenderId = followerId
+                });
+            }
+        }
 
         return Ok(new { message = "Followed successfully" });
     }

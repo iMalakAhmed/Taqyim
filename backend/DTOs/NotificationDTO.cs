@@ -9,6 +9,7 @@ public class NotificationDTO
     public string NotificationType { get; set; } = string.Empty;
     public int? SenderId { get; set; }
     public DateTime Timestamp { get; set; }
+    public bool IsRead { get; set; }
     public UserDTO? Sender { get; set; }
     public required UserDTO User { get; set; }
 }
