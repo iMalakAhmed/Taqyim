@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import HorizontalLine from "./HorizontalLine";
 import Button from "./Button";
 import { IconX } from "@tabler/icons-react";
+import MediaUpload, { getFullMediaUrl } from "../MediaUpload";
+import { useDeleteMediaMutation } from "@/app/redux/services/mediaApi";
 
 interface Props {
   isOpen: boolean;
@@ -29,8 +31,12 @@ const EditProfileModal: React.FC<Props> = ({
   const [userName, setUserName] = useState(initialData.userName);
   const [bio, setBio] = useState(initialData.bio || "");
   const [profilePic, setProfilePic] = useState(initialData.profilePic || "");
+  const [profilePicId, setProfilePicId] = useState<number | null>(null);
 
-  const handleSubmit = () => {
+  const [deleteMedia] = useDeleteMediaMutation();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     onSave({ userName, bio, profilePic });
     onClose();
   };
@@ -60,6 +66,7 @@ const EditProfileModal: React.FC<Props> = ({
         <HorizontalLine />
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          {/* Username */}
           <div>
             <label htmlFor="userName" className="block font-medium mb-1">
               User Name <span className="text-accent">*</span>
@@ -75,6 +82,7 @@ const EditProfileModal: React.FC<Props> = ({
             <HorizontalLine className="mt-5" />
           </div>
 
+          {/* Bio */}
           <div>
             <label htmlFor="bio" className="block font-medium mb-1">
               Bio
@@ -89,25 +97,67 @@ const EditProfileModal: React.FC<Props> = ({
             <HorizontalLine className="mt-5" />
           </div>
 
+          {/* Profile Picture Upload */}
           <div>
-            <label htmlFor="profilePic" className="block font-medium mb-1">
-              Profile Picture URL
+            <label className="block font-medium mb-1">
+              Upload Profile Picture
             </label>
-            <input
-              id="profilePic"
-              type="text"
-              value={profilePic}
-              onChange={(e) => setProfilePic(e.target.value)}
-              className="w-full px-3 py-2 border rounded focus:outline-none"
+            <MediaUpload
+              onUploadSuccess={(mediaId) => {
+                fetch(`/api/media/${mediaId}`)
+                  .then((res) => res.json())
+                  .then((media) => {
+                    setProfilePic(media.filePath);
+                    setProfilePicId(media.mediaId);
+                  });
+              }}
+              onDeleteSuccess={() => {
+                setProfilePic("");
+                setProfilePicId(null);
+              }}
             />
+
+            {profilePic && (
+              <div className="mt-3 flex flex-col items-center gap-2">
+                <img
+                  src={getFullMediaUrl(profilePic)}
+                  alt="Profile Preview"
+                  className="w-20 h-20 object-cover border"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    if (
+                      profilePicId &&
+                      confirm("Delete this profile picture?")
+                    ) {
+                      try {
+                        await deleteMedia(profilePicId).unwrap();
+                        setProfilePic("");
+                        setProfilePicId(null);
+                      } catch {
+                        alert("Failed to delete image");
+                      }
+                    } else {
+                      setProfilePic("");
+                      setProfilePicId(null);
+                    }
+                  }}
+                >
+                  Delete
+                </Button>
+              </div>
+            )}
             <HorizontalLine className="mt-5" />
           </div>
 
+          {/* Save/Cancel Buttons */}
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" type="button" onClick={onClose}>
               Cancel
             </Button>
-            <Button variant="primary" type="submit">
+            <Button variant="primary" type="submit" disabled={!userName.trim()}>
               Save
             </Button>
           </div>

@@ -10,8 +10,6 @@ import {
   useDeleteUserMutation,
 } from "@/app/redux/services/userApi";
 import {
-  useFollowUserMutation,
-  useUnfollowUserMutation,
   useGetFollowersQuery,
   useGetFollowingQuery,
 } from "@/app/redux/services/connectionApi";
@@ -23,7 +21,7 @@ import { authApi } from "@/app/redux/services/authApi";
 import { removeAuthCookie } from "@/app/actions/auth";
 import CopyToClipboardButton from "@/app/components/ui/ShareButton";
 import FollowButton from "@/app/components/ui/FollowButton";
-import HorizontalLine from "./ui/HorizontalLine";
+import { getFullMediaUrl } from "./MediaUpload";
 
 const UserProfile = () => {
   const params = useParams();
@@ -117,7 +115,7 @@ const UserProfile = () => {
         <img
           src={
             user.profilePic && user.profilePic.trim() !== ""
-              ? user.profilePic
+              ? getFullMediaUrl(user.profilePic)
               : "/default-profile.jpg"
           }
           alt={user.userName}

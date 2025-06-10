@@ -30,6 +30,7 @@ import Link from "next/link";
 import CopyToClipboardButton from "./ShareButton";
 import { formatTimestamp } from "./FormatTimeStamp";
 import FollowButton from "./FollowButton";
+import MediaUpload, { getFullMediaUrl } from "../MediaUpload";
 
 type ReviewCardProps = {
   reviewId: number;
@@ -51,6 +52,7 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
     data: review,
     isLoading: isReviewLoading,
     error: reviewError,
+    refetch: refetchReview,
   } = useGetReviewQuery(reviewId);
 
   const dispatch = useDispatch();
@@ -66,14 +68,15 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
   const [deleteReview, { isLoading: isDeleting }] = useDeleteReviewMutation();
 
   const [isEditing, setIsEditing] = useState(false);
-
   const [rating, setRating] = useState<number>(review?.rating || 0);
   const [comment, setComment] = useState<string>(review?.comment || "");
+  const [media, setMedia] = useState(review?.media || []);
 
   useEffect(() => {
     if (review) {
       setRating(review.rating);
       setComment(review.comment);
+      setMedia(review.media ?? []);
       dispatch(setReactionCount({ reviewId, count: review.reactions.length }));
       dispatch(setCommentCount({ reviewId, count: review.comments.length }));
     }
@@ -92,10 +95,32 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
 
   const handleReviewUpdate = async () => {
     try {
-      await updateReview({ id: reviewId, data: { rating, comment } }).unwrap();
+      await updateReview({
+        id: reviewId,
+        data: {
+          rating,
+          comment,
+          media: media.map((m) => ({
+            mediaId: m.mediaId,
+          })),
+        },
+      });
+
+      await refetchReview();
+      setIsEditing(false);
     } catch (error) {
       console.error("Failed to update review", error);
     }
+  };
+
+  const handleMediaUploadSuccess = async (mediaId: number) => {
+    const res = await fetch(`/api/media/${mediaId}`);
+    const newMedia = await res.json();
+    setMedia((prev) => [...prev, newMedia]);
+  };
+
+  const handleMediaDeleteSuccess = (deletedId: number) => {
+    setMedia((prev) => prev.filter((m) => m.mediaId !== deletedId));
   };
 
   if (isUserLoading || isReviewLoading) return <div>Loading...</div>;
@@ -103,14 +128,6 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
   if (!user || !review) return null;
 
   const isOwner = user.userId === review.userId;
-  console.log("Following list:", user?.ConnectionFollowings);
-  console.log("Checking if following user:", review.user.userId);
-  console.log(
-    "Result:",
-    user?.ConnectionFollowings?.some((f) => f.userId === review.user.userId)
-  );
-
-  const getFullMediaUrl = (path: string) => `http://localhost:5273${path}`;
 
   return (
     <div
@@ -126,7 +143,11 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
           }}
         >
           <Image
-            src={review.user.profilePic || "/default-profile.jpg"}
+            src={
+              review.user.profilePic && review.user.profilePic.trim() !== ""
+                ? getFullMediaUrl(review.user.profilePic)
+                : "/default-profile.jpg"
+            }
             width={80}
             height={80}
             alt="user profile"
@@ -152,7 +173,6 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
                   onClick={async (e) => {
                     stopPropagation(e);
                     await handleReviewUpdate();
-                    setIsEditing(false);
                   }}
                   disabled={isUpdating}
                 >
@@ -246,32 +266,53 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
         </div>
 
         {isEditing ? (
-          <textarea
-            className="w-full h-full border p-2 my-2 text-sm"
-            value={comment}
-            onClick={(e) => {
-              stopPropagation(e);
-            }}
-            onChange={(e) => setComment(e.target.value)}
-            rows={3}
-          />
+          <>
+            <textarea
+              className="w-full h-full border p-2 my-2 text-sm"
+              value={comment}
+              onClick={(e) => {
+                stopPropagation(e);
+              }}
+              onChange={(e) => setComment(e.target.value)}
+              rows={3}
+            />
+            <div className="my-4">
+              <MediaUpload
+                existingMedia={media}
+                reviewId={review.reviewId}
+                onUploadSuccess={handleMediaUploadSuccess}
+                onDeleteSuccess={handleMediaDeleteSuccess}
+              />
+            </div>
+          </>
         ) : (
           <>
             <p className="text-sm font-body pt-2 pb-3">{review.comment}</p>
-
             {review.media && review.media.length > 0 && (
               <div className="flex flex-wrap gap-2 pb-3">
                 {review.media.map((mediaItem) => (
                   <div
                     key={mediaItem.mediaId}
-                    className="relative z-0 w-32 h-32 rounded overflow-hidden border"
+                    className="relative z-0 w-32 h-32 rounded overflow-hidden border group"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(
+                        getFullMediaUrl(mediaItem.filePath),
+                        "_blank"
+                      );
+                    }}
                   >
                     <Image
                       src={getFullMediaUrl(mediaItem.filePath)}
                       alt={mediaItem.fileName}
                       layout="fill"
-                      objectFit="cover"
+                      className="object-cover"
                     />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
+                      <span className="text-white opacity-0 group-hover:opacity-100">
+                        View
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>

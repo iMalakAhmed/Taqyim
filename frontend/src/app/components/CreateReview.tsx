@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useCreateReviewMutation } from "../redux/services/reviewApi";
+import { useDeleteMediaMutation } from "../redux/services/mediaApi";
 import MediaUpload from "./MediaUpload";
 import Button from "./ui/Button";
 import { IconX } from "@tabler/icons-react";
 import HorizontalLine from "./ui/HorizontalLine";
 import StarRating from "./ui/StarRating";
+import { getFullMediaUrl } from "./MediaUpload";
 
 type CreateReviewProps = {
   onCancel: () => void;
@@ -17,9 +19,13 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
   const [productId, setProductId] = useState<number | null>(null);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
-  const [uploadedMediaIds, setUploadedMediaIds] = useState<number[]>([]);
+  const [uploadedMedia, setUploadedMedia] = useState<
+    { mediaId: number; filePath: string }[]
+  >([]);
+
   const [createReview, { isLoading, error, isSuccess }] =
     useCreateReviewMutation();
+  const [deleteMedia] = useDeleteMediaMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,28 +42,40 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
         rating,
         comment,
         media:
-          uploadedMediaIds.length > 0
-            ? uploadedMediaIds.map((id) => ({ mediaId: id }))
+          uploadedMedia.length > 0
+            ? uploadedMedia.map((m) => ({ mediaId: m.mediaId }))
             : undefined,
       };
 
-      console.log("Submitting review with data:", reviewData);
-      console.log(
-        "Token from sessionStorage:",
-        sessionStorage.getItem("token")
-      );
-
       await createReview(reviewData).unwrap();
 
-      // Reset form on success
+      // Reset on success
       setBusinessId("");
       setProductId(null);
       setRating(5);
       setComment("");
-      setUploadedMediaIds([]);
+      setUploadedMedia([]);
       onCancel();
     } catch (err) {
       console.error("Failed to create review:", err);
+    }
+  };
+
+  const handleMediaUpload = async (mediaId: number) => {
+    const res = await fetch(`/api/media/${mediaId}`);
+    const media = await res.json();
+    setUploadedMedia((prev) => [
+      ...prev,
+      { mediaId, filePath: media.filePath },
+    ]);
+  };
+
+  const handleMediaDelete = async (mediaId: number) => {
+    try {
+      await deleteMedia(mediaId).unwrap();
+      setUploadedMedia((prev) => prev.filter((m) => m.mediaId !== mediaId));
+    } catch {
+      alert("Failed to delete media.");
     }
   };
 
@@ -149,14 +167,35 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
           <div>
             <label className="block font-medium mb-1">Upload Media</label>
             <MediaUpload
-              onUploadSuccess={(mediaId) =>
-                setUploadedMediaIds((prev) => [...prev, mediaId])
+              onUploadSuccess={handleMediaUpload}
+              onDeleteSuccess={(mediaId) =>
+                setUploadedMedia((prev) =>
+                  prev.filter((m) => m.mediaId !== mediaId)
+                )
               }
             />
-            {uploadedMediaIds.length > 0 && (
-              <p className="text-sm mt-2 text-secondary">
-                Uploaded Media IDs: {uploadedMediaIds.join(", ")}
-              </p>
+            {uploadedMedia.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {uploadedMedia.map((media) => (
+                  <div
+                    key={media.mediaId}
+                    className="relative group w-20 h-20 rounded border overflow-hidden"
+                  >
+                    <img
+                      src={getFullMediaUrl(media.filePath)}
+                      alt="Uploaded media"
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => handleMediaDelete(media.mediaId)}
+                    >
+                      <IconX className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             )}
             <HorizontalLine />
           </div>
