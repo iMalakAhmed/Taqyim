@@ -200,8 +200,7 @@ export default function NavBar() {
     }
 
     sessionStorage.removeItem("token"); // Clear token from session storage
-    await removeAuthCookie(); // Remove the cookie (for httpOnly token if any)
-    // Invalidate RTK Query cache related to the user
+    await removeAuthCookie();
     dispatch(authApi.util.resetApiState());
     router.push("/auth/login"); // Redirect to login page
   };
