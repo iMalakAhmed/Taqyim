@@ -5,10 +5,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import {
   useUpdateBusinessMutation,
+  useCreateBusinessMutation,
   useCreateLocationMutation,
   useUpdateLocationMutation,
   useDeleteLocationMutation,
-  useCreateBusinessMutation,
   useGetBusinessByIdQuery,
 } from "@/app/redux/services/BusinessApi";
 import { BusinessLocationUpdateType } from "@/app/redux/services/types";
@@ -19,10 +19,10 @@ import { skipToken } from "@reduxjs/toolkit/query";
 export default function CreateBusinessProfilePage() {
   const router = useRouter();
   const [updateBusiness] = useUpdateBusinessMutation();
+  const [createBusiness] = useCreateBusinessMutation();
   const [addLocation] = useCreateLocationMutation();
   const [updateLocation] = useUpdateLocationMutation();
   const [deleteLocation] = useDeleteLocationMutation();
-  const [createBusiness] = useCreateBusinessMutation();
   const dispatch = useDispatch();
 
   const [name, setName] = useState("");
@@ -77,22 +77,27 @@ export default function CreateBusinessProfilePage() {
       let newBusinessId = currentBusinessId;
 
       if (!newBusinessId) {
-        console.log("Attempting to create business with:", {
+        const businessData = {
           name,
-          category: category ? [category] : undefined,
-          description,
-          logo: logo || undefined,
-          location: location || undefined,
-        });
-        const res = await createBusiness({
-          name,
-          category: category ? [category] : undefined,
-          description,
-          logo: logo || undefined,
-          location: location || undefined,
-        }).unwrap();
+          category: category ? [category] : null,
+          description: description || null,
+          logo: logo || null,
+          location: location || null,
+        };
+        console.log("Attempting to create business with:", businessData);
+        const res = await createBusiness(businessData).unwrap();
         newBusinessId = res.businessId;
         setCurrentBusinessId(newBusinessId);
+      } else {
+        await updateBusiness({
+          id: newBusinessId,
+          body: {
+            name,
+            category: category ? [category] : null,
+            description: description || null,
+            logo: logo || null,
+          },
+        });
       }
 
       const existingIds = business?.businessLocations?.map(l => l.locationId).filter(Boolean) || [];

@@ -122,8 +122,9 @@ namespace Taqyim.Api.Controllers
         }
 
         [HttpPost("signout")]
-        public IActionResult SignOut(){
-            // No server-side action needed for cookie-based auth removal
+        public new IActionResult SignOut()
+        {
+            Response.Cookies.Delete("token");
             return Ok();
         }
 

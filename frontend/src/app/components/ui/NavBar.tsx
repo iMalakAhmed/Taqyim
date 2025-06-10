@@ -16,7 +16,7 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { useDispatch } from "react-redux";
-import { useGetCurrentUserQuery, authApi } from "../../redux/services/authApi";
+import { useGetCurrentUserQuery, authApi, useSignOutMutation } from "../../redux/services/authApi";
 import { useRouter } from "next/navigation";
 import { removeAuthCookie } from "../../actions/auth";
 import Button from "./Button";
@@ -174,6 +174,8 @@ export default function NavBar() {
     refetchOnMountOrArgChange: true,
   });
 
+  const [signOut, { isLoading: isSigningOut }] = useSignOutMutation();
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -190,19 +192,15 @@ export default function NavBar() {
 
   const handleSignOut = async () => {
     try {
-      // Call the backend signout API
-      await fetch("/api/auth/signout", {
-        method: "POST",
-      });
+      await signOut().unwrap(); // Use unwrap to handle errors
+      sessionStorage.removeItem("token"); // Ensure token is cleared from session storage
+      dispatch(authApi.util.resetApiState()); // Explicitly reset RTK Query state
+      await removeAuthCookie();
+      console.log("User data after sign out attempt:", user); // Added for debugging
+      router.push("/auth/login"); // Redirect to login page
     } catch (err) {
-      console.error("Error calling signout API:", err);
-      // Continue with client-side signout even if API call fails
+      console.error("Error signing out:", err);
     }
-
-    sessionStorage.removeItem("token"); // Clear token from session storage
-    await removeAuthCookie();
-    dispatch(authApi.util.resetApiState());
-    router.push("/auth/login"); // Redirect to login page
   };
 
   return (
