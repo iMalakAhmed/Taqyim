@@ -8,6 +8,12 @@ import {
   IconMail,
   IconUser,
   IconUserCircle,
+  IconSearch,
+  IconMenu2,
+  IconX,
+  IconLogin,
+  IconUserPlus,
+  IconLogout,
 } from "@tabler/icons-react";
 import { useDispatch } from "react-redux";
 import { useGetCurrentUserQuery, authApi } from "../../redux/services/authApi";
@@ -152,38 +158,51 @@ export default function NavBar() {
   //     router.push("/auth/login");
   //   }
   // }, [isError, isLoading, router]);
+
   const handleSignOut = async () => {
     try {
-      // Call the backend signout API
       await fetch("/api/auth/signout", {
         method: "POST",
       });
     } catch (err) {
       console.error("Error calling signout API:", err);
-      // Continue with client-side signout even if API call fails
     }
 
-    sessionStorage.removeItem('token'); // Clear token from session storage
-    await removeAuthCookie(); // Remove the cookie (for httpOnly token if any)
-    // Invalidate RTK Query cache related to the user
+    sessionStorage.removeItem("token");
+    await removeAuthCookie();
     dispatch(authApi.util.resetApiState());
-    router.push("/auth/login"); // Redirect to login page
+    router.push("/auth/login");
+    setMobileMenuOpen(false);
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery("");
+      setSearchOpen(false);
+    }
   };
 
   return (
     <div
-      className={`top-0 w-full z-[999] bg-background h-24 text-text ${
+      className={`top-0 w-full z-[999] bg-background text-text ${
         isFixed ? "fixed" : "relative"
       }`}
     >
-      <div className="mx-24 flex flex-row justify-between items-center h-full">
+      {/* Desktop Navbar */}
+      <div className="hidden md:flex mx-4 md:mx-8 lg:mx-24 flex-row justify-between items-center h-24">
         {user ? (
-          <Link href="/home">
-            <h1 className="font-heading text-text">TAQYIM</h1>
+          <Link href="/home" className="min-w-[100px]">
+            <h1 className="font-heading text-text text-xl lg:text-2xl">
+              TAQYIM
+            </h1>
           </Link>
         ) : (
-          <Link href="/">
-            <h1 className="font-heading text-text">TAQYIM</h1>
+          <Link href="/" className="min-w-[100px]">
+            <h1 className="font-heading text-text text-xl lg:text-2xl">
+              TAQYIM
+            </h1>
           </Link>
         )}
 
@@ -192,6 +211,8 @@ export default function NavBar() {
             <input
               type="text"
               placeholder="Search Reviews..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full h-10 px-4 rounded-full text-text border border-text focus:outline-none focus:border-accent"
               value={searchQuery}
               onChange={handleSearchChange}
