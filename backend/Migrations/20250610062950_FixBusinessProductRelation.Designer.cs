@@ -12,8 +12,8 @@ using Taqyim.Api.Data;
 namespace Taqyim.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250610035347_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250610062950_FixBusinessProductRelation")]
+    partial class FixBusinessProductRelation
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -370,6 +370,9 @@ namespace Taqyim.Api.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationId"));
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
 
                     b.Property<string>("NotificationType")
                         .HasColumnType("nvarchar(max)");

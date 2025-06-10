@@ -20,7 +20,8 @@ import { IconEdit, IconShare, IconTrash } from "@tabler/icons-react";
 import MapView from './ui/MapView';
 
 const BusinessProfile = () => {
-  const businessId = 1;
+  const params = useParams();
+  const businessId = Number(params?.id);
   const router = useRouter();
 
   // 🔄 All hooks come first (no conditionals above)

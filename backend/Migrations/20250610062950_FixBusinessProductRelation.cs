@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Taqyim.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class FixBusinessProductRelation : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -177,6 +177,7 @@ namespace Taqyim.Api.Migrations
                     NotificationType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SenderId = table.Column<int>(type: "int", nullable: true),
                     Timestamp = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false),
                     UserId1 = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>

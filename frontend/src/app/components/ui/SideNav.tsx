@@ -56,6 +56,7 @@ export default function SideNav({ className }: { className?: string }) {
   ];
 
   return (
+    <>
     <nav className={`bg-background flex flex-col font-heading text-2xl ${className}`}>
       <VerticalLine className="absolute top-0 right-0 h-full" />
 
