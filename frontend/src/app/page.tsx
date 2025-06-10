@@ -10,7 +10,6 @@ export default function LandingPage() {
     <div className="min-h-screen w-full flex flex-col justify-center items-center bg-background">
       {/* Header Section */}
       <section className="w-full flex flex-col items-center">
-        <HorizontalLine />
         <TypingHeader />
         <HorizontalLine />
       </section>
