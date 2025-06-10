@@ -26,7 +26,7 @@ namespace Taqyim.Api.Controllers
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var user = await _context.Users.FindAsync(userId);
-            
+
 
             if (user == null)
                 return Forbid("User Not Found");
@@ -41,7 +41,6 @@ namespace Taqyim.Api.Controllers
                 VerifiedByUserId = null,
                 Owner = user
             };
-            user.Type = "BusinessOwner";
 
 
             _context.Businesses.Add(business);
@@ -53,8 +52,8 @@ namespace Taqyim.Api.Controllers
         // GET /api/businesses
         [HttpGet]
         public async Task<IActionResult> GetBusinesses(
-            [FromQuery] string? name, 
-            [FromQuery] string? category, 
+            [FromQuery] string? name,
+            [FromQuery] string? category,
             [FromQuery] bool includeDeleted = false,
             [FromQuery] string? searchQuery = null)
         {
@@ -63,7 +62,7 @@ namespace Taqyim.Api.Controllers
                 .Include(b => b.Owner)
                 .Include(b => b.BusinessLocations)
                 .Include(b => b.Products)
-                .Include(b=> b.ConnectionFollowers)
+                .Include(b => b.ConnectionFollowers)
                 .Include(b => b.ConnectionFollowings)
                 .AsQueryable();
 
@@ -74,7 +73,7 @@ namespace Taqyim.Api.Controllers
             if (!string.IsNullOrEmpty(searchQuery))
             {
                 searchQuery = searchQuery.ToLower();
-                query = query.Where(b => 
+                query = query.Where(b =>
                     b.Name.ToLower().Contains(searchQuery) ||
                     b.Description.ToLower().Contains(searchQuery) ||
                     (b.Category != null && b.Category.Any(c => c.ToLower().Contains(searchQuery)))
@@ -246,7 +245,7 @@ namespace Taqyim.Api.Controllers
                     ConnectionId = cf.ConnectionId,
                     FollowerType = cf.FollowerType,
                     FollowingType = cf.FollowingType,
-                    UserId = cf.FollowerId??0,
+                    UserId = cf.FollowerId ?? 0,
                     ConnectedUserId = cf.FollowingId ?? 0,
                     BusinessFollowerId = cf.BusinessFollowerId,
                     BusinessFollowingId = cf.BusinessFollowingId,
@@ -285,8 +284,8 @@ namespace Taqyim.Api.Controllers
                     ConnectionId = cf.ConnectionId,
                     FollowerType = cf.FollowerType,
                     FollowingType = cf.FollowingType,
-                    UserId = cf.FollowerId??0,
-                    ConnectedUserId = cf.FollowingId??0,
+                    UserId = cf.FollowerId ?? 0,
+                    ConnectedUserId = cf.FollowingId ?? 0,
                     BusinessFollowerId = cf.BusinessFollowerId,
                     BusinessFollowingId = cf.BusinessFollowingId,
                     CreatedAt = cf.CreatedAt,
@@ -381,20 +380,20 @@ namespace Taqyim.Api.Controllers
 
             return NoContent();
         }
-        
+
         [Authorize(Roles = "Admin,Moderator")]
         [HttpPut("{id}/verify")]
         public async Task<IActionResult> VerifyBusiness(int id)
         {
-                var business = await _context.Businesses
-                    .Include(b => b.Owner) 
-                    .FirstOrDefaultAsync(b => b.BusinessId == id);
+            var business = await _context.Businesses
+                .Include(b => b.Owner)
+                .FirstOrDefaultAsync(b => b.BusinessId == id);
             if (business == null) return NotFound();
 
             var adminId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             business.VerifiedByUserId = adminId;
             business.Owner.IsVerified = true;
-            business.Owner.Type = "BusinessOwner";
+            business.Owner.Type = "Business";
 
             await _context.SaveChangesAsync();
             return Ok(new { message = "Business verified." });
@@ -405,17 +404,51 @@ namespace Taqyim.Api.Controllers
         public async Task<IActionResult> UnverifyBusiness(int id)
         {
             var business = await _context.Businesses
-                .Include(b => b.Owner) 
+                .Include(b => b.Owner)
                 .FirstOrDefaultAsync(b => b.BusinessId == id);
-                    
+
             if (business == null) return NotFound();
 
             business.VerifiedByUserId = null;
             business.Owner.IsVerified = false;
-            business.Owner.Type = "User"; 
+            business.Owner.Type = "User";
 
             await _context.SaveChangesAsync();
             return Ok(new { message = "Business unverified." });
         }
+        
+[Authorize]
+[HttpGet("my")]
+public async Task<IActionResult> GetMyBusiness()
+{
+    var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+    var business = await _context.Businesses
+        .Include(b => b.BusinessLocations)
+        .FirstOrDefaultAsync(b => b.Owner.UserId == userId);
+
+    if (business == null)
+        return NotFound("No business found for this user.");
+
+    return Ok(new
+    {
+        businessId = business.BusinessId,
+        name = business.Name,
+        category = business.Category,
+        description = business.Description,
+        logo = business.Logo,
+        businessLocations = business.BusinessLocations.Select(loc => new
+        {
+            locationId = loc.LocationId,
+            label = loc.Label,
+            address = loc.Address,
+            latitude = loc.Latitude,
+            longitude = loc.Longitude
+        })
+    });
+}
+
+
+
     }
 }

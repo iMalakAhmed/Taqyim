@@ -68,7 +68,7 @@ namespace Taqyim.Api.Controllers
                 return NotFound(new { message = "Product or related business not found." });
 
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var isOwner = business.Owner.Type == "BusinessOwner";
+            var isOwner = business.Owner.Type == "Business";
             var isModerator = (business.Owner.Type == "Moderator" || business.Owner.Type == "Admin");
             if (!isOwner && !isModerator)
                 return Forbid();
@@ -99,7 +99,7 @@ namespace Taqyim.Api.Controllers
                 return NotFound(new { message = "Product or related business not found." });
 
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var isOwner = product.Business.Owner.Type == "BusinessOwner";
+            var isOwner = product.Business.Owner.Type == "Business";
             var isModerator = (product.Business.Owner.Type == "Moderator" || product.Business.Owner.Type == "Admin");
             if (!isOwner && !isModerator)
                 return Forbid();
@@ -124,7 +124,7 @@ namespace Taqyim.Api.Controllers
                 return NotFound(new { message = "Product or related business not found." });
 
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            var isOwner = product.Business.Owner.Type == "BusinessOwner";
+            var isOwner = product.Business.Owner.Type == "Business";
             var isModerator = (product.Business.Owner.Type == "Moderator" || product.Business.Owner.Type == "Admin");
 
             if (!isOwner && !isModerator)

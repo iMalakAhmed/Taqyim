@@ -16,7 +16,7 @@ export const businessApi = createApi({
     baseUrl: `${API_BASE_URL}/businesses`,
     credentials: "include",
     prepareHeaders: (headers) => {
-      const token = sessionStorage.getItem('token');
+      const token = sessionStorage.getItem("token");
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }
@@ -48,7 +48,7 @@ export const businessApi = createApi({
         url: `/`,
         method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
       }),
@@ -127,6 +127,13 @@ export const businessApi = createApi({
       query: () => `/`,
       providesTags: ["Business"],
     }),
+    getMyBusiness: builder.query<BusinessType, void>({
+      query: () => ({
+        url: "/my",
+        method: "GET",
+      }),
+      providesTags: ["Business"],
+    }),
   }),
 });
 
@@ -141,5 +148,6 @@ export const {
   useCreateLocationMutation,
   useDeleteLocationMutation,
   useDeleteBusinessMutation,
-  useGetAllBusinessesQuery
+  useGetAllBusinessesQuery,
+  useGetMyBusinessQuery,
 } = businessApi;
