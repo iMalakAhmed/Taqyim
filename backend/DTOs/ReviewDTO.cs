@@ -19,13 +19,19 @@ public class ReviewDTO
     public required BusinessDTO Business { get; set; }
     public required ProductDTO? Product { get; set; }
 
-    
+
     public ICollection<CommentDTO> Comments { get; set; } = new List<CommentDTO>();
     public ICollection<ReactionDTO> Reactions { get; set; } = new List<ReactionDTO>();
     public ICollection<TagDTO> Tags { get; set; } = new List<TagDTO>();
     public ICollection<MediaDTO> Media { get; set; } = new List<MediaDTO>();
 
 }
+
+public class MediaRefDTO
+{
+    public int MediaId { get; set; }
+}
+
 
 public class CreateReviewDTO
 {
@@ -42,7 +48,7 @@ public class CreateReviewDTO
     public List<string>? Tags { get; set; }
     public int? ProductId { get; set; }
 
-    public ICollection<MediaDTO> Media { get; set; } = new List<MediaDTO>();
+    public List<MediaRefDTO>? Media { get; set; }
 
 }
 

@@ -19,6 +19,6 @@ public class Media
     public required User User { get; set; }
     
     [ForeignKey("ReviewId")]
-public Review? Review { get; set; }
+    public Review? Review { get; set; }
 
 } 
