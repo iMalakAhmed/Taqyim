@@ -20,8 +20,7 @@ import { IconEdit, IconShare, IconTrash } from "@tabler/icons-react";
 import MapView from './ui/MapView';
 
 const BusinessProfile = () => {
-  const params = useParams();
-  const businessId = Number(params?.id);
+  const businessId = 1;
   const router = useRouter();
 
   // 🔄 All hooks come first (no conditionals above)
@@ -57,7 +56,7 @@ const BusinessProfile = () => {
   }
   if (error || !business) {
     // Redirect to a 404 page or display an error message if business not found
-    router.replace('/404'); // Or a custom not-found page
+    router.replace('/not-found'); // Or a custom not-found page
     return null;
   }
 
@@ -103,7 +102,6 @@ const BusinessProfile = () => {
               <FollowButton
                 followingId={businessId}
                 followingType="Business"
-                isInitiallyFollowing={isFollowing}
                 onToggle={() => refetchFollowers()}
               />
             </div>
@@ -115,8 +113,7 @@ const BusinessProfile = () => {
           <EditBusinessModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
-            onSave={(data) => {
-              console.log("Saved:", data);
+            onSave={() => {
               setIsModalOpen(false);
               refetch();
             }}
@@ -133,6 +130,10 @@ const BusinessProfile = () => {
               <Button variant="primary" className="ml-2 p-6" onClick={handleDelete}>
                 <IconTrash stroke={2} /> Delete Business
               </Button>
+            
+            <Button onClick={() => setIsModalOpen(true)} variant="primary" className="mr-3 p-6">
+                <IconEdit stroke={2} /> Edit Business
+              </Button>
             </>
           )}
 
@@ -143,11 +144,6 @@ const BusinessProfile = () => {
           >
             <IconShare stroke={2} /> Share profile
           </CopyToClipboardButton>
-          {canEdit && (
-            <Button onClick={() => router.push("/createBusiness")} variant="primary" className="ml-2 p-6">
-              <IconEdit stroke={2} /> Edit Business
-            </Button>
-          )}
         </div>
       </div>
 

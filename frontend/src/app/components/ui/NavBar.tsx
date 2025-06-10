@@ -32,6 +32,8 @@ export default function NavBar() {
     refetchOnMountOrArgChange: true,
   });
 
+  /* = useGetCurrentUserQuery();*/
+
 
   // Temporarily commented out for debugging signup redirect issue
   // React.useEffect(() => {
