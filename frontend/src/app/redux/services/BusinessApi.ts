@@ -123,6 +123,10 @@ export const businessApi = createApi({
         { type: "Business", id: businessId },
       ],
     }),
+    getAllBusinesses: builder.query<BusinessType[], void>({
+      query: () => `/`,
+      providesTags: ["Business"],
+    }),
   }),
 });
 
@@ -136,5 +140,6 @@ export const {
   useUpdateLocationMutation,
   useCreateLocationMutation,
   useDeleteLocationMutation,
-  useDeleteBusinessMutation
+  useDeleteBusinessMutation,
+  useGetAllBusinessesQuery
 } = businessApi;

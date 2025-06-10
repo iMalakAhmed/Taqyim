@@ -19,6 +19,8 @@ import {
   IconStarFilled,
   IconTrash,
   IconTrashOff,
+  IconBookmark,
+  IconBookmarkFilled,
 } from "@tabler/icons-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setReactionCount } from "@/app/redux/slices/reactionCounterSlice";
@@ -236,9 +238,21 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
       <div className="flex flex-col">
         <HorizontalLine />
         <div className="flex flex-row items-center pt-3">
-          <h1 className="font-heading font-bold text-lg">Business Name</h1>
-          {review.productId && (
-            <h2 className="font-heading text-base pl-2">- Product Name</h2>
+          <Link
+            href={`/business/${review.business.businessId}`}
+            onClick={(e) => stopPropagation(e)}
+            className="font-heading font-bold text-lg hover:underline"
+          >
+            {review.business.name}
+          </Link>
+          {review.product && (
+            <Link
+              href={`/product/${review.product.productId}`}
+              onClick={(e) => stopPropagation(e)}
+              className="font-heading text-base pl-2 hover:underline"
+            >
+              - {review.product.name}
+            </Link>
           )}
 
           {isEditing ? (

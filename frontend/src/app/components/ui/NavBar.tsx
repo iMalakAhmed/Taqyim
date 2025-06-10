@@ -14,6 +14,8 @@ import {
   IconUserCircle,
   IconUserPlus,
   IconX,
+  IconBookmark,
+  IconBookmarkFilled,
 } from "@tabler/icons-react";
 import { useDispatch } from "react-redux";
 import { useGetCurrentUserQuery, authApi, useSignOutMutation } from "../../redux/services/authApi";
@@ -32,6 +34,7 @@ import {
   SearchReviewDTO,
   SearchUserDTO,
 } from "@/app/redux/services/types";
+import { Avatar, AvatarImage, AvatarFallback } from "@/app/components/ui/avatar";
 
 export default function NavBar() {
   const pathname = usePathname();
@@ -220,86 +223,106 @@ export default function NavBar() {
           </Link>
         )}
 
-        <input />
-
         <div className="flex-1 mx-4 flex justify-center">
-          <form className="w-full max-w-lg">
+          <form
+            onSubmit={(e) => e.preventDefault()}
+            className="relative flex items-center w-full max-w-lg mx-auto border-2 border-stone-800 rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] bg-stone-50"
+          >
             <input
               type="text"
-              placeholder="Search Reviews..."
-              className="w-full h-10 px-4 rounded-full text-text border border-text focus:outline-none focus:border-accent"
+              placeholder="Search businesses, users, reviews..."
               value={searchQuery}
               onChange={handleSearchChange}
               onFocus={handleFocus}
               onBlur={handleBlur}
-              onKeyDown={handleKeyDown} // Add onKeyDown handler
+              onKeyDown={handleKeyDown}
+              className="w-full p-3 font-serif text-stone-900 placeholder-stone-500 bg-stone-50 focus:outline-none focus:ring-0 rounded-none"
             />
-            {showSearchResults && debouncedSearchQuery.length > 0 && (
-              <div className="absolute mt-2 w-full bg-background border border-gray-300 rounded shadow-lg max-h-60 overflow-y-auto z-50">
-                {allUsers.length > 0 && (
-                  <div className="p-2 border-b border-gray-200">
-                    <h3 className="font-bold text-lg">Users</h3>
-                    {allUsers.map((userResult) => (
-                      <Link
-                        key={userResult.userId}
-                        href={`/profile/${userResult.userId}`}
-                        onClick={handleResultClick}
-                        className="block p-2 hover:bg-gray-100 cursor-pointer"
-                      >
-                        {userResult.userName}
-                      </Link>
-                    ))}
-                  </div>
+            <button
+              type="submit"
+              className="p-3 bg-stone-800 text-white rounded-none hover:bg-stone-700 transition-colors duration-200"
+            >
+              <IconSearch className="h-5 w-5" />
+            </button>
+            {showSearchResults && debouncedSearchQuery && (
+              <div className="absolute z-10 w-full mt-2 top-full left-0 bg-stone-50 border-2 border-stone-800 rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] max-h-[80vh] overflow-y-auto overflow-x-hidden newspaper-scroll-bar py-4">
+                {/* Search for keyword in reviews option */}
+                {debouncedSearchQuery && (
+                  <Link
+                    href={`/search?q=${encodeURIComponent(debouncedSearchQuery)}&filter=reviews`}
+                    className="block px-4 py-3 text-lg font-bold font-serif text-blue-600 hover:bg-stone-100 transition-colors duration-200 border-b border-stone-200"
+                    onClick={handleResultClick}
+                  >
+                    Search for '{debouncedSearchQuery}' in reviews
+                  </Link>
                 )}
-                {allBusinesses.length > 0 && (
-                  <div className="p-2 border-b border-gray-200">
-                    <h3 className="font-bold text-lg">Businesses</h3>
-                    {allBusinesses.map((businessResult) => (
-                      <Link
-                        key={businessResult.businessId}
-                        href={`/Business/${businessResult.businessId}`}
-                        onClick={handleResultClick}
-                        className="block p-2 hover:bg-gray-100 cursor-pointer"
-                      >
-                        {businessResult.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-                {allReviews.length > 0 && (
-                  <div className="p-2">
-                    <h3 className="font-bold text-lg">Reviews</h3>
-                    {allReviews.map((reviewResult) => (
-                      <Link
-                        key={reviewResult.reviewId}
-                        href={`/reviews/${reviewResult.reviewId}`}
-                        onClick={handleResultClick}
-                        className="block p-2 hover:bg-gray-100 cursor-pointer"
-                      >
-                        Review for {reviewResult.businessName} by{" "}
-                        {reviewResult.userName}:{" "}
-                        {reviewResult.comment.substring(0, 50)}...
-                      </Link>
-                    ))}
-                  </div>
-                )}
-                {allUsers.length === 0 &&
-                  allBusinesses.length === 0 &&
-                  allReviews.length === 0 &&
-                  debouncedSearchQuery.length > 0 &&
-                  !isLoadingUsers &&
-                  !isLoadingBusinesses &&
-                  !isLoadingReviews && (
-                    <div className="p-2 text-center text-gray-500">
-                      No results found.
+                <div className="space-y-4 px-4 pt-4">
+                  {/* Only show users and businesses directly in dropdown, reviews are for dedicated page */}
+                  {allUsers.length > 0 && (
+                    <div>
+                      <h3 className="text-xl font-bold font-serif text-stone-900 mb-2 border-b-2 border-stone-800 pb-1">Users</h3>
+                      {allUsers.map((user) => (
+                        <Link
+                          href={`/profile/${user.userId}`}
+                          key={user.userId}
+                          className="flex items-center gap-3 py-2 hover:bg-stone-100 transition-colors duration-200 rounded-md"
+                          onClick={handleResultClick}
+                        >
+                          <Avatar className="h-12 w-12 border-2 border-stone-800 flex-shrink-0">
+                            <AvatarImage src={user.profilePic || undefined} />
+                            <AvatarFallback className="font-serif text-stone-800 bg-stone-100">{user.userName[0]}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-bold font-serif text-stone-900">{user.userName}</p>
+                            <p className="text-sm text-stone-600 font-serif">{user.email}</p>
+                          </div>
+                        </Link>
+                      ))}
                     </div>
                   )}
-                {(isLoadingUsers || isLoadingBusinesses || isLoadingReviews) &&
-                  debouncedSearchQuery.length > 0 && (
-                    <div className="p-2 text-center text-gray-500">
-                      Loading...
+
+                  {allBusinesses.length > 0 && (
+                    <div>
+                      <h3 className="text-xl font-bold font-serif text-stone-900 mt-4 mb-2 border-b-2 border-stone-800 pb-1">Businesses</h3>
+                      {allBusinesses.map((business) => (
+                        <Link
+                          href={`/business/${business.businessId}`}
+                          key={business.businessId}
+                          className="flex items-center gap-3 py-2 hover:bg-stone-100 transition-colors duration-200 rounded-md"
+                          onClick={handleResultClick}
+                        >
+                          <Avatar className="h-12 w-12 border-2 border-stone-800 flex-shrink-0">
+                            <AvatarFallback className="font-serif text-stone-800 bg-stone-100">{business.name[0]}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-bold font-serif text-stone-900">{business.name}</p>
+                            <p className="text-sm text-stone-600 font-serif">{business.category}</p>
+                          </div>
+                        </Link>
+                      ))}
                     </div>
                   )}
+
+                  {!isLoadingUsers && !isLoadingBusinesses && 
+                   allUsers.length === 0 && allBusinesses.length === 0 && (
+                    <p className="text-center text-stone-500 font-serif py-4">No direct profile or business matches found.</p>
+                  )}
+
+                  {((usersData && (usersPage * pageSize < usersData.totalCount)) || 
+                   (businessesData && (businessesPage * pageSize < businessesData.totalCount))) && (
+                    <div className="text-center py-4">
+                      <button
+                        onClick={() => {
+                          if (usersData && (usersPage * pageSize < usersData.totalCount)) setUsersPage((prev) => prev + 1);
+                          if (businessesData && (businessesPage * pageSize < businessesData.totalCount)) setBusinessesPage((prev) => prev + 1);
+                        }}
+                        className="px-4 py-2 bg-stone-800 text-white font-serif rounded-none hover:bg-stone-700 transition-colors duration-200 border-2 border-stone-800 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                      >
+                        Load More Profiles
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </form>
@@ -331,6 +354,11 @@ export default function NavBar() {
               <Button variant="none" size="sm" className="hover:text-secondary">
                 <IconBellRinging2 />
               </Button>
+              <Link href="/saved" className="text-text hover:text-secondary">
+                <Button variant="none" size="sm">
+                  <IconBookmark />
+                </Button>
+              </Link>
               <Button variant="none" size="sm" className="hover:text-secondary">
                 <IconMail />
               </Button>
@@ -414,7 +442,7 @@ export default function NavBar() {
                   <IconBellRinging2 size={20} className="mr-2" />
                   Notifications
                 </Link>
-
+                
                 <Link
                   href="/messages"
                   className="flex items-center text-text hover:text-accent py-2"

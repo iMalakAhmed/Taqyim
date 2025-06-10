@@ -55,6 +55,17 @@ public class SearchController : ControllerBase
             return Ok(results);
         }
 
+        // GET /api/search/products
+        [HttpGet("products")]
+        public async Task<ActionResult<PaginatedResultDTO<SearchProductDTO>>> SearchProducts([FromQuery] string? query, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            if (string.IsNullOrEmpty(query))
+                return BadRequest("Search query is required");
+
+            var results = await _searchService.SearchProductsAsync(query, page, pageSize);
+            return Ok(results);
+        }
+
         // GET /api/search
         [HttpGet]
         public async Task<IActionResult> SearchAll([FromQuery] string? query)

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Taqyim.Api.Models;
+using System.Text.Json;
 
 namespace Taqyim.Api.Data
 {
@@ -23,7 +24,7 @@ namespace Taqyim.Api.Data
         public DbSet<Badge> Badges { get; set; }
         public DbSet<UserBadge> UserBadges { get; set; }
         public DbSet<Media> Media { get; set; }
-        public DbSet<SavedReview> SavedReviews { get; set; }
+        //public DbSet<SavedReview> SavedReviews { get; set; }
         public DbSet<Product> Products { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -52,9 +53,16 @@ namespace Taqyim.Api.Data
                 .HasForeignKey(b => b.VerifiedByUserId)
                 .OnDelete(DeleteBehavior.SetNull);
 
+                // Custom ValueConverter for Category (ICollection<string> to JSON string)
+                var stringListConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<
+                    ICollection<string>?,
+                    string>(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null), // Convert List<string> to JSON string
+                    v => JsonSerializer.Deserialize<ICollection<string>>(v, (JsonSerializerOptions?)null)!); // Convert JSON string to List<string>
+
                 modelBuilder.Entity<Business>()
                 .Property(b => b.Category)
-                .HasConversion<string>();
+                .HasConversion(stringListConverter);
 
                 modelBuilder.Entity<Business>()
                 .HasOne(b => b.VerifiedByUser)
@@ -245,7 +253,7 @@ namespace Taqyim.Api.Data
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
-            modelBuilder.Entity<SavedReview>(entity =>
+            /*modelBuilder.Entity<SavedReview>(entity =>
             {
                 entity.HasKey(e => e.SavedReviewId);
 
@@ -258,7 +266,7 @@ namespace Taqyim.Api.Data
                     .WithMany(p => p.SavedByUsers)
                     .HasForeignKey(d => d.ReviewId)
                     .OnDelete(DeleteBehavior.Cascade);
-            });
+            });*/
         }
     }
 }

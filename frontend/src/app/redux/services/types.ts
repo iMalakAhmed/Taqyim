@@ -68,6 +68,14 @@ export interface ProductType {
   description?: string | null;
 }
 
+export interface SearchProductDTO {
+  productId: number;
+  name: string;
+  description?: string | null;
+  businessId: number;
+  businessName: string;
+}
+
 export interface BusinessLocationCreateType {
   locationId?: number;
   address?: string | null;
@@ -138,6 +146,7 @@ export interface ReviewType {
   savedAt?: string | null;
   user: UserType;
   business: BusinessType;
+  product?: ProductType;
   comments: CommentType[];
   reactions: ReactionType[];
   tags: TagType[];
@@ -259,7 +268,10 @@ export interface SearchReviewDTO {
   tags: string[];
 }
 
+
+
 export interface PaginatedResult<T> {
   items: T[];
   totalCount: number;
 }
+
