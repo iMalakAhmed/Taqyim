@@ -15,15 +15,10 @@ import { setAuthCookie } from "../../actions/auth";
 export default function SignupPage() {
   const [userType, setUserType] = useState<"User" | "Business" | null>(null);
   const [form, setForm] = useState({
-    firstName: "",
+    userName: "",
     email: "",
     password: "",
     confirmPassword: "",
-    // Business-specific fields
-    businessName: "",
-    businessCategory: "",
-    businessDescription: "",
-    businessAddress: "",
   });
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,7 +26,9 @@ export default function SignupPage() {
 
   const [register, { isLoading: isRegistering }] = useRegisterMutation();
   const [login, { isLoading: isLoggingIn }] = useLoginMutation();
-  const { refetch: refetchCurrentUser } = useGetCurrentUserQuery();
+  const { refetch: refetchCurrentUser } = useGetCurrentUserQuery(undefined, {
+    skip: true,
+  });
 
   const handleRegistrationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,43 +42,32 @@ export default function SignupPage() {
     }
 
     try {
-      // 1. Register the user
-      const registerResult = await register({
+      // 1. Register
+      await register({
         email: form.email,
         password: form.password,
-        userName: form.firstName,
+        userName: form.userName,
         type: userType!,
-        businessName: form.businessName,
-        businessCategory: form.businessCategory,
-        businessDescription: form.businessDescription,
-        businessAddress: form.businessAddress,
       }).unwrap();
 
-      // 2. Login after successful registration
+      // 2. Login
       const loginResult = await login({
         email: form.email,
         password: form.password,
       }).unwrap();
 
-      // Set the token cookie using the server action
-      // await setAuthCookie(loginResult.token);
-      sessionStorage.setItem('token', loginResult.token);
+      sessionStorage.setItem("token", loginResult.token);
       console.log("Token stored in session storage:", loginResult.token);
 
-      // 3. Wait for the current user query to complete with a small delay
-      await new Promise(resolve => setTimeout(resolve, 100)); // Add a 100ms delay
-      await refetchCurrentUser();
-
-      // 4. Redirect based on user type or redirect URL from backend
-      if (registerResult.redirectUrl) {
-        router.push(registerResult.redirectUrl);
+      // 3. Redirect based on userType (not backend)
+      if (userType === "Business") {
+        router.push("/createBusiness");
       } else {
-        if (userType === "Business") {
-          router.push("/createBusiness");
-        } else {
-          router.push("/createProfile");
-        }
+        router.push("/createProfile");
       }
+
+      // 4. Optional: background user refetch
+      refetchCurrentUser().catch(console.error);
     } catch (err: any) {
       setErrorMsg(err.data?.message || err.error || "An error occurred");
     } finally {
@@ -231,18 +217,18 @@ export default function SignupPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 1.0, duration: 0.6 }}
             >
-              <label htmlFor="firstName" className="font-serif text-text mb-1">
+              <label htmlFor="userName" className="font-serif text-text mb-1">
                 User Name
               </label>
               <input
-                id="firstName"
-                name="firstName"
+                id="userName"
+                name="userName"
                 type="text"
                 autoComplete="username"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border text-text rounded-t-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
                 placeholder="User Name"
-                value={form.firstName}
+                value={form.userName}
                 onChange={handleChange}
               />
             </motion.div>
@@ -318,92 +304,6 @@ export default function SignupPage() {
                 onChange={handleChange}
               />
             </motion.div>
-
-            {/* Business-specific fields (conditionally rendered) */}
-            {userType === "Business" && (
-              <motion.div
-                className="space-y-5"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                transition={{ delay: 1.4, duration: 0.6 }}
-              >
-                <div className="flex flex-col">
-                  <label
-                    htmlFor="businessName"
-                    className="font-serif text-text mb-1"
-                  >
-                    Business Name
-                  </label>
-                  <input
-                    id="businessName"
-                    name="businessName"
-                    type="text"
-                    required={userType === "Business"}
-                    className="appearance-none rounded-none relative block w-full px-3 py-2 border placeholder-gray-500 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
-                    placeholder="Business Name"
-                    value={form.businessName}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="flex flex-col">
-                  <label
-                    htmlFor="businessCategory"
-                    className="font-serif text-[var(--text)] mb-1"
-                  >
-                    Business Category
-                  </label>
-                  <input
-                    id="businessCategory"
-                    name="businessCategory"
-                    type="text"
-                    required={userType === "Business"}
-                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
-                    placeholder="Business Category"
-                    value={form.businessCategory}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="flex flex-col">
-                  <label
-                    htmlFor="businessDescription"
-                    className="font-serif text-[var(--text)] mb-1"
-                  >
-                    Business Description
-                  </label>
-                  <input
-                    id="businessDescription"
-                    name="businessDescription"
-                    type="text"
-                    required={userType === "Business"}
-                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
-                    placeholder="Business Description"
-                    value={form.businessDescription}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="flex flex-col">
-                  <label
-                    htmlFor="businessAddress"
-                    className="font-serif text-[var(--text)] mb-1"
-                  >
-                    Business Address
-                  </label>
-                  <input
-                    id="businessAddress"
-                    name="businessAddress"
-                    type="text"
-                    required={userType === "Business"}
-                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
-                    placeholder="Business Address"
-                    value={form.businessAddress}
-                    onChange={handleChange}
-                  />
-                </div>
-              </motion.div>
-            )}
 
             {errorMsg && (
               <div

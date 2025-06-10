@@ -1,0 +1,9 @@
+user_id,item_id,item_type,score
+1,1,Business,4
+1,1,Business,5
+1,1,Business,5
+1,4,User,1
+1,1,Review,0.8
+1,1,Review,0.6
+1,1,Review,0.6
+1,1,Review,0.6

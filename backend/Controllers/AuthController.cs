@@ -26,23 +26,66 @@ namespace Taqyim.Api.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
+            Console.WriteLine("Step 1: Starting registration");
+
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                return BadRequest(new { message = "Validation failed", errors });
+            }
+
+            Console.WriteLine("Step 2: Validation passed");
+
             if (await _context.Users.AnyAsync(u => u.Email == request.Email))
             {
                 return BadRequest(new { message = "Email already exists" });
             }
+
+            Console.WriteLine("Step 3: Email is unique");
+
             var user = new User
             {
                 Email = request.Email,
                 UserName = request.UserName,
                 PasswordHash = HashPassword(request.Password),
-                Type = "User",
+                Type = request.Type,
                 CreatedAt = DateTime.UtcNow
             };
+
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
+
+            Console.WriteLine("Step 4: User created");
+
+            if (request.Type == "Business")
+            {
+                var business = new Business
+                {
+                    UserId = user.UserId,
+                    CreatedAt = DateTime.UtcNow,
+                };
+
+                _context.Businesses.Add(business);
+                await _context.SaveChangesAsync();
+
+                Console.WriteLine("Step 5: Business created");
+            }
+
             var token = _jwtService.GenerateToken(user);
-            return Ok(new { token });
+
+            Console.WriteLine("Step 6: Token generated");
+
+            return Ok(new
+            {
+                token,
+                user = new {
+                    id = user.UserId,
+                    email = user.Email,
+                    userName = user.UserName
+                }
+            });
         }
+
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
@@ -57,7 +100,7 @@ namespace Taqyim.Api.Controllers
         }
 
         [Authorize]
-        [HttpGet("userinfo")]
+        [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUser()
         {
             var userId=int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
@@ -79,8 +122,9 @@ namespace Taqyim.Api.Controllers
         }
 
         [HttpPost("signout")]
-        public IActionResult SignOut(){
-            // No server-side action needed for cookie-based auth removal
+        public new IActionResult SignOut()
+        {
+            Response.Cookies.Delete("token");
             return Ok();
         }
 
@@ -107,6 +151,8 @@ namespace Taqyim.Api.Controllers
 
         [Required]
         public string UserName { get; set; }=string.Empty;
+
+        public string? Type { get; set; }
         
     }
 

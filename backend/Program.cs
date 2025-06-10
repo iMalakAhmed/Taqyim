@@ -5,16 +5,48 @@ using System.Text;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.OpenApi.Models;
 
 using Taqyim.Api.Data; 
 using Taqyim.Api.Services;
+using Taqyim.Api.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Taqyim.Api", Version = "v1" });
+
+    // 🔒 Enable JWT support in Swagger
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Enter 'Bearer' [space] and then your JWT token.\n\nExample: Bearer eyJhbGciOiJIUzI1NiIsInR5..."
+    });
+
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
+
 
 // Configure CORS
 builder.Services.AddCors(options =>
@@ -82,6 +114,10 @@ builder.Services.AddAuthentication(x =>
 
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<SearchService>();
+builder.Services.AddScoped<RecommendationDataService>();
+builder.Services.AddScoped<AnalyticsService>();
+
 
 // Configure database based on environment
 if (builder.Environment.IsProduction())
@@ -94,6 +130,10 @@ else
     builder.Services.AddDbContext<ApplicationDbContext>(opts =>
         opts.UseSqlServer(builder.Configuration.GetConnectionString("TaqyimDb")));
 }
+
+// Add NotificationController as a scoped service
+builder.Services.AddScoped<NotificationController>();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 

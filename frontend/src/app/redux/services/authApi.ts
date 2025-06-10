@@ -9,14 +9,17 @@ export interface CurrentUserResponse {
   email: string;
   userName: string;
   type: string;
-  // Add business information if the user is a business owner
-  usersBusinesses?: Array<{ BusinessId: number; Name: string }>; // Adjusted to match backend DTO structure
 }
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
+
+console.log("authApi - NEXT_PUBLIC_API_BASE_URL:", process.env.NEXT_PUBLIC_API_BASE_URL);
+console.log("authApi - API_BASE_URL constructed:", API_BASE_URL);
 
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
-    // No baseUrl here, as we are using full URLs below
+    baseUrl: API_BASE_URL,
     credentials: "include",
     prepareHeaders: (headers) => {
       const token = sessionStorage.getItem('token'); // Get token from session storage
@@ -30,23 +33,37 @@ export const authApi = createApi({
   endpoints: (builder) => ({
     login: builder.mutation<AuthResponse, LoginCredentials>({
       query: (credentials) => ({
-        url: "http://localhost:5273/api/auth/login", // Full URL
+        url: "/auth/login",
         method: "POST",
         body: credentials,
       }),
     }),
     register: builder.mutation<AuthResponse, RegisterData>({
       query: (data) => ({
-        url: "http://localhost:5273/api/auth/register", // Full URL
+        url: "/auth/register",
         method: "POST",
         body: data,
       }),
     }),
     getCurrentUser: builder.query<CurrentUserResponse, void>({
-      query: () => "http://localhost:5273/api/auth/userinfo", // Changed endpoint name
+      query: () => "/auth/me",
+    }),
+    signOut: builder.mutation<void, void>({
+      query: () => ({
+        url: "/auth/signout",
+        method: "POST",
+      }),
+      onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
+        try {
+          await queryFulfilled;
+          dispatch(authApi.util.resetApiState());
+        } catch (error) {
+          console.error("Sign out failed:", error);
+        }
+      },
     }),
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useGetCurrentUserQuery } =
+export const { useLoginMutation, useRegisterMutation, useGetCurrentUserQuery, useSignOutMutation } =
   authApi;

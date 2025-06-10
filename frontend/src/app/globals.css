@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import url("https://fonts.googleapis.com/css2?family=Inter&family=Playfair+Display&display=swap");
 
+
 html,
 body {
   overflow-x: hidden;

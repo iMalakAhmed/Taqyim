@@ -4,7 +4,11 @@ import {
   IconMail,
 } from "@tabler/icons-react";
 
-export default function TeamSection() {
+export default function TeamSection({
+  compact = false,
+}: {
+  compact?: boolean;
+}) {
   const team = [
     {
       name: "Haya Osama",
@@ -34,18 +38,20 @@ export default function TeamSection() {
   ];
 
   return (
-    <div className="space-y-4 text-text-inverse">
+    <div className="space-y-2">
       {team.map((member) => (
-        <div key={member.name} className="flex items-center space-x-3">
-          <span className="text-sm font-medium w-32">{member.name}</span>
+        <div key={member.name} className="flex items-center gap-2 flex-wrap">
+          {!compact && (
+            <span className="w-24 text-xs font-medium">{member.name}</span>
+          )}
           <a href={member.github} target="_blank" rel="noopener noreferrer">
-            <IconBrandGithub className="w-5 h-5 hover:text-accent transition" />
+            <IconBrandGithub className="w-4 h-4 hover:text-accent" />
           </a>
           <a href={member.linkedin} target="_blank" rel="noopener noreferrer">
-            <IconBrandLinkedin className="w-5 h-5 hover:text-primary transition" />
+            <IconBrandLinkedin className="w-4 h-4 hover:text-primary" />
           </a>
           <a href={`mailto:${member.email}`}>
-            <IconMail className="w-5 h-5 hover:text-secondary transition" />
+            <IconMail className="w-4 h-4 hover:text-secondary" />
           </a>
         </div>
       ))}

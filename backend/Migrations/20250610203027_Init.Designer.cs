@@ -12,8 +12,8 @@ using Taqyim.Api.Data;
 namespace Taqyim.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250609145726_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250610203027_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -326,6 +326,8 @@ namespace Taqyim.Api.Migrations
 
                     b.HasKey("MediaId");
 
+                    b.HasIndex("ReviewId");
+
                     b.HasIndex("UserId");
 
                     b.ToTable("Media");
@@ -368,6 +370,9 @@ namespace Taqyim.Api.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationId"));
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
 
                     b.Property<string>("NotificationType")
                         .HasColumnType("nvarchar(max)");
@@ -491,65 +496,6 @@ namespace Taqyim.Api.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Reviews");
-                });
-
-            modelBuilder.Entity("Taqyim.Api.Models.ReviewImage", b =>
-                {
-                    b.Property<int>("ReviewImageId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReviewImageId"));
-
-                    b.Property<string>("Caption")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ReviewId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ReviewImageId");
-
-                    b.HasIndex("ReviewId");
-
-                    b.ToTable("ReviewImages");
-                });
-
-            modelBuilder.Entity("Taqyim.Api.Models.SavedReview", b =>
-                {
-                    b.Property<int>("SavedReviewId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SavedReviewId"));
-
-                    b.Property<int>("ReviewId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("SavedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("SavedReviewId");
-
-                    b.HasIndex("ReviewId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("SavedReviews");
                 });
 
             modelBuilder.Entity("Taqyim.Api.Models.Tag", b =>
@@ -791,11 +737,17 @@ namespace Taqyim.Api.Migrations
 
             modelBuilder.Entity("Taqyim.Api.Models.Media", b =>
                 {
+                    b.HasOne("Taqyim.Api.Models.Review", "Review")
+                        .WithMany("Media")
+                        .HasForeignKey("ReviewId");
+
                     b.HasOne("Taqyim.Api.Models.User", "User")
                         .WithMany("Media")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Review");
 
                     b.Navigation("User");
                 });
@@ -896,36 +848,6 @@ namespace Taqyim.Api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Taqyim.Api.Models.ReviewImage", b =>
-                {
-                    b.HasOne("Taqyim.Api.Models.Review", "Review")
-                        .WithMany("ReviewImages")
-                        .HasForeignKey("ReviewId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Review");
-                });
-
-            modelBuilder.Entity("Taqyim.Api.Models.SavedReview", b =>
-                {
-                    b.HasOne("Taqyim.Api.Models.Review", "Review")
-                        .WithMany("SavedByUsers")
-                        .HasForeignKey("ReviewId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Taqyim.Api.Models.User", "User")
-                        .WithMany("SavedReviews")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Review");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Taqyim.Api.Models.Tag", b =>
                 {
                     b.HasOne("Taqyim.Api.Models.Review", "Review")
@@ -1010,11 +932,9 @@ namespace Taqyim.Api.Migrations
                 {
                     b.Navigation("Comments");
 
+                    b.Navigation("Media");
+
                     b.Navigation("Reactions");
-
-                    b.Navigation("ReviewImages");
-
-                    b.Navigation("SavedByUsers");
 
                     b.Navigation("Tags");
                 });
@@ -1046,8 +966,6 @@ namespace Taqyim.Api.Migrations
                     b.Navigation("Reactions");
 
                     b.Navigation("Reviews");
-
-                    b.Navigation("SavedReviews");
 
                     b.Navigation("UserBadges");
 

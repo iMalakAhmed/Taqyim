@@ -177,6 +177,7 @@ namespace Taqyim.Api.Migrations
                     NotificationType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SenderId = table.Column<int>(type: "int", nullable: true),
                     Timestamp = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false),
                     UserId1 = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -456,33 +457,6 @@ namespace Taqyim.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SavedReviews",
-                columns: table => new
-                {
-                    SavedReviewId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    ReviewId = table.Column<int>(type: "int", nullable: false),
-                    SavedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SavedReviews", x => x.SavedReviewId);
-                    table.ForeignKey(
-                        name: "FK_SavedReviews_Reviews_ReviewId",
-                        column: x => x.ReviewId,
-                        principalTable: "Reviews",
-                        principalColumn: "ReviewId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_SavedReviews_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Tags",
                 columns: table => new
                 {
@@ -671,16 +645,6 @@ namespace Taqyim.Api.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SavedReviews_ReviewId",
-                table: "SavedReviews",
-                column: "ReviewId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SavedReviews_UserId",
-                table: "SavedReviews",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Tags_ReviewId",
                 table: "Tags",
                 column: "ReviewId");
@@ -732,9 +696,6 @@ namespace Taqyim.Api.Migrations
 
             migrationBuilder.DropTable(
                 name: "Reactions");
-
-            migrationBuilder.DropTable(
-                name: "SavedReviews");
 
             migrationBuilder.DropTable(
                 name: "Tags");

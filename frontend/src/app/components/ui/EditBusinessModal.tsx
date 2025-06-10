@@ -12,6 +12,15 @@ import {
   useDeleteLocationMutation,
 } from "@/app/redux/services/BusinessApi";
 import toast from "react-hot-toast";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMapEvents,
+  useMap,
+} from "react-leaflet";
+import L from "leaflet";
 
 interface Props {
   isOpen: boolean;
@@ -27,6 +36,40 @@ interface Props {
   };
 }
 
+function LocationPicker({ onSelect }: { onSelect: (lat: number, lng: number) => void }) {
+  const [disableClick, setDisableClick] = useState(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setDisableClick(false), 1000);
+    return () => clearTimeout(timeout);
+  }, [disableClick]);
+
+  useMapEvents({
+    click(e) {
+      if (!disableClick) onSelect(e.latlng.lat, e.latlng.lng);
+    },
+  });
+
+  return null;
+}
+
+function FitBounds({ locations }: { locations: BusinessLocationUpdateType[] }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (locations.length > 0) {
+      const bounds = L.latLngBounds(
+        locations.map((loc) => [loc.latitude, loc.longitude] as [number, number])
+      );
+      map.fitBounds(bounds, { padding: [50, 50] });
+    } else {
+      map.setView([30.0444, 31.2357], 13);
+    }
+  }, [locations, map]);
+
+  return null;
+}
+
 const EditBusinessModal: React.FC<Props> = ({
   isOpen,
   onClose,
@@ -37,6 +80,7 @@ const EditBusinessModal: React.FC<Props> = ({
   const [category, setCategory] = useState(initialData.category || "");
   const [description, setDescription] = useState(initialData.description || "");
   const [logo, setLogo] = useState(initialData.logo || "");
+  const [address, setAddress] = useState("");
   const [locations, setLocations] = useState<BusinessLocationUpdateType[]>([]);
 
   const [updateBusiness] = useUpdateBusinessMutation();
@@ -48,91 +92,73 @@ const EditBusinessModal: React.FC<Props> = ({
     setLocations(initialData.businessLocations || []);
   }, [initialData.businessLocations]);
 
-  const handleLocationChange = (
-    index: number,
-    key: keyof BusinessLocationUpdateType,
-    value: any
-  ) => {
-    const updated = [...locations];
-    updated[index] = { ...updated[index], [key]: value };
-    setLocations(updated);
-  };
-
-  const addNewLocation = () => {
-    setLocations([
-      ...locations,
-      {
-        label: "",
-        address: "",
-        latitude: null,
-        longitude: null,
-      },
-    ]);
-  };
-
-  const removeLocation = (index: number) => {
-    const updated = [...locations];
-    updated.splice(index, 1);
-    setLocations(updated);
+  const geocodeAddress = async () => {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(
+          address
+        )}&format=json`
+      );
+      const data = await res.json();
+      if (data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lng = parseFloat(data[0].lon);
+        const newLocation: BusinessLocationUpdateType = {
+          label: data[0].display_name?.split(",")[0] || "Selected on map",
+          address: data[0].display_name || "Selected on map",
+          latitude: lat,
+          longitude: lng,
+        };
+        setLocations((prev) => [...prev, newLocation]);
+        toast.success("Location added");
+      } else {
+        toast.error("Location not found");
+      }
+    } catch (err) {
+      console.error("Geocoding error:", err);
+      toast.error("Geocoding failed");
+    }
   };
 
   const handleSubmit = async () => {
-    const hasInvalidLocation = locations.some(
-      (loc) =>
-        !loc.address ||
-        typeof loc.latitude !== "number" ||
-        typeof loc.longitude !== "number"
-    );
-
-    if (!name || hasInvalidLocation) {
-      toast.error("Please fill all required fields correctly.");
+    if (!name) {
+      toast.error("Please enter a business name.");
       return;
     }
 
     try {
-      await updateBusiness({
+      const result: any = await updateBusiness({
         id: initialData.businessId,
-        body: { name, category, description, logo },
+        body: {
+          name,
+          category: typeof category === "string" ? (category ? [category] : []) : category,
+          description,
+          logo,
+        },
       });
 
-      const existingIds = (initialData.businessLocations?.map((l) => l.locationId).filter((id): id is number => typeof id === "number") ?? []);
-      const updatedIds = locations.map((l) => l.locationId).filter((id): id is number => typeof id === "number");
-
-      for (const existingId of existingIds) {
-        if (!updatedIds.includes(existingId)) {
-          await deleteLocation({
-            businessId: initialData.businessId,
-            locationId: existingId,
-          });
-        }
+      if (!result || 'error' in result || !result.data) {
+        throw new Error("Business update failed");
       }
 
       for (const loc of locations) {
-        if (loc.locationId && loc.locationId > 0) {
+        if (loc.locationId) {
           await updateLocation({
             businessId: initialData.businessId,
             locationId: loc.locationId,
             body: loc,
           });
         } else {
-          const result = await addLocation({
+          await addLocation({
             businessId: initialData.businessId,
             body: loc,
-          }) as { data?: { locationId?: number } };
-
-          if ("data" in result && result.data?.locationId) {
-            loc.locationId = result.data.locationId;
-          }
+          });
         }
       }
 
-      toast.success("Business updated successfully.");
-
+      toast.success("Business and locations updated.");
       onSave({
-        name,
-        category,
-        description,
-        logo,
+        ...(result.data || {}),
         businessLocations: locations,
       });
 
@@ -146,8 +172,8 @@ const EditBusinessModal: React.FC<Props> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-opacity-50 flex justify-center items-start z-50 overflow-y-auto">
-      <div className="bg-gray-300 opacity-80 p-6 rounded-lg w-full max-w-md shadow-lg overflow-y-auto max-h-[90vh] mt-24">
+    <div className="fixed inset-0 flex justify-center items-start z-50 overflow-y-auto">
+      <div className="bg-gray-300 p-6 rounded-lg w-full max-w-md shadow-lg overflow-y-auto max-h-[90vh] mt-24">
         <h2 className="text-xl font-semibold mb-4">Edit Business</h2>
 
         <input
@@ -182,51 +208,132 @@ const EditBusinessModal: React.FC<Props> = ({
         />
 
         <h3 className="text-lg font-semibold mb-2">Business Locations</h3>
-        {locations.map((loc, idx) => (
-          <div key={loc.locationId || idx} className="mb-4 border p-2 rounded bg-white">
-            <input
-              type="text"
-              placeholder="Label"
-              value={loc.label || ""}
-              onChange={(e) => handleLocationChange(idx, "label", e.target.value)}
-              className="w-full mb-2 p-2 border rounded"
-            />
-            <input
-              type="text"
-              placeholder="Address"
-              value={loc.address || ""}
-              onChange={(e) => handleLocationChange(idx, "address", e.target.value)}
-              className="w-full mb-2 p-2 border rounded"
-            />
-            <input
-              type="number"
-              placeholder="Latitude"
-              value={loc.latitude ?? ""}
-              onChange={(e) => handleLocationChange(idx, "latitude", parseFloat(e.target.value))}
-              className="w-full mb-2 p-2 border rounded"
-            />
-            <input
-              type="number"
-              placeholder="Longitude"
-              value={loc.longitude ?? ""}
-              onChange={(e) => handleLocationChange(idx, "longitude", parseFloat(e.target.value))}
-              className="w-full mb-2 p-2 border rounded"
-            />
-            <button
-              className="text-sm text-red-600 underline"
-              onClick={() => removeLocation(idx)}
-            >
-              Remove Location
-            </button>
-          </div>
-        ))}
-
+        <input
+          type="text"
+          placeholder="Search address by name"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          className="w-full mb-2 p-2 border rounded"
+        />
         <button
-          className="mb-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          onClick={addNewLocation}
+          onClick={geocodeAddress}
+          className="mb-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >
-          + Add New Location
+          Search & Add Location
         </button>
+
+        <div className="w-full h-64 mb-4">
+          <MapContainer
+            center={[30.0444, 31.2357]}
+            zoom={13}
+            scrollWheelZoom={true}
+            style={{ height: "100%", width: "100%" }}
+          >
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
+            <LocationPicker
+              onSelect={async (lat, lng) => {
+                const res = await fetch(
+                  `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+                );
+                const data = await res.json();
+                const newLocation: BusinessLocationUpdateType = {
+                  label: data?.display_name?.split(",")[0] || "Selected on map",
+                  address: data?.display_name || "Selected on map",
+                  latitude: lat,
+                  longitude: lng,
+                };
+                setLocations((prev) => [...prev, newLocation]);
+              }}
+            />
+
+            <FitBounds locations={locations} />
+
+            {locations.map((loc, index) => (
+              <Marker
+                key={index}
+                position={[
+                  loc.latitude ?? 0,
+                  loc.longitude ?? 0
+                ]}
+                draggable={true}
+                eventHandlers={{
+                  dragend: async (e) => {
+                    const newLat = e.target.getLatLng().lat;
+                    const newLng = e.target.getLatLng().lng;
+                    try {
+                      const res = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?lat=${newLat}&lon=${newLng}&format=json`
+                      );
+                      const data = await res.json();
+                      const newLabel = data?.display_name?.split(",")[0] || "Moved on map";
+                      const newAddress = data?.display_name || "Moved on map";
+                      setLocations((prev) =>
+                        prev.map((l, i) =>
+                          i === index
+                            ? {
+                                ...l,
+                                latitude: newLat,
+                                longitude: newLng,
+                                label: newLabel,
+                                address: newAddress,
+                              }
+                            : l
+                        )
+                      );
+                    } catch (error) {
+                      console.error("Reverse geocoding failed", error);
+                      setLocations((prev) =>
+                        prev.map((l, i) =>
+                          i === index
+                            ? {
+                                ...l,
+                                latitude: newLat,
+                                longitude: newLng,
+                                label: "Moved on map",
+                                address: "Moved on map",
+                              }
+                            : l
+                        )
+                      );
+                    }
+                  },
+                  click: () => {
+                    if (confirm(`Delete location "${loc.label}"?`)) {
+                      const toDelete = locations[index];
+                      if (toDelete.locationId) {
+                        deleteLocation({
+                          businessId: initialData.businessId,
+                          locationId: toDelete.locationId,
+                        });
+                      }
+                      setLocations((prev) => prev.filter((_, i) => i !== index));
+                    }
+                  },
+                }}
+                icon={L.icon({
+                  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+                  iconSize: [25, 41],
+                  iconAnchor: [12, 41],
+                })}
+              >
+                <Popup>
+                  <input
+                    type="text"
+                    className="p-1 border rounded text-sm"
+                    value={loc.label ?? ""}
+                    onChange={(e) => {
+                      const newLabel = e.target.value;
+                      setLocations((prev) =>
+                        prev.map((l, i) => (i === index ? { ...l, label: newLabel } : l))
+                      );
+                    }}
+                  />
+                </Popup>
+              </Marker>
+            ))}
+          </MapContainer>
+        </div>
 
         <div className="flex justify-end gap-2">
           <button

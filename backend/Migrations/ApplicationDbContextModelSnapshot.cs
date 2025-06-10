@@ -368,6 +368,9 @@ namespace Taqyim.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationId"));
 
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
                     b.Property<string>("NotificationType")
                         .HasColumnType("nvarchar(max)");
 
@@ -490,32 +493,6 @@ namespace Taqyim.Api.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Reviews");
-                });
-
-            modelBuilder.Entity("Taqyim.Api.Models.SavedReview", b =>
-                {
-                    b.Property<int>("SavedReviewId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SavedReviewId"));
-
-                    b.Property<int>("ReviewId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("SavedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("SavedReviewId");
-
-                    b.HasIndex("ReviewId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("SavedReviews");
                 });
 
             modelBuilder.Entity("Taqyim.Api.Models.Tag", b =>
@@ -868,25 +845,6 @@ namespace Taqyim.Api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Taqyim.Api.Models.SavedReview", b =>
-                {
-                    b.HasOne("Taqyim.Api.Models.Review", "Review")
-                        .WithMany("SavedByUsers")
-                        .HasForeignKey("ReviewId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Taqyim.Api.Models.User", "User")
-                        .WithMany("SavedReviews")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Review");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Taqyim.Api.Models.Tag", b =>
                 {
                     b.HasOne("Taqyim.Api.Models.Review", "Review")
@@ -975,8 +933,6 @@ namespace Taqyim.Api.Migrations
 
                     b.Navigation("Reactions");
 
-                    b.Navigation("SavedByUsers");
-
                     b.Navigation("Tags");
                 });
 
@@ -1007,8 +963,6 @@ namespace Taqyim.Api.Migrations
                     b.Navigation("Reactions");
 
                     b.Navigation("Reviews");
-
-                    b.Navigation("SavedReviews");
 
                     b.Navigation("UserBadges");
 

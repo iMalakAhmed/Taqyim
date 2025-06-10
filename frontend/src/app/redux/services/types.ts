@@ -43,6 +43,7 @@ export interface UserType {
   reviews: ReviewType[];
   ConnectionFollowers?: UserType[];
   ConnectionFollowings?: UserType[];
+  usersBusinesses: BusinessType[];
 }
 
 export interface UpdateUserType {
@@ -58,6 +59,21 @@ export interface ConnectionType {
   createdAt: string;
   user: UserType;
   connectedUser: UserType;
+}
+
+export interface ProductType {
+  productId: number;
+  businessId: number;
+  name: string;
+  description?: string | null;
+}
+
+export interface SearchProductDTO {
+  productId: number;
+  name: string;
+  description?: string | null;
+  businessId: number;
+  businessName: string;
 }
 
 export interface BusinessLocationCreateType {
@@ -96,7 +112,7 @@ export interface BusinessCreateType {
 
 export interface BusinessUpdateType {
   name?: string | null;
-  category?: string | null;
+  category?: string[] | null;
   description?: string | null;
   logo?: string | null;
 }
@@ -105,16 +121,17 @@ export interface BusinessType {
   businessId: number;
   userId: number;
   name: string;
-  category: string;
+  category: string[];
   description: string;
   logo?: string | null;
   location?: string | null;
   createdAt: string;
   isVerified: boolean;
   verifiedByUserId?: number | null;
-  user: UserType;
+  owner: UserType;
   verifiedByUser?: UserType | null;
   businessLocations: BusinessLocationType[];
+  products?: ProductType[] | null;
 }
 
 export interface ReviewType {
@@ -129,6 +146,7 @@ export interface ReviewType {
   savedAt?: string | null;
   user: UserType;
   business: BusinessType;
+  product?: ProductType;
   comments: CommentType[];
   reactions: ReactionType[];
   tags: TagType[];
@@ -212,4 +230,84 @@ export interface MediaType {
   fileSize: number;
   uploadedAt: string;
   user: UserType;
+}
+
+export interface SearchUserDTO {
+  userId: number;
+  userName: string;
+  email: string;
+  type: string;
+  profilePic: string | null;
+}
+
+export interface SearchBusinessDTO {
+  businessId: number;
+  name: string;
+  category: string;
+  description: string;
+  rating: number | null;
+  priceRange: number | null;
+  createdAt: string;
+  reviewCount: number;
+  businessLocations: BusinessLocationType[];
+}
+
+export interface SearchReviewDTO {
+  reviewId: number;
+  comment: string;
+  rating: number;
+  createdAt: string;
+  updatedAt: string | null;
+  businessName: string;
+  businessId: number;
+  userName: string;
+  userId: number;
+  userProfilePic: string | null;
+  commentsCount: number;
+  reactionsCount: number;
+  tags: string[];
+}
+
+export interface PaginatedResult<T> {
+  items: T[];
+  totalCount: number;
+}
+
+export interface MonthlyReviewStat {
+  month: string;
+  reviewCount: number;
+  averageRating: number;
+}
+
+export interface ProductStatsDto {
+  productId: number;
+  productName: string;
+  reviewCount: number;
+  averageRating: number;
+}
+
+export interface ReviewEngagementDto {
+  reviewId: number;
+  reactionCount: number;
+  commentSnippet: string;
+}
+
+export interface ReviewerStatsDto {
+  userId: number;
+  username: string;
+  reviewCount: number;
+  averageRatingGiven: number;
+}
+
+export interface BusinessAnalytics {
+  totalReviews: number;
+  averageRating: number;
+  followerCount: number;
+  monthlyReviews: MonthlyReviewStat[];
+  mostCommonTags: string[];
+  productStats: ProductStatsDto[];
+  mostLikedReview: ReviewEngagementDto | null;
+  totalMediaCount: number;
+  sentimentBreakdown: Record<string, number>;
+  topReviewers: ReviewerStatsDto[];
 }

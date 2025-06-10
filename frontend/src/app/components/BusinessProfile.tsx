@@ -38,9 +38,10 @@ const BusinessProfile = () => {
     return (
       currentUser?.type === "Admin" ||
       currentUser?.type === "Moderator" ||
-      currentUser?.userId === business?.userId
+      currentUser?.userId === business?.owner?.userId
     );
   }, [currentUser, business]);
+    
 
   const isFollowing = useMemo(() => {
     return followers.some(
@@ -56,7 +57,7 @@ const BusinessProfile = () => {
   }
   if (error || !business) {
     // Redirect to a 404 page or display an error message if business not found
-    router.replace('/404'); // Or a custom not-found page
+    router.replace('/not-found'); // Or a custom not-found page
     return null;
   }
 
@@ -72,6 +73,7 @@ const BusinessProfile = () => {
       }
     }
   };
+
 
   return (
     <div className="w-full h-full flex flex-col text-text justify-center py-10 ml-16">
@@ -101,7 +103,6 @@ const BusinessProfile = () => {
               <FollowButton
                 followingId={businessId}
                 followingType="Business"
-                isInitiallyFollowing={isFollowing}
                 onToggle={() => refetchFollowers()}
               />
             </div>
@@ -130,6 +131,10 @@ const BusinessProfile = () => {
               <Button variant="primary" className="ml-2 p-6" onClick={handleDelete}>
                 <IconTrash stroke={2} /> Delete Business
               </Button>
+            
+            <Button onClick={() => setIsModalOpen(true)} variant="primary" className="mr-3 p-6">
+                <IconEdit stroke={2} /> Edit Business
+              </Button>
             </>
           )}
 
@@ -140,15 +145,10 @@ const BusinessProfile = () => {
           >
             <IconShare stroke={2} /> Share profile
           </CopyToClipboardButton>
-          {canEdit && (
-            <Button onClick={() => router.push("/createBusiness")} variant="primary" className="ml-2 p-6">
-              <IconEdit stroke={2} /> Edit Business
-            </Button>
-          )}
         </div>
       </div>
 
-      <div className="w-full max-w-5xl mt-6 mx-auto px-4">
+      <div className="w-full max-w-5xl mt-6 mx-auto px-4 z-0">
         <h2 className="font-heading font-bold text-xl mb-2">Business Locations</h2>
         <MapView locations={business.businessLocations} />
       </div>

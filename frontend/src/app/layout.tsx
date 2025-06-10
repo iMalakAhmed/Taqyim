@@ -17,11 +17,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className="antialiased">
         <Providers>
           <NavBar />
-          <HorizontalLine className="fixed top-24 left-0 w-64 z-50" />
           <SideNav />
           {children}
         </Providers>

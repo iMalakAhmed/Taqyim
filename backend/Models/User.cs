@@ -17,7 +17,7 @@ public class User
     [Required]
     public string PasswordHash { get; set; } = null!;
     public string UserName { get; set; } = string.Empty;
-    public string Type { get; set; } = "User";
+    public string? Type { get; set; } = "User";
     public string? phoneNumber { get; set; }
     public bool IsVerified { get; set; }= false;
     public int? VerifiedByUserId { get; set; }
@@ -43,5 +43,5 @@ public class User
     public virtual ICollection<Connection> Connections { get; set; } = new List<Connection>();
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
     public virtual ICollection<Media> Media { get; set; } = new List<Media>();
-    public virtual ICollection<SavedReview> SavedReviews { get; set; } = new List<SavedReview>();
+    //public virtual ICollection<SavedReview> SavedReviews { get; set; } = new List<SavedReview>();
 }

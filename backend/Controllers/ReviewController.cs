@@ -6,6 +6,7 @@ using Taqyim.Api.Data;
 using Taqyim.Api.Models;
 using Taqyim.Api.DTOs;
 using System.Collections.Generic;
+using static Taqyim.Api.Models.NotificationTypes;
 
 namespace Taqyim.Api.Controllers;
 
@@ -14,10 +15,12 @@ namespace Taqyim.Api.Controllers;
 public class ReviewController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
+    private readonly NotificationController _notificationController;
 
-    public ReviewController(ApplicationDbContext context)
+    public ReviewController(ApplicationDbContext context, NotificationController notificationController)
     {
         _context = context;
+        _notificationController = notificationController;
     }
 
     private static ReviewDTO MapReviewToDto(Review review)
@@ -179,46 +182,63 @@ public class ReviewController : ControllerBase
         return Ok(MapReviewToDto(review));
     }
 
-    // POST: /api/review
-    [Authorize]
-    [HttpPost]
-    public async Task<ActionResult<ReviewDTO>> CreateReview(CreateReviewDTO createReviewDTO)
+ // POST: /api/review
+[Authorize]
+[HttpPost]
+public async Task<ActionResult<ReviewDTO>> CreateReview(CreateReviewDTO createReviewDTO)
+{
+    var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var business = await _context.Businesses
+        .Include(b => b.Owner)
+        .FirstOrDefaultAsync(b => b.BusinessId == createReviewDTO.BusinessId);
+
+    if (business == null)
+        return NotFound("Business not found");
+
+    if (createReviewDTO.ProductId.HasValue)
     {
-        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var business = await _context.Businesses.FindAsync(createReviewDTO.BusinessId);
-
-        if (business == null)
-            return NotFound("Business not found");
-
-        var review = new Review
-        {
-            UserId = userId,
-            BusinessId = createReviewDTO.BusinessId,
-            Rating = createReviewDTO.Rating,
-            Comment = createReviewDTO.Comment,
-            CreatedAt = DateTime.UtcNow,
-            ProductId = createReviewDTO.ProductId,
-        };
-
-        _context.Reviews.Add(review);
-        await _context.SaveChangesAsync();
-
-        if (createReviewDTO.Tags != null)
-        {
-            foreach (var tagType in createReviewDTO.Tags)
-            {
-                var tag = new Tag
-                {
-                    ReviewId = review.ReviewId,
-                    TagType = tagType
-                };
-                _context.Tags.Add(tag);
-            }
-            await _context.SaveChangesAsync();
-        }
-
-        return CreatedAtAction(nameof(GetReview), new { id = review.ReviewId }, await GetReview(review.ReviewId));
+        var product = await _context.Products.FindAsync(createReviewDTO.ProductId.Value);
+        if (product == null)
+            return NotFound("Product not found");
     }
+
+    var review = new Review
+    {
+        UserId = userId,
+        BusinessId = createReviewDTO.BusinessId,
+        Rating = createReviewDTO.Rating,
+        Comment = createReviewDTO.Comment,
+        CreatedAt = DateTime.UtcNow,
+        ProductId = createReviewDTO.ProductId,
+    };
+
+    _context.Reviews.Add(review);
+    await _context.SaveChangesAsync();
+
+    // Link uploaded media to the new review
+    if (createReviewDTO.Media != null && createReviewDTO.Media.Any())
+    {
+        var mediaIds = createReviewDTO.Media?.Select(m => m.MediaId).ToList();
+        await _context.Media
+            .Where(m => mediaIds.Contains(m.MediaId))
+            .ExecuteUpdateAsync(setters =>
+                setters.SetProperty(m => m.ReviewId, review.ReviewId));
+    }
+
+    // Re-fetch with related data to ensure Media gets populated
+    var fullReview = await _context.Reviews
+        .Include(r => r.User)
+        .Include(r => r.Business)
+        .Include(r => r.Product)
+        .Include(r => r.Comments).ThenInclude(c => c.Commenter)
+        .Include(r => r.Reactions).ThenInclude(re => re.User)
+        .Include(r => r.Tags)
+        .Include(r => r.Media)
+        .FirstOrDefaultAsync(r => r.ReviewId == review.ReviewId);
+
+    return Ok(MapReviewToDto(fullReview!));
+}
+
 
     // PUT: /api/review/{id}
     [Authorize]
@@ -280,7 +300,10 @@ public class ReviewController : ControllerBase
     [HttpPost("{id}/comment")]
     public async Task<ActionResult<CommentDTO>> AddComment(int id, CreateCommentDTO createCommentDTO)
     {
-        var review = await _context.Reviews.FindAsync(id);
+        var review = await _context.Reviews
+            .Include(r => r.User) // Include review author to notify them
+            .FirstOrDefaultAsync(r => r.ReviewId == id);
+
         if (review == null)
             return NotFound("Review not found");
 
@@ -295,6 +318,17 @@ public class ReviewController : ControllerBase
 
         _context.Comments.Add(comment);
         await _context.SaveChangesAsync();
+
+        // Notify review author about the new comment
+        if (review.UserId != userId) // Don't notify if the author commented on their own review
+        {
+            await _notificationController.CreateNotification(new CreateNotificationDTO
+            {
+                UserId = review.UserId,
+                NotificationType = ReviewCommented,
+                SenderId = userId
+            });
+        }
 
         var createdComment = await _context.Comments
             .Include(c => c.Commenter)
@@ -327,7 +361,10 @@ public class ReviewController : ControllerBase
     [HttpPost("{id}/reaction")]
     public async Task<ActionResult<ReactionDTO>> AddReaction(int id, CreateReactionDTO createReactionDTO)
     {
-        var review = await _context.Reviews.FindAsync(id);
+        var review = await _context.Reviews
+            .Include(r => r.User) // Include review author to notify them
+            .FirstOrDefaultAsync(r => r.ReviewId == id);
+
         if (review == null)
             return NotFound("Review not found");
 
@@ -356,6 +393,17 @@ public class ReviewController : ControllerBase
                 CreatedAt = DateTime.UtcNow
             };
             _context.Reactions.Add(reaction);
+
+            // Notify review author about the new reaction
+            if (review.UserId != userId) // Don't notify if the author reacted to their own review
+            {
+                await _notificationController.CreateNotification(new CreateNotificationDTO
+                {
+                    UserId = review.UserId,
+                    NotificationType = ReviewLiked,
+                    SenderId = userId
+                });
+            }
         }
 
         await _context.SaveChangesAsync();
