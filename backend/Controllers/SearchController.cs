@@ -11,10 +11,10 @@ using System.Threading.Tasks;
 
 namespace Taqyim.Api.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class SearchController : ControllerBase
-    {
+[ApiController]
+[Route("api/[controller]")]
+public class SearchController : ControllerBase
+{
         private readonly SearchService _searchService;
 
         public SearchController(SearchService searchService)

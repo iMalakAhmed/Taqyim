@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useGetCurrentUserQuery, useUpdateUserMutation } from "@/app/redux/services/userApi";
 import toast from "react-hot-toast";
-import { authApi } from "@/app/redux/services/authApi";
+import { useUpdateUserMutation } from "@/app/redux/services/userApi";
+import { useGetCurrentUserQuery } from "@/app/redux/services/authApi";
 import { useDispatch } from "react-redux";
+import { authApi } from "@/app/redux/services/authApi";
 
 export default function CreateProfilePage() {
   const { data: user, isLoading } = useGetCurrentUserQuery();

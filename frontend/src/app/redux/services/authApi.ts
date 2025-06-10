@@ -48,8 +48,22 @@ export const authApi = createApi({
     getCurrentUser: builder.query<CurrentUserResponse, void>({
       query: () => "/auth/me",
     }),
+    signOut: builder.mutation<void, void>({
+      query: () => ({
+        url: "/auth/signout",
+        method: "POST",
+      }),
+      onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
+        try {
+          await queryFulfilled;
+          dispatch(authApi.util.resetApiState());
+        } catch (error) {
+          console.error("Sign out failed:", error);
+        }
+      },
+    }),
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useGetCurrentUserQuery } =
+export const { useLoginMutation, useRegisterMutation, useGetCurrentUserQuery, useSignOutMutation } =
   authApi;
