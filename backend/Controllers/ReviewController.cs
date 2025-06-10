@@ -182,78 +182,63 @@ public class ReviewController : ControllerBase
         return Ok(MapReviewToDto(review));
     }
 
-    // POST: /api/review
-    [Authorize]
-    [HttpPost]
-    public async Task<ActionResult<ReviewDTO>> CreateReview(CreateReviewDTO createReviewDTO)
+ // POST: /api/review
+[Authorize]
+[HttpPost]
+public async Task<ActionResult<ReviewDTO>> CreateReview(CreateReviewDTO createReviewDTO)
+{
+    var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var business = await _context.Businesses
+        .Include(b => b.Owner)
+        .FirstOrDefaultAsync(b => b.BusinessId == createReviewDTO.BusinessId);
+
+    if (business == null)
+        return NotFound("Business not found");
+
+    if (createReviewDTO.ProductId.HasValue)
     {
-        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var business = await _context.Businesses
-            .Include(b => b.Owner) // Include business owner to notify them
-            .FirstOrDefaultAsync(b => b.BusinessId == createReviewDTO.BusinessId);
-
-        if (business == null)
-            return NotFound("Business not found");
-
-        // Check if Product exists if ProductId is provided
-        if (createReviewDTO.ProductId.HasValue)
-        {
-            var product = await _context.Products.FindAsync(createReviewDTO.ProductId.Value);
-            if (product == null)
-                return NotFound("Product not found");
-        }
-
-        var review = new Review
-        {
-            UserId = userId,
-            BusinessId = createReviewDTO.BusinessId,
-            Rating = createReviewDTO.Rating,
-            Comment = createReviewDTO.Comment,
-            CreatedAt = DateTime.UtcNow,
-            ProductId = createReviewDTO.ProductId,
-        };
-
-        _context.Reviews.Add(review);
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (Exception ex)
-        {
-            // Log the exception details for debugging
-            Console.WriteLine($"Error saving review: {ex.Message}\n{ex.StackTrace}");
-            // You might want to return a more specific error here, but for debugging, 500 is fine.
-            return StatusCode(500, "An error occurred while saving the review.");
-        }
-
-        // Temporarily remove Tags and MediaIds handling to isolate the issue
-        // if (createReviewDTO.Tags != null)
-        // {
-        //     foreach (var tagType in createReviewDTO.Tags)
-        //     {
-        //         var tag = new Tag
-        //         {
-        //             ReviewId = review.ReviewId,
-        //             TagType = tagType
-        //         };
-        //         _context.Tags.Add(tag);
-        //     }
-        //     await _context.SaveChangesAsync();
-        // }
-
-        // if (createReviewDTO.MediaIds != null && createReviewDTO.MediaIds.Any())
-        // {
-        //     var mediaItems = await _context.Media.Where(m => createReviewDTO.MediaIds.Contains(m.MediaId)).ToListAsync();
-        //     foreach (var mediaItem in mediaItems)
-        //     {
-        //         mediaItem.ReviewId = review.ReviewId;
-        //         _context.Media.Update(mediaItem);
-        //     }
-        //     await _context.SaveChangesAsync();
-        // }
-
-        return Ok(); // Return Ok() instead of CreatedAtAction for now
+        var product = await _context.Products.FindAsync(createReviewDTO.ProductId.Value);
+        if (product == null)
+            return NotFound("Product not found");
     }
+
+    var review = new Review
+    {
+        UserId = userId,
+        BusinessId = createReviewDTO.BusinessId,
+        Rating = createReviewDTO.Rating,
+        Comment = createReviewDTO.Comment,
+        CreatedAt = DateTime.UtcNow,
+        ProductId = createReviewDTO.ProductId,
+    };
+
+    _context.Reviews.Add(review);
+    await _context.SaveChangesAsync();
+
+    // Link uploaded media to the new review
+    if (createReviewDTO.Media != null && createReviewDTO.Media.Any())
+    {
+        var mediaIds = createReviewDTO.Media?.Select(m => m.MediaId).ToList();
+        await _context.Media
+            .Where(m => mediaIds.Contains(m.MediaId))
+            .ExecuteUpdateAsync(setters =>
+                setters.SetProperty(m => m.ReviewId, review.ReviewId));
+    }
+
+    // Re-fetch with related data to ensure Media gets populated
+    var fullReview = await _context.Reviews
+        .Include(r => r.User)
+        .Include(r => r.Business)
+        .Include(r => r.Product)
+        .Include(r => r.Comments).ThenInclude(c => c.Commenter)
+        .Include(r => r.Reactions).ThenInclude(re => re.User)
+        .Include(r => r.Tags)
+        .Include(r => r.Media)
+        .FirstOrDefaultAsync(r => r.ReviewId == review.ReviewId);
+
+    return Ok(MapReviewToDto(fullReview!));
+}
+
 
     // PUT: /api/review/{id}
     [Authorize]

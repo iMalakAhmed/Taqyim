@@ -35,11 +35,17 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
         productId: productId !== null ? Number(productId) : undefined,
         rating,
         comment,
-        mediaIds: uploadedMediaIds.length > 0 ? uploadedMediaIds : undefined,
+        media:
+          uploadedMediaIds.length > 0
+            ? uploadedMediaIds.map((id) => ({ mediaId: id }))
+            : undefined,
       };
 
       console.log("Submitting review with data:", reviewData);
-      console.log("Token from sessionStorage:", sessionStorage.getItem('token'));
+      console.log(
+        "Token from sessionStorage:",
+        sessionStorage.getItem("token")
+      );
 
       await createReview(reviewData).unwrap();
 
