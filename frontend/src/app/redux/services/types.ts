@@ -221,3 +221,44 @@ export interface MediaType {
   uploadedAt: string;
   user: UserType;
 }
+
+export interface SearchUserDTO {
+  userId: number;
+  userName: string;
+  email: string;
+  type: string;
+  profilePic: string | null;
+}
+
+export interface SearchBusinessDTO {
+  businessId: number;
+  name: string;
+  category: string;
+  description: string;
+  rating: number | null;
+  priceRange: number | null;
+  createdAt: string;
+  reviewCount: number;
+  businessLocations: BusinessLocationType[];
+}
+
+export interface SearchReviewDTO {
+  reviewId: number;
+  comment: string;
+  rating: number;
+  createdAt: string;
+  updatedAt: string | null;
+  businessName: string;
+  businessId: number;
+  userName: string;
+  userId: number;
+  userProfilePic: string | null;
+  commentsCount: number;
+  reactionsCount: number;
+  tags: string[];
+}
+
+export interface PaginatedResult<T> {
+  items: T[];
+  totalCount: number;
+}

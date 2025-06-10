@@ -14,7 +14,7 @@ type CreateReviewProps = {
 
 export default function CreateReview({ onCancel }: CreateReviewProps) {
   const [businessId, setBusinessId] = useState<number | "">("");
-  const [productId, setProductId] = useState<number | "">("");
+  const [productId, setProductId] = useState<number | null>(null);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [uploadedMediaIds, setUploadedMediaIds] = useState<number[]>([]);
@@ -30,17 +30,22 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
     }
 
     try {
-      await createReview({
+      const reviewData = {
         businessId: Number(businessId),
-        productId: productId ? Number(productId) : undefined,
+        productId: productId !== null ? Number(productId) : undefined,
         rating,
         comment,
         mediaIds: uploadedMediaIds.length > 0 ? uploadedMediaIds : undefined,
-      }).unwrap();
+      };
+
+      console.log("Submitting review with data:", reviewData);
+      console.log("Token from sessionStorage:", sessionStorage.getItem('token'));
+
+      await createReview(reviewData).unwrap();
 
       // Reset form on success
       setBusinessId("");
-      setProductId("");
+      setProductId(null);
       setRating(5);
       setComment("");
       setUploadedMediaIds([]);
@@ -100,10 +105,10 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
             <input
               id="productId"
               type="number"
-              value={productId}
+              value={productId === null ? "" : productId}
               onChange={(e) =>
                 setProductId(
-                  e.target.value === "" ? "" : Number(e.target.value)
+                  e.target.value === "" ? null : Number(e.target.value)
                 )
               }
               className="w-full px-2 py-1 focus:outline-none"

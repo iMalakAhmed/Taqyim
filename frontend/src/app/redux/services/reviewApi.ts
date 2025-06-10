@@ -8,7 +8,6 @@ import type {
   ReactionType,
   CreateReactionType,
 } from "./types";
-import { getTokenFromCookie } from "@/app/utils/auth";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
@@ -18,8 +17,7 @@ export const reviewApi = createApi({
     baseUrl: `${API_BASE_URL}/review`,
     credentials: "include",
     prepareHeaders: (headers) => {
-      const token = getTokenFromCookie();
-      console.log("Token:", token);
+      const token = sessionStorage.getItem('token');
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }

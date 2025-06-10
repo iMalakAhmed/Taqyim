@@ -10,7 +10,7 @@ public class SearchBusinessDTO
     public required string Category { get; set; }
     public required string Description { get; set; }
     public double? Rating { get; set; }
-    public double? PriceRange { get; set; }
+    public string? PriceRange { get; set; }
     public DateTime CreatedAt { get; set; }
     public int ReviewCount { get; set; }
     public required ICollection<BusinessLocationDTO> BusinessLocations { get; set; } 
@@ -47,4 +47,10 @@ public class SearchResultDTO
 {
     public required ICollection<BusinessDTO> Businesses { get; set; }
     public required ICollection<UserDTO> Users { get; set; }
+}
+
+public class PaginatedResultDTO<T>
+{
+    public IEnumerable<T> Items { get; set; } = new List<T>();
+    public int TotalCount { get; set; }
 } 

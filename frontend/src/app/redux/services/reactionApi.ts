@@ -1,7 +1,6 @@
 // redux/services/reactionApi.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { CreateReactionType, ReactionType } from "./types";
-import { getTokenFromCookie } from "@/app/utils/auth";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
@@ -11,7 +10,7 @@ export const reactionApi = createApi({
     baseUrl: API_BASE_URL,
     credentials: "include",
     prepareHeaders: (headers) => {
-      const token = getTokenFromCookie();
+      const token = sessionStorage.getItem('token');
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }

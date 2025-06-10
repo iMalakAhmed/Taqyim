@@ -1,5 +1,4 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { getTokenFromCookie } from "@/app/utils/auth";
 import { CommentReactionType, CreateCommentReactionType } from "./types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
@@ -10,7 +9,7 @@ export const commentReactionApi = createApi({
     baseUrl: `${API_BASE_URL}/CommentReaction`,
     credentials: "include",
     prepareHeaders: (headers) => {
-      const token = getTokenFromCookie();
+      const token = sessionStorage.getItem('token');
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }

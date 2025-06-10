@@ -190,6 +190,14 @@ public class ReviewController : ControllerBase
         if (business == null)
             return NotFound("Business not found");
 
+        // Check if Product exists if ProductId is provided
+        if (createReviewDTO.ProductId.HasValue)
+        {
+            var product = await _context.Products.FindAsync(createReviewDTO.ProductId.Value);
+            if (product == null)
+                return NotFound("Product not found");
+        }
+
         var review = new Review
         {
             UserId = userId,
@@ -201,23 +209,45 @@ public class ReviewController : ControllerBase
         };
 
         _context.Reviews.Add(review);
-        await _context.SaveChangesAsync();
-
-        if (createReviewDTO.Tags != null)
+        try
         {
-            foreach (var tagType in createReviewDTO.Tags)
-            {
-                var tag = new Tag
-                {
-                    ReviewId = review.ReviewId,
-                    TagType = tagType
-                };
-                _context.Tags.Add(tag);
-            }
             await _context.SaveChangesAsync();
         }
+        catch (Exception ex)
+        {
+            // Log the exception details for debugging
+            Console.WriteLine($"Error saving review: {ex.Message}\n{ex.StackTrace}");
+            // You might want to return a more specific error here, but for debugging, 500 is fine.
+            return StatusCode(500, "An error occurred while saving the review.");
+        }
 
-        return CreatedAtAction(nameof(GetReview), new { id = review.ReviewId }, await GetReview(review.ReviewId));
+        // Temporarily remove Tags and MediaIds handling to isolate the issue
+        // if (createReviewDTO.Tags != null)
+        // {
+        //     foreach (var tagType in createReviewDTO.Tags)
+        //     {
+        //         var tag = new Tag
+        //         {
+        //             ReviewId = review.ReviewId,
+        //             TagType = tagType
+        //         };
+        //         _context.Tags.Add(tag);
+        //     }
+        //     await _context.SaveChangesAsync();
+        // }
+
+        // if (createReviewDTO.MediaIds != null && createReviewDTO.MediaIds.Any())
+        // {
+        //     var mediaItems = await _context.Media.Where(m => createReviewDTO.MediaIds.Contains(m.MediaId)).ToListAsync();
+        //     foreach (var mediaItem in mediaItems)
+        //     {
+        //         mediaItem.ReviewId = review.ReviewId;
+        //         _context.Media.Update(mediaItem);
+        //     }
+        //     await _context.SaveChangesAsync();
+        // }
+
+        return Ok(); // Return Ok() instead of CreatedAtAction for now
     }
 
     // PUT: /api/review/{id}

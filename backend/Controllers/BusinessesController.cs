@@ -52,7 +52,11 @@ namespace Taqyim.Api.Controllers
 
         // GET /api/businesses
         [HttpGet]
-        public async Task<IActionResult> GetBusinesses([FromQuery] string? name, [FromQuery] string? category, [FromQuery] bool includeDeleted = false)
+        public async Task<IActionResult> GetBusinesses(
+            [FromQuery] string? name, 
+            [FromQuery] string? category, 
+            [FromQuery] bool includeDeleted = false,
+            [FromQuery] string? searchQuery = null)
         {
             var query = _context.Businesses
                 .Include(b => b.Reviews).ThenInclude(r => r.User)
@@ -66,8 +70,24 @@ namespace Taqyim.Api.Controllers
             if (!includeDeleted)
                 query = query.Where(b => !b.IsDeleted);
 
+            // Apply search query if provided
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                searchQuery = searchQuery.ToLower();
+                query = query.Where(b => 
+                    b.Name.ToLower().Contains(searchQuery) ||
+                    b.Description.ToLower().Contains(searchQuery) ||
+                    (b.Category != null && b.Category.Any(c => c.ToLower().Contains(searchQuery)))
+                );
+            }
+
+            // Apply name filter if provided
             if (!string.IsNullOrEmpty(name))
-                query = query.Where(b => b.Owner.UserName.Contains(name));
+                query = query.Where(b => b.Name.ToLower().Contains(name.ToLower()));
+
+            // Apply category filter if provided
+            if (!string.IsNullOrEmpty(category))
+                query = query.Where(b => b.Category != null && b.Category.Contains(category));
 
             var result = await query
                 .Select(b => new

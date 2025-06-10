@@ -18,7 +18,7 @@ import {
 import Button from "./Button";
 import CreateReview from "../CreateReview";
 
-export default function SideNav() {
+export default function SideNav({ className }: { className?: string }) {
   const pathname = usePathname();
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -57,7 +57,7 @@ export default function SideNav() {
   ];
 
   return (
-    <nav className="fixed top-24 left-0 h-full w-96 bg-background flex flex-col font-heading text-2xl">
+    <nav className={`bg-background flex flex-col font-heading text-2xl ${className}`}>
       <VerticalLine className="absolute top-0 right-0 h-full" />
 
       <ul className="space-y-4 mt-8 ml-20 flex-grow overflow-auto">
