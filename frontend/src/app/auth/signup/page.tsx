@@ -26,54 +26,54 @@ export default function SignupPage() {
 
   const [register, { isLoading: isRegistering }] = useRegisterMutation();
   const [login, { isLoading: isLoggingIn }] = useLoginMutation();
-  const { refetch: refetchCurrentUser } = useGetCurrentUserQuery(undefined , { skip: true ,});
+  const { refetch: refetchCurrentUser } = useGetCurrentUserQuery(undefined, {
+    skip: true,
+  });
 
   const handleRegistrationSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setErrorMsg(null);
-  setIsSubmitting(true);
+    e.preventDefault();
+    setErrorMsg(null);
+    setIsSubmitting(true);
 
-  if (form.password !== form.confirmPassword) {
-    setErrorMsg("Passwords do not match");
-    setIsSubmitting(false);
-    return;
-  }
-
-  try {
-    // 1. Register
-    await register({
-      email: form.email,
-      password: form.password,
-      userName: form.userName,
-      type: userType!,
-    }).unwrap();
-
-    // 2. Login
-    const loginResult = await login({
-      email: form.email,
-      password: form.password,
-    }).unwrap();
-
-    sessionStorage.setItem('token', loginResult.token);
-    console.log("Token stored in session storage:", loginResult.token);
-
-    // 3. Redirect based on userType (not backend)
-    if (userType === "Business") {
-      router.push("/createBusiness");
-    } else {
-      router.push("/createProfile");
+    if (form.password !== form.confirmPassword) {
+      setErrorMsg("Passwords do not match");
+      setIsSubmitting(false);
+      return;
     }
 
-    // 4. Optional: background user refetch
-    refetchCurrentUser().catch(console.error);
+    try {
+      // 1. Register
+      await register({
+        email: form.email,
+        password: form.password,
+        userName: form.userName,
+        type: userType!,
+      }).unwrap();
 
-  } catch (err: any) {
-    setErrorMsg(err.data?.message || err.error || "An error occurred");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      // 2. Login
+      const loginResult = await login({
+        email: form.email,
+        password: form.password,
+      }).unwrap();
 
+      sessionStorage.setItem("token", loginResult.token);
+      console.log("Token stored in session storage:", loginResult.token);
+
+      // 3. Redirect based on userType (not backend)
+      if (userType === "Business") {
+        router.push("/createBusiness");
+      } else {
+        router.push("/createProfile");
+      }
+
+      // 4. Optional: background user refetch
+      refetchCurrentUser().catch(console.error);
+    } catch (err: any) {
+      setErrorMsg(err.data?.message || err.error || "An error occurred");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({
@@ -304,7 +304,6 @@ export default function SignupPage() {
                 onChange={handleChange}
               />
             </motion.div>
-
 
             {errorMsg && (
               <div

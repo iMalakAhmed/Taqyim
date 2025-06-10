@@ -1,35 +1,56 @@
-import { configureStore } from '@reduxjs/toolkit';
-import { setupListeners } from '@reduxjs/toolkit/query';
-import { authApi } from './services/authApi';
-import { searchApi } from './services/searchApi';
-import { commentApi } from './services/commentApi';
-import { commentReactionApi } from './services/commentReactionApi';
-import { businessApi } from './services/BusinessApi';
-import { userApi } from './services/userApi';
-import { connectionApi } from './services/connectionApi';
+import { configureStore } from "@reduxjs/toolkit";
+import { userApi } from "./services/userApi";
+import { businessApi } from "./services/BusinessApi";
+import userReducer from "./slices/userSlice";
+import businessReducer from "./slices/businessSlice";
+import { authApi } from "./services/authApi";
+import { reviewApi } from "./services/reviewApi";
+import { reactionApi } from "./services/reactionApi";
+import { mediaApi } from "./services/mediaApi";
+import { commentApi } from "./services/commentApi";
+import { connectionApi } from "./services/connectionApi";
+import reactionCounterReducer from "./slices/reactionCounterSlice";
+import commentCounterReducer from "./slices/commentCounterSlice";
+import commentReactionCounterReducer from "./slices/commentReactionCounterSlice";
+import { commentReactionApi } from "./services/commentReactionApi";
+import replyCounterReducer from "./slices/replyCounterSlice";
+import authReducer from "./slices/authSlice";
+import { searchApi } from "./services/searchApi";
 
 export const store = configureStore({
   reducer: {
-    [authApi.reducerPath]: authApi.reducer,
     [userApi.reducerPath]: userApi.reducer,
-    [searchApi.reducerPath]: searchApi.reducer,
+    [businessApi.reducerPath]: businessApi.reducer,
+    [authApi.reducerPath]: authApi.reducer,
+    [reviewApi.reducerPath]: reviewApi.reducer,
+    [reactionApi.reducerPath]: reactionApi.reducer,
+    [mediaApi.reducerPath]: mediaApi.reducer,
     [commentApi.reducerPath]: commentApi.reducer,
     [commentReactionApi.reducerPath]: commentReactionApi.reducer,
-    [businessApi.reducerPath]: businessApi.reducer,
     [connectionApi.reducerPath]: connectionApi.reducer,
+    [searchApi.reducerPath]: searchApi.reducer,
+    auth: authReducer,
+    user: userReducer,
+    business: businessReducer,
+    reactionCounter: reactionCounterReducer,
+    commentCounter: commentCounterReducer,
+    commentReactionCounter: commentReactionCounterReducer,
+    replyCounter: replyCounterReducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware()
-      .concat(authApi.middleware)
-      .concat(searchApi.middleware)
-      .concat(businessApi.middleware)
-      .concat(commentApi.middleware)
-      .concat(userApi.middleware)
-      .concat(connectionApi.middleware)
-      .concat(commentReactionApi.middleware),
+    getDefaultMiddleware().concat(
+      userApi.middleware,
+      authApi.middleware,
+      businessApi.middleware,
+      reviewApi.middleware,
+      reactionApi.middleware,
+      mediaApi.middleware,
+      commentApi.middleware,
+      commentReactionApi.middleware,
+      connectionApi.middleware,
+      searchApi.middleware
+    ),
 });
 
-setupListeners(store.dispatch);
-
 export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch; 
+export type AppDispatch = typeof store.dispatch;

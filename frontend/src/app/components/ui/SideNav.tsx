@@ -18,7 +18,7 @@ import Button from "./Button";
 import CreateReview from "../CreateReview";
 import VerticalLine from "./VerticalLine";
 
-export default function SideNav({ className }: { className?: string }) {
+export default function SideNav() {
   const pathname = usePathname();
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -57,36 +57,38 @@ export default function SideNav({ className }: { className?: string }) {
 
   return (
     <>
-    <nav className={`bg-background flex flex-col font-heading text-2xl ${className}`}>
-      <VerticalLine className="absolute top-0 right-0 h-full" />
-
-      <ul className="space-y-4 mt-8 ml-20 flex-grow overflow-auto">
-        {mainNavItems.map(({ href, label, icon: Icon }) => {
-          const isActive = pathname === href;
-          return (
-            <li
-              key={href}
-              className={`flex items-center space-x-3 group cursor-pointer ${
-                isActive ? "font-bold text-accent" : "text-text"
-              }`}
-            >
-              <Icon
-                size={20}
-                className={`transition-colors ${
-                  isActive ? "text-accent" : "text-text group-hover:text-accent"
-                }`}
-              />
-              <a
-                href={href}
-                className={`transition-colors flex-1 ${
-                  isActive ? "text-accent" : "group-hover:text-accent"
+      {/* Desktop Left Sidebar */}
+      <nav className="hidden md:flex fixed top-24 left-0 h-full w-96 bg-background flex-col font-heading text-2xl">
+        <VerticalLine className="absolute top-0 right-0 h-full" />
+        <ul className="space-y-4 mt-8 ml-20 flex-grow overflow-auto">
+          {mainNavItems.map(({ href, label, icon: Icon }) => {
+            const isActive = pathname === href;
+            return (
+              <li
+                key={href}
+                className={`flex items-center space-x-3 group cursor-pointer ${
+                  isActive ? "font-bold text-accent" : "text-text"
                 }`}
               >
-                {label}
-              </a>
-            </li>
-          );
-        })}
+                <Icon
+                  size={20}
+                  className={`transition-colors ${
+                    isActive
+                      ? "text-accent"
+                      : "text-text group-hover:text-accent"
+                  }`}
+                />
+                <a
+                  href={href}
+                  className={`transition-colors flex-1 ${
+                    isActive ? "text-accent" : "group-hover:text-accent"
+                  }`}
+                >
+                  {label}
+                </a>
+              </li>
+            );
+          })}
 
           <li
             className="flex items-center space-x-2 font-bold text-primary cursor-pointer select-none"
