@@ -21,7 +21,7 @@ export default function RootLayout({
       <body className="antialiased">
         <Providers>
           <NavBar />
-          <HorizontalLine className="fixed top-24 left-0 w-64 z-50" />
+          {/* <HorizontalLine className="fixed top-24 left-0 w-64 z-50" /> */}
           <SideNav />
           {children}
         </Providers>
