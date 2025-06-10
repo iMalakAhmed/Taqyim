@@ -17,7 +17,6 @@ export default function CreateProfilePage() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const [userName, setUserName] = useState("");
   const [bio, setBio] = useState("");
   const [profilePic, setProfilePic] = useState("");
   const [profilePicId, setProfilePicId] = useState<number | null>(null);
@@ -28,7 +27,11 @@ export default function CreateProfilePage() {
     try {
       await updateUser({
         id: user.userId,
-        data: { userName, bio, profilePic },
+        data: {
+          userName: user.userName,
+          bio,
+          profilePic,
+        },
       }).unwrap();
       dispatch(authApi.util.invalidateTags(["Auth"]));
 
@@ -63,14 +66,6 @@ export default function CreateProfilePage() {
       <h1 className="text-2xl font-bold mb-6 text-center">
         Create Your Profile
       </h1>
-
-      <label className="block mb-2 font-medium">Username</label>
-      <input
-        type="text"
-        value={userName}
-        onChange={(e) => setUserName(e.target.value)}
-        className="w-full p-2 border rounded mb-4"
-      />
 
       <label className="block mb-2 font-medium">Bio</label>
       <textarea
