@@ -9,6 +9,7 @@ using Microsoft.OpenApi.Models;
 
 using Taqyim.Api.Data; 
 using Taqyim.Api.Services;
+using Taqyim.Api.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -125,6 +126,10 @@ else
     builder.Services.AddDbContext<ApplicationDbContext>(opts =>
         opts.UseSqlServer(builder.Configuration.GetConnectionString("TaqyimDb")));
 }
+
+// Add NotificationController as a scoped service
+builder.Services.AddScoped<NotificationController>();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 

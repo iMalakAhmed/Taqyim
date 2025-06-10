@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using Taqyim.Api.Data;
 using Taqyim.Api.Models;
 using Taqyim.Api.DTOs;
+using static Taqyim.Api.Models.NotificationTypes;
 
 namespace Taqyim.Api.Controllers;
 
@@ -12,10 +14,12 @@ namespace Taqyim.Api.Controllers;
 public class UserBadgeController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
+    private readonly NotificationController _notificationController;
 
-    public UserBadgeController(ApplicationDbContext context)
+    public UserBadgeController(ApplicationDbContext context, NotificationController notificationController)
     {
         _context = context;
+        _notificationController = notificationController;
     }
 
     [HttpGet("user/{userId}")]
@@ -86,6 +90,14 @@ public class UserBadgeController : ControllerBase
 
         _context.UserBadges.Add(userBadge);
         await _context.SaveChangesAsync();
+
+        // Notify user about the new badge
+        await _notificationController.CreateNotification(new CreateNotificationDTO
+        {
+            UserId = user.UserId,
+            NotificationType = NewBadge,
+            SenderId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!)
+        });
 
         return CreatedAtAction(nameof(GetUserBadges), new { userId = userBadge.UserId }, new UserBadgeDTO
         {

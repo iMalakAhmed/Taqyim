@@ -12,8 +12,8 @@ using Taqyim.Api.Data;
 namespace Taqyim.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250609025232_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20250610041439_AddNotificationIsRead")]
+    partial class AddNotificationIsRead
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -226,19 +226,37 @@ namespace Taqyim.Api.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ConnectionId"));
 
+                    b.Property<int?>("BusinessFollowerId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("BusinessFollowingId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("FollowerId")
+                    b.Property<int?>("FollowerId")
                         .HasColumnType("int");
 
-                    b.Property<int>("FollowingId")
+                    b.Property<string>("FollowerType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("FollowingId")
                         .HasColumnType("int");
+
+                    b.Property<string>("FollowingType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("ConnectionId");
+
+                    b.HasIndex("BusinessFollowerId");
+
+                    b.HasIndex("BusinessFollowingId");
 
                     b.HasIndex("FollowerId");
 
@@ -297,6 +315,9 @@ namespace Taqyim.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("ReviewId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("UploadedAt")
                         .HasColumnType("datetime2");
 
@@ -304,6 +325,8 @@ namespace Taqyim.Api.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("MediaId");
+
+                    b.HasIndex("ReviewId");
 
                     b.HasIndex("UserId");
 
@@ -347,6 +370,9 @@ namespace Taqyim.Api.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationId"));
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
 
                     b.Property<string>("NotificationType")
                         .HasColumnType("nvarchar(max)");
@@ -470,39 +496,6 @@ namespace Taqyim.Api.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Reviews");
-                });
-
-            modelBuilder.Entity("Taqyim.Api.Models.ReviewImage", b =>
-                {
-                    b.Property<int>("ReviewImageId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReviewImageId"));
-
-                    b.Property<string>("Caption")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ReviewId")
-                        .HasColumnType("int");
-
-                    b.HasKey("ReviewImageId");
-
-                    b.HasIndex("ReviewId");
-
-                    b.ToTable("ReviewImages");
                 });
 
             modelBuilder.Entity("Taqyim.Api.Models.SavedReview", b =>
@@ -735,21 +728,33 @@ namespace Taqyim.Api.Migrations
 
             modelBuilder.Entity("Taqyim.Api.Models.Connection", b =>
                 {
-                    b.HasOne("Taqyim.Api.Models.User", "Follower")
+                    b.HasOne("Taqyim.Api.Models.Business", "BusinessFollower")
+                        .WithMany("ConnectionFollowings")
+                        .HasForeignKey("BusinessFollowerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Taqyim.Api.Models.Business", "BusinessFollowing")
                         .WithMany("ConnectionFollowers")
+                        .HasForeignKey("BusinessFollowingId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Taqyim.Api.Models.User", "Follower")
+                        .WithMany("ConnectionFollowings")
                         .HasForeignKey("FollowerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Taqyim.Api.Models.User", "Following")
-                        .WithMany("ConnectionFollowings")
+                        .WithMany("ConnectionFollowers")
                         .HasForeignKey("FollowingId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Taqyim.Api.Models.User", null)
                         .WithMany("Connections")
                         .HasForeignKey("UserId");
+
+                    b.Navigation("BusinessFollower");
+
+                    b.Navigation("BusinessFollowing");
 
                     b.Navigation("Follower");
 
@@ -758,11 +763,17 @@ namespace Taqyim.Api.Migrations
 
             modelBuilder.Entity("Taqyim.Api.Models.Media", b =>
                 {
+                    b.HasOne("Taqyim.Api.Models.Review", "Review")
+                        .WithMany("Media")
+                        .HasForeignKey("ReviewId");
+
                     b.HasOne("Taqyim.Api.Models.User", "User")
                         .WithMany("Media")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Review");
 
                     b.Navigation("User");
                 });
@@ -863,17 +874,6 @@ namespace Taqyim.Api.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Taqyim.Api.Models.ReviewImage", b =>
-                {
-                    b.HasOne("Taqyim.Api.Models.Review", "Review")
-                        .WithMany("ReviewImages")
-                        .HasForeignKey("ReviewId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Review");
-                });
-
             modelBuilder.Entity("Taqyim.Api.Models.SavedReview", b =>
                 {
                     b.HasOne("Taqyim.Api.Models.Review", "Review")
@@ -947,6 +947,10 @@ namespace Taqyim.Api.Migrations
                 {
                     b.Navigation("BusinessLocations");
 
+                    b.Navigation("ConnectionFollowers");
+
+                    b.Navigation("ConnectionFollowings");
+
                     b.Navigation("Products");
 
                     b.Navigation("Reviews");
@@ -973,9 +977,9 @@ namespace Taqyim.Api.Migrations
                 {
                     b.Navigation("Comments");
 
-                    b.Navigation("Reactions");
+                    b.Navigation("Media");
 
-                    b.Navigation("ReviewImages");
+                    b.Navigation("Reactions");
 
                     b.Navigation("SavedByUsers");
 

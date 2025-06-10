@@ -13,10 +13,12 @@ namespace Taqyim.Api.Controllers;
 public class MessageController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
+    private readonly NotificationController _notificationController;
 
-    public MessageController(ApplicationDbContext context)
+    public MessageController(ApplicationDbContext context, NotificationController notificationController)
     {
         _context = context;
+        _notificationController = notificationController;
     }
 
     // GET: /api/message/conversations
@@ -236,6 +238,20 @@ public class MessageController : ControllerBase
         conversation.LastMessageAt = DateTime.UtcNow;
         _context.Messages.Add(message);
         await _context.SaveChangesAsync();
+
+        // Notify other users in the conversation about the new message
+        foreach (var user in conversation.Users)
+        {
+            if (user.UserId != userId) // Don't notify the sender
+            {
+                await _notificationController.CreateNotification(new CreateNotificationDTO
+                {
+                    UserId = user.UserId,
+                    NotificationType = NotificationTypes.NewMessage,
+                    SenderId = userId
+                });
+            }
+        }
 
         var createdMessage = await _context.Messages
             .Include(m => m.Sender)
