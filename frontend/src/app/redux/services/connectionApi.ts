@@ -20,7 +20,8 @@ export const connectionApi = createApi({
     baseUrl: `${API_BASE_URL}/connection`,
     credentials: "include",
     prepareHeaders: (headers) => {
-      const token = getTokenFromCookie();
+      /*const token = getTokenFromCookie();*/
+      const token = sessionStorage.getItem('token');
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }

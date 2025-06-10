@@ -31,7 +31,7 @@ export default function SignupPage() {
 
   const [register, { isLoading: isRegistering }] = useRegisterMutation();
   const [login, { isLoading: isLoggingIn }] = useLoginMutation();
-  const { refetch: refetchCurrentUser } = useGetCurrentUserQuery();
+  const { refetch: refetchCurrentUser } = useGetCurrentUserQuery(undefined , { skip: true ,});
 
   const handleRegistrationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -17,7 +17,7 @@ public class User
     [Required]
     public string PasswordHash { get; set; } = null!;
     public string UserName { get; set; } = string.Empty;
-    public string Type { get; set; } = "User";
+    public string? Type { get; set; } = "User";
     public string? phoneNumber { get; set; }
     public bool IsVerified { get; set; }= false;
     public int? VerifiedByUserId { get; set; }

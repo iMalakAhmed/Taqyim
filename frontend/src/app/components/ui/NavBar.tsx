@@ -41,7 +41,6 @@ export default function NavBar() {
     pollingInterval: 1000,
     refetchOnMountOrArgChange: true,
   });
-
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -55,6 +54,14 @@ export default function NavBar() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // Temporarily commented out for debugging signup redirect issue
+  // React.useEffect(() => {
+  //   if (isError && !isLoading) {
+  //     removeAuthCookie();
+  //     router.push("/auth/login");
+  //   }
+  // }, [isError, isLoading, router]);
 
   const handleSignOut = async () => {
     try {

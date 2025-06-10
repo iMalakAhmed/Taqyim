@@ -35,7 +35,7 @@ namespace Taqyim.Api.Controllers
                 Email = request.Email,
                 UserName = request.UserName,
                 PasswordHash = HashPassword(request.Password),
-                Type = "User",
+                Type = request.Type,
                 CreatedAt = DateTime.UtcNow
             };
             _context.Users.Add(user);
@@ -57,7 +57,7 @@ namespace Taqyim.Api.Controllers
         }
 
         [Authorize]
-        [HttpGet("userinfo")]
+        [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUser()
         {
             var userId=int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
@@ -107,6 +107,12 @@ namespace Taqyim.Api.Controllers
 
         [Required]
         public string UserName { get; set; }=string.Empty;
+
+        public string? Type { get; set; }
+        public string? BusinessName { get; set; }
+        public string? BusinessCategory { get; set; }
+        public string? BusinessDescription { get; set; }
+        public string? BusinessAddress { get; set; }
         
     }
 

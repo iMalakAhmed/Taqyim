@@ -205,6 +205,12 @@ public class MessageController : ControllerBase
         await _context.SaveChangesAsync();
         return NoContent();
     }
+    [HttpGet("users")]
+    public async Task<IActionResult> GetAllUsers()
+  {
+    var users = await _context.Users.ToListAsync();
+    return Ok(users);
+  }
 
     // POST: /api/message
     [Authorize]
@@ -256,4 +262,5 @@ public class MessageController : ControllerBase
             }
         };
     }
+    
 } 
