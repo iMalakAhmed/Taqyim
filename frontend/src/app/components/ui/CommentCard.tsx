@@ -26,6 +26,7 @@ import CopyToClipboardButton from "./ShareButton";
 import Image from "next/image";
 import { formatTimestamp } from "./FormatTimeStamp";
 import FollowButton from "./FollowButton";
+import { getFullMediaUrl } from "../MediaUpload";
 
 type CommentProps = {
   reviewId: number;
@@ -107,7 +108,12 @@ export default function CommentCard({ reviewId, comment }: CommentProps) {
               }}
             >
               <Image
-                src={comment.commenter.profilePic || "/default-profile.jpg"}
+                src={
+                  comment.commenter.profilePic &&
+                  comment.commenter.profilePic.trim() !== ""
+                    ? getFullMediaUrl(comment.commenter.profilePic)
+                    : "/default-profile.jpg"
+                }
                 width={64}
                 height={64}
                 alt="user profile"

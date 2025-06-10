@@ -17,7 +17,7 @@ export const reviewApi = createApi({
     baseUrl: `${API_BASE_URL}/review`,
     credentials: "include",
     prepareHeaders: (headers) => {
-      const token = sessionStorage.getItem('token');
+      const token = sessionStorage.getItem("token");
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }
@@ -64,7 +64,17 @@ export const reviewApi = createApi({
       invalidatesTags: [{ type: "Reviews", id: "LIST" }],
     }),
 
-    updateReview: build.mutation<void, { id: number; data: UpdateReviewType }>({
+    updateReview: build.mutation<
+      void,
+      {
+        id: number;
+        data: {
+          rating: number;
+          comment: string;
+          media?: { mediaId: number }[];
+        };
+      }
+    >({
       query: ({ id, data }) => ({
         url: `/${id}`,
         method: "PUT",
