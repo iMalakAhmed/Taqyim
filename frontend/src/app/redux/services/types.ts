@@ -263,3 +263,42 @@ export interface PaginatedResult<T> {
   items: T[];
   totalCount: number;
 }
+
+export interface MonthlyReviewStat {
+  month: string;
+  reviewCount: number;
+  averageRating: number;
+}
+
+export interface ProductStatsDto {
+  productId: number;
+  productName: string;
+  reviewCount: number;
+  averageRating: number;
+}
+
+export interface ReviewEngagementDto {
+  reviewId: number;
+  reactionCount: number;
+  commentSnippet: string;
+}
+
+export interface ReviewerStatsDto {
+  userId: number;
+  username: string;
+  reviewCount: number;
+  averageRatingGiven: number;
+}
+
+export interface BusinessAnalytics {
+  totalReviews: number;
+  averageRating: number;
+  followerCount: number;
+  monthlyReviews: MonthlyReviewStat[];
+  mostCommonTags: string[];
+  productStats: ProductStatsDto[];
+  mostLikedReview: ReviewEngagementDto | null;
+  totalMediaCount: number;
+  sentimentBreakdown: Record<string, number>;
+  topReviewers: ReviewerStatsDto[];
+}

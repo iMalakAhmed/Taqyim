@@ -115,6 +115,9 @@ builder.Services.AddAuthentication(x =>
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<SearchService>();
+builder.Services.AddScoped<RecommendationDataService>();
+builder.Services.AddScoped<AnalyticsService>();
+
 
 // Configure database based on environment
 if (builder.Environment.IsProduction())

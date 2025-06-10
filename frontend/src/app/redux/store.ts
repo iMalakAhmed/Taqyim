@@ -16,6 +16,7 @@ import { commentReactionApi } from "./services/commentReactionApi";
 import replyCounterReducer from "./slices/replyCounterSlice";
 import authReducer from "./slices/authSlice";
 import { searchApi } from "./services/searchApi";
+import { analyticsApi } from "./services/analyticsApi";
 
 export const store = configureStore({
   reducer: {
@@ -29,6 +30,7 @@ export const store = configureStore({
     [commentReactionApi.reducerPath]: commentReactionApi.reducer,
     [connectionApi.reducerPath]: connectionApi.reducer,
     [searchApi.reducerPath]: searchApi.reducer,
+    [analyticsApi.reducerPath]: analyticsApi.reducer,
     auth: authReducer,
     user: userReducer,
     business: businessReducer,
@@ -48,7 +50,8 @@ export const store = configureStore({
       commentApi.middleware,
       commentReactionApi.middleware,
       connectionApi.middleware,
-      searchApi.middleware
+      searchApi.middleware,
+      analyticsApi.middleware
     ),
 });
 
