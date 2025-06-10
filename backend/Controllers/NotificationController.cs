@@ -17,7 +17,6 @@ public class NotificationController : ControllerBase
     private readonly ApplicationDbContext _context;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    // Common notification types
     public static class NotificationTypes
     {
         public const string NewMessage = "NEW_MESSAGE";
