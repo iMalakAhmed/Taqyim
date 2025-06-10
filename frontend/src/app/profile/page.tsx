@@ -1,5 +1,5 @@
-import UserProfile from "../components/UserProfile";
+import { redirect } from "next/navigation";
 
-export default function ProfilePage() {
-  return <UserProfile />;
+export default function MeProfileRedirect() {
+  redirect("/profile/me");
 }

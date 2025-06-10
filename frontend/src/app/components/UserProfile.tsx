@@ -187,14 +187,15 @@ const UserProfile = () => {
 
           {isSelf && user.type === "BusinessOwner" && (
             <Button
-              onClick={() => router.push(`/Business/${user.usersBusinesses[0].BusinessId}`)}
+              onClick={() =>
+                router.push(`/Business/${user.usersBusinesses[1].businessId}`)
+              }
               variant="primary"
               className="ml-2 p-6"
             >
               <IconEdit stroke={2} /> View Business Profile
             </Button>
           )}
-
         </div>
 
         {/* Bio */}

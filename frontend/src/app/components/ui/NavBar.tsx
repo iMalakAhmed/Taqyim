@@ -5,15 +5,15 @@ import ThemeToggle from "./ThemeToggle";
 import { usePathname } from "next/navigation";
 import {
   IconBellRinging2,
+  IconLogin,
+  IconLogout,
   IconMail,
+  IconMenu2,
+  IconSearch,
   IconUser,
   IconUserCircle,
-  IconSearch,
-  IconMenu2,
-  IconX,
-  IconLogin,
   IconUserPlus,
-  IconLogout,
+  IconX,
 } from "@tabler/icons-react";
 import { useDispatch } from "react-redux";
 import { useGetCurrentUserQuery, authApi } from "../../redux/services/authApi";
@@ -165,7 +165,14 @@ export default function NavBar() {
     }
   };
 
-  const { data: user, isLoading, refetch } = useGetCurrentUserQuery();
+  const {
+    data: user,
+    isLoading,
+    refetch,
+  } = useGetCurrentUserQuery(undefined, {
+    pollingInterval: 1000, // Optional auto-refresh
+    refetchOnMountOrArgChange: true,
+  });
 
   useEffect(() => {
     const handleResize = () => {
@@ -183,53 +190,43 @@ export default function NavBar() {
 
   const handleSignOut = async () => {
     try {
+      // Call the backend signout API
       await fetch("/api/auth/signout", {
         method: "POST",
       });
     } catch (err) {
       console.error("Error calling signout API:", err);
+      // Continue with client-side signout even if API call fails
     }
 
-    sessionStorage.removeItem("token");
-    await removeAuthCookie();
+    sessionStorage.removeItem("token"); // Clear token from session storage
+    await removeAuthCookie(); // Remove the cookie (for httpOnly token if any)
+    // Invalidate RTK Query cache related to the user
     dispatch(authApi.util.resetApiState());
-    router.push("/auth/login");
-    setMobileMenuOpen(false);
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
-      setSearchQuery("");
-      setSearchOpen(false);
-    }
+    router.push("/auth/login"); // Redirect to login page
   };
 
   return (
     <div
-      className={`top-0 w-full z-[999] bg-background text-text ${
+      className={`top-0 w-full z-[999] bg-background h-24 text-text ${
         isFixed ? "fixed" : "relative"
       }`}
     >
-      {/* Desktop Navbar */}
-      <div className="hidden md:flex mx-4 md:mx-8 lg:mx-24 flex-row justify-between items-center h-24">
+      <div className="mx-24 flex flex-row justify-between items-center h-full">
         {user ? (
-          <Link href="/home" className="min-w-[100px]">
-            <h1 className="font-heading text-text text-xl lg:text-2xl">
-              TAQYIM
-            </h1>
+          <Link href="/home">
+            <h1 className="font-heading text-text">TAQYIM</h1>
           </Link>
         ) : (
-          <Link href="/" className="min-w-[100px]">
-            <h1 className="font-heading text-text text-xl lg:text-2xl">
-              TAQYIM
-            </h1>
+          <Link href="/">
+            <h1 className="font-heading text-text">TAQYIM</h1>
           </Link>
         )}
 
+        <input />
+
         <div className="flex-1 mx-4 flex justify-center">
-          <form className="w-full max-w-lg relative">
+          <form className="w-full max-w-lg">
             <input
               type="text"
               placeholder="Search Reviews..."
@@ -387,7 +384,7 @@ export default function NavBar() {
         {/* Mobile Search */}
         {searchOpen && (
           <div className="px-4 pb-4">
-            <form onSubmit={handleSearch} className="w-full">
+            <form className="w-full">
               <input
                 type="text"
                 placeholder="Search Reviews..."

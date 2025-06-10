@@ -43,6 +43,7 @@ export interface UserType {
   reviews: ReviewType[];
   ConnectionFollowers?: UserType[];
   ConnectionFollowings?: UserType[];
+  usersBusinesses: BusinessType[];
 }
 
 export interface UpdateUserType {
