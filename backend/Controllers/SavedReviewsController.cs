@@ -54,16 +54,57 @@ public class SavedReviewsController : ControllerBase
     }
 
     [HttpGet("{userId}")]
-public async Task<ActionResult<List<Review>>> GetSavedReviews(int userId)
+public async Task<ActionResult> GetSavedReviews(
+    int userId, 
+    [FromQuery] int page = 1,          // default page 1
+    [FromQuery] int limit = 10)        // default 10 items per page
 {
-    var reviews = await _context.SavedReviews
+    if (page <= 0) page = 1;
+    if (limit <= 0) limit = 10;
+
+    var query = _context.SavedReviews
         .Where(sr => sr.UserId == userId)
         .Select(sr => sr.Review)
         .Include(r => r.Business)
         .Include(r => r.User)
+        .AsQueryable();
+
+    var totalCount = await query.CountAsync();
+
+    var reviews = await query
+        .Skip((page - 1) * limit)
+        .Take(limit)
         .ToListAsync();
 
-    return Ok(reviews);
+    return Ok(new
+    {
+        total = totalCount,
+        page,
+        limit,
+        reviews
+    });
+}
+
+[HttpDelete("{reviewId}")]
+public async Task<IActionResult> UnsaveReview(int reviewId)
+{
+    // Extract userId from JWT token claims
+    var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "userId");
+    if (userIdClaim == null) return Unauthorized();  // If no userId claim, block request
+
+    int userId = int.Parse(userIdClaim.Value);
+
+    // Find the saved review entry
+    var saved = await _context.SavedReviews
+        .FirstOrDefaultAsync(sr => sr.UserId == userId && sr.ReviewId == reviewId);
+
+    if (saved == null)
+        return NotFound();
+
+    _context.SavedReviews.Remove(saved);
+    await _context.SaveChangesAsync();
+
+    return Ok();
 }
 
 }

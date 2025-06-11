@@ -872,6 +872,25 @@ namespace Taqyim.Api.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Taqyim.Api.Models.SavedReview", b =>
+                {
+                    b.HasOne("Taqyim.Api.Models.Review", "Review")
+                        .WithMany("SavedByUsers")
+                        .HasForeignKey("ReviewId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Taqyim.Api.Models.User", "User")
+                        .WithMany("SavedReviews")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Review");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Taqyim.Api.Models.Tag", b =>
                 {
                     b.HasOne("Taqyim.Api.Models.Review", "Review")
@@ -960,6 +979,8 @@ namespace Taqyim.Api.Migrations
 
                     b.Navigation("Reactions");
 
+                    b.Navigation("SavedByUsers");
+
                     b.Navigation("Tags");
                 });
 
@@ -990,6 +1011,8 @@ namespace Taqyim.Api.Migrations
                     b.Navigation("Reactions");
 
                     b.Navigation("Reviews");
+
+                    b.Navigation("SavedReviews");
 
                     b.Navigation("UserBadges");
 
