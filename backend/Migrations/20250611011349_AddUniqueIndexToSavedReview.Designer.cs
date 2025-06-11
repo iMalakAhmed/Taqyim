@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Taqyim.Api.Data;
 
@@ -11,9 +12,11 @@ using Taqyim.Api.Data;
 namespace Taqyim.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250611011349_AddUniqueIndexToSavedReview")]
+    partial class AddUniqueIndexToSavedReview
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -495,7 +498,6 @@ namespace Taqyim.Api.Migrations
                     b.ToTable("Reviews");
                 });
 
-<<<<<<< HEAD
             modelBuilder.Entity("Taqyim.Api.Models.SavedReview", b =>
                 {
                     b.Property<int>("SavedReviewId")
@@ -523,8 +525,6 @@ namespace Taqyim.Api.Migrations
                     b.ToTable("SavedReviews");
                 });
 
-=======
->>>>>>> cdb39e9395eedc95b1b30eaeb9fa66cc759226a9
             modelBuilder.Entity("Taqyim.Api.Models.Tag", b =>
                 {
                     b.Property<int>("TagId")
@@ -875,6 +875,25 @@ namespace Taqyim.Api.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Taqyim.Api.Models.SavedReview", b =>
+                {
+                    b.HasOne("Taqyim.Api.Models.Review", "Review")
+                        .WithMany("SavedByUsers")
+                        .HasForeignKey("ReviewId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Taqyim.Api.Models.User", "User")
+                        .WithMany("SavedReviews")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Review");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Taqyim.Api.Models.Tag", b =>
                 {
                     b.HasOne("Taqyim.Api.Models.Review", "Review")
@@ -963,6 +982,8 @@ namespace Taqyim.Api.Migrations
 
                     b.Navigation("Reactions");
 
+                    b.Navigation("SavedByUsers");
+
                     b.Navigation("Tags");
                 });
 
@@ -993,6 +1014,8 @@ namespace Taqyim.Api.Migrations
                     b.Navigation("Reactions");
 
                     b.Navigation("Reviews");
+
+                    b.Navigation("SavedReviews");
 
                     b.Navigation("UserBadges");
 

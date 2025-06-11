@@ -17,6 +17,7 @@ import {
 import Button from "./Button";
 import CreateReview from "../CreateReview";
 import VerticalLine from "./VerticalLine";
+import { useGetSavedReviewsQuery } from "@/app/redux/services/savedReviewApi";
 
 export default function SideNav() {
   const pathname = usePathname();
@@ -24,6 +25,10 @@ export default function SideNav() {
   const [showModal, setShowModal] = useState(false);
 
   const { data: currentUser, isLoading } = useGetCurrentUserQuery();
+
+  const { data: savedReviews } = useGetSavedReviewsQuery(currentUser?.userId ?? 0, {
+    skip: !currentUser?.userId,
+  });
 
   if (
     isLoading ||
@@ -63,6 +68,7 @@ export default function SideNav() {
         <ul className="space-y-4 mt-8 ml-20 flex-grow overflow-auto">
           {mainNavItems.map(({ href, label, icon: Icon }) => {
             const isActive = pathname === href;
+            const isSaved = href === "/saved";
             return (
               <li
                 key={href}
@@ -85,6 +91,11 @@ export default function SideNav() {
                   }`}
                 >
                   {label}
+                  {isSaved && savedReviews && (
+                    <span className="ml-2 text-xs text-primary">
+                      ({savedReviews.length})
+                    </span>
+                  )}
                 </a>
               </li>
             );
