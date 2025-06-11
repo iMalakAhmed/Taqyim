@@ -12,8 +12,8 @@ using Taqyim.Api.Data;
 namespace Taqyim.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250610210529_AddSavedReviews")]
-    partial class AddSavedReviews
+    [Migration("20250611032639_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -519,7 +519,8 @@ namespace Taqyim.Api.Migrations
 
                     b.HasIndex("ReviewId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "ReviewId")
+                        .IsUnique();
 
                     b.ToTable("SavedReviews");
                 });
