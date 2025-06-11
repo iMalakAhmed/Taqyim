@@ -137,6 +137,28 @@ builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
+// Add this code right after var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    try
+    {
+        // Add IsRead column if it doesn't exist
+        context.Database.ExecuteSqlRaw(@"
+            IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID(N'[dbo].[Notifications]') AND name = 'IsRead')
+            BEGIN
+                ALTER TABLE [dbo].[Notifications] ADD [IsRead] bit NOT NULL DEFAULT 0;
+            END
+        ");
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while adding the IsRead column to Notifications table.");
+    }
+}
+
 // Configure the HTTP request pipeline
 
 // Use CORS middleware early in the pipeline

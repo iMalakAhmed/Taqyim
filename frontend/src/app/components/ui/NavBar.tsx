@@ -43,6 +43,7 @@ import {
   AvatarImage,
   AvatarFallback,
 } from "@/app/components/ui/avatar";
+import NotificationBell from './NotificationBell';
 
 export default function NavBar() {
   const pathname = usePathname();
@@ -393,9 +394,7 @@ export default function NavBar() {
                 </div>
               </div>
 
-              <Button variant="none" size="sm" className="hover:text-secondary">
-                <IconBellRinging2 />
-              </Button>
+              <NotificationBell />
               <Link href="/saved" className="text-text hover:text-secondary">
                 <Button variant="none" size="sm">
                   <IconBookmark />
@@ -481,8 +480,7 @@ export default function NavBar() {
                   className="flex items-center text-text hover:text-accent py-2"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <IconBellRinging2 size={20} className="mr-2" />
-                  Notifications
+                  <NotificationBell />
                 </Link>
 
                 <Link
