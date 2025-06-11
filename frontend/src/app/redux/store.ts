@@ -56,6 +56,7 @@ export const store = configureStore({
       connectionApi.middleware,
       searchApi.middleware,
       savedReviewApi.middleware,
+      recommendationApi.middleware,
     ),
 });
 

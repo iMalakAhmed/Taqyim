@@ -9,50 +9,45 @@ type SavePayload = {
 };
 
 export const savedReviewApi = createApi({
-  reducerPath: "savedReviewApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${API_BASE_URL}/SavedReviews`,
-    credentials: "include",
-    prepareHeaders: (headers) => {
-      const token = sessionStorage.getItem("token");
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
-  tagTypes: ["SavedReview"],
-  endpoints: (build) => ({
-    saveReview: build.mutation<void, SavePayload>({
+    reducerPath: "savedReviewApi",
+    baseQuery: fetchBaseQuery({
+      baseUrl: `${API_BASE_URL}/SavedReviews`,
+      credentials: "include",
+      prepareHeaders: (headers) => {
+        const token = sessionStorage.getItem("token");
+        if (token) {
+          headers.set("Authorization", `Bearer ${token}`);
+        }
+        return headers;
+      },
+    }),
+    tagTypes: ["SavedReview"],
+    endpoints: (build) => ({
+      saveReview: build.mutation<void, SavePayload>({
         query: ({ reviewId, userId }) => ({
           url: `/${reviewId}`,
           method: "POST",
-          body: userId, // ← send plain number, not { userId: userId }
-          headers: {
-            "Content-Type": "application/json" // make sure it's explicitly set
-          }
+          body: userId,
+          headers: { "Content-Type": "application/json" },
         }),
         invalidatesTags: ["SavedReview"],
       }),
-      
-
-    unsaveReview: build.mutation<void, SavePayload>({
-      query: ({ reviewId, userId }) => ({
-        url: `/${reviewId}?userId=${userId}`,
-        method: "DELETE",
+      unsaveReview: build.mutation<void, SavePayload>({
+        query: ({ reviewId, userId }) => ({
+          url: `/${reviewId}?userId=${userId}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["SavedReview"],
       }),
-      invalidatesTags: ["SavedReview"],
+      getSavedReviews: build.query<ReviewType[], number>({
+        query: (userId) => `/${userId}`,
+        providesTags: ["SavedReview"],
+      }),
     }),
-
-    getSavedReviews: build.query<ReviewType[], number>({
-      query: (userId) => `/${userId}`,
-      providesTags: ["SavedReview"],
-    }),
-  }),
-});
-
-export const {
-  useSaveReviewMutation,
-  useUnsaveReviewMutation,
-  useGetSavedReviewsQuery,
-} = savedReviewApi;
+  });
+  export const {
+    useSaveReviewMutation,
+    useUnsaveReviewMutation,
+    useGetSavedReviewsQuery,
+  } = savedReviewApi;
+  
