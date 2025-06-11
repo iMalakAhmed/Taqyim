@@ -6,6 +6,7 @@ import {
   BusinessLocationType,
   BusinessLocationCreateType,
   BusinessLocationUpdateType,
+  ProductType,
 } from "./types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
@@ -134,6 +135,19 @@ export const businessApi = createApi({
       }),
       providesTags: ["Business"],
     }),
+    createProduct: builder.mutation<
+      void,
+      { businessId: number; body: ProductType }
+    >({
+      query: ({ businessId, body }) => ({
+        url: `/${businessId}/products`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (result, error, { businessId }) => [
+        { type: "Business", id: businessId },
+      ],
+    }),
   }),
 });
 
@@ -150,4 +164,5 @@ export const {
   useDeleteBusinessMutation,
   useGetAllBusinessesQuery,
   useGetMyBusinessQuery,
+  useCreateProductMutation,
 } = businessApi;
