@@ -3,10 +3,21 @@
 import Link from "next/link";
 import { useParams, notFound } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useGetSavedReviewsQuery, useSaveReviewMutation, useUnsaveReviewMutation } from "@/app/redux/services/savedReviewApi";
-import { useGetCurrentUserQuery, useGetUserQuery } from "@/app/redux/services/userApi";
+import {
+  useGetSavedReviewsQuery,
+  useSaveReviewMutation,
+  useUnsaveReviewMutation,
+} from "@/app/redux/services/savedReviewApi";
+import {
+  useGetCurrentUserQuery,
+  useGetUserQuery,
+} from "@/app/redux/services/userApi";
 import { formatTimestamp } from "@/app/components/ui/FormatTimeStamp";
-import { IconStarFilled, IconBookmark, IconBookmarkFilled } from "@tabler/icons-react";
+import {
+  IconStarFilled,
+  IconBookmark,
+  IconBookmarkFilled,
+} from "@tabler/icons-react";
 
 export default function SavedReviewsPage() {
   const params = useParams();
@@ -28,7 +39,8 @@ export default function SavedReviewsPage() {
   });
 
   const user = viewedId && viewedId !== "me" ? viewedUser : currentUser;
-  const isLoading = viewedId && viewedId !== "me" ? isUserLoading : isCurrentLoading;
+  const isLoading =
+    viewedId && viewedId !== "me" ? isUserLoading : isCurrentLoading;
   const error = viewedId && viewedId !== "me" ? userError : currentError;
 
   const userId = user?.userId;
@@ -56,7 +68,11 @@ export default function SavedReviewsPage() {
   }, [viewedId]);
 
   if (isLoading || isSavedLoading)
-    return <div className="p-6 text-center font-serif text-gray-700">Loading saved articles...</div>;
+    return (
+      <div className="p-6 text-center font-serif text-gray-700">
+        Loading saved articles...
+      </div>
+    );
   if (!user || error || isError) return notFound();
 
   // Handler to toggle saved state (unsave in this case since we are on saved page)
@@ -82,7 +98,8 @@ export default function SavedReviewsPage() {
     <main className="ml-[250px] px-6 py-10 font-serif bg-gray-50 min-h-screen">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-5xl font-extrabold border-b-[3px] border-gray-300 pb-6 mb-10 text-center">
-          <span className="text-primary italic">{user.userName}</span>'s Saved Articles
+          <span className="text-primary italic">{user.userName}</span>'s Saved
+          Articles
         </h1>
 
         {savedReviews?.length === 0 ? (
@@ -91,7 +108,7 @@ export default function SavedReviewsPage() {
           </p>
         ) : (
           <section className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            {savedReviews.map((review) => (
+            {savedReviews?.map((review) => (
               <article
                 key={review.reviewId}
                 className="bg-white border border-gray-200 rounded-xl shadow hover:shadow-md transition-all duration-300 p-6 space-y-3 relative"
@@ -99,11 +116,16 @@ export default function SavedReviewsPage() {
                 {/* Header */}
                 <header className="flex flex-col">
                   <h2 className="text-xl font-bold text-gray-900">
-                    {review.comments[0]?.content || review.comment || "(No Title)"}
+                    {review.comments[0]?.content ||
+                      review.comment ||
+                      "(No Title)"}
                   </h2>
                   <div className="text-sm text-gray-600">
                     <span className="inline-flex items-center mr-3">
-                      <IconStarFilled size={16} className="text-yellow-500 mr-1" />
+                      <IconStarFilled
+                        size={16}
+                        className="text-yellow-500 mr-1"
+                      />
                       {review.rating} / 5
                     </span>
                     <span>• Saved on {formatTimestamp(review.createdAt)}</span>
@@ -111,7 +133,9 @@ export default function SavedReviewsPage() {
                 </header>
 
                 {/* Body */}
-                <p className="text-gray-700 text-sm italic line-clamp-4">{review.comment}</p>
+                <p className="text-gray-700 text-sm italic line-clamp-4">
+                  {review.comment}
+                </p>
 
                 {/* Footer */}
                 <footer className="text-sm text-blue-600 flex flex-col space-y-1">

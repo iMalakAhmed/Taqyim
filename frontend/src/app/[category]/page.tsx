@@ -5,7 +5,6 @@ import { useGetAllBusinessesQuery } from "@/app/redux/services/BusinessApi";
 import BusinessCard from "@/app/components/ui/BusinessCard";
 import ProductCard from "@/app/components/ui/ProductCard";
 
-
 const validCategories = [
   "Food-Dining",
   "Health-Wellness",
@@ -24,7 +23,6 @@ export default function CategoryPage() {
 
   const { data: businesses, isLoading, isError } = useGetAllBusinessesQuery();
 
-
   if (!businesses || !Array.isArray(businesses))
     return <p>No businesses available.</p>;
 
@@ -34,14 +32,21 @@ export default function CategoryPage() {
   );
 
   return (
-    <main className="p-6 space-y-10">
-      <h1 className="text-3xl font-bold">{category.replace(/-/g, " ")} Businesses</h1>
+    <main className="w-full min-h-screen bg-background text-text pt-24 p-96">
+      <h1 className="text-3xl font-bold p-5">
+        {category.replace(/-/g, " ")} Businesses
+      </h1>
 
       {filteredBusinesses.length === 0 ? (
-        <p className="text-gray-500 italic">No businesses found in this category.</p>
+        <p className="text-gray-500 italic">
+          No businesses found in this category.
+        </p>
       ) : (
         filteredBusinesses.map((business) => (
-          <div key={business.businessId} className="border rounded-xl p-4 shadow">
+          <div
+            key={business.businessId}
+            className="border rounded-xl p-4 shadow"
+          >
             <BusinessCard business={business} />
 
             {business.products?.length > 0 ? (

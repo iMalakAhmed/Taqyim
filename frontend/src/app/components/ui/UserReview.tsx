@@ -6,19 +6,19 @@ import ReviewCard from "./ReviewCard";
 
 export default function UserReviews() {
   const { id } = useParams();
-  const businessId = parseInt(id as string);
+  const userId = parseInt(id as string);
   const { data: reviews, error, isLoading } = useGetReviewsQuery();
 
-  const businessReviews = Array.isArray(reviews)
-    ? reviews.filter((review) => review.business.businessId === businessId)
+  const userReviews = Array.isArray(reviews?.items)
+    ? reviews.items.filter((review) => review.user.userId === userId)
     : [];
 
   return (
     <div className="mt-6 space-y-6">
       <h2 className="text-2xl font-bold">User's Reviews</h2>
 
-      {businessReviews && businessReviews.length > 0 ? (
-        businessReviews.map((review) => (
+      {userReviews && userReviews.length > 0 ? (
+        userReviews.map((review) => (
           <ReviewCard key={review.reviewId} reviewId={review.reviewId} />
         ))
       ) : (

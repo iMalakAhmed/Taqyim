@@ -84,7 +84,7 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
 
   return (
     <div
-      className="fixed inset-0 flex justify-center items-center bg-background z-[9999]  text-text backdrop-invert-25"
+      className="fixed inset-0 flex justify-center items-center z-[9999]  text-text backdrop-invert-25"
       onClick={onCancel}
     >
       <div

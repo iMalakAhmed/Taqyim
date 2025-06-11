@@ -306,7 +306,7 @@ export default function NavBar() {
                       </h3>
                       {allBusinesses.map((business) => (
                         <Link
-                          href={`/business/${business.businessId}`}
+                          href={`/Business/${business.businessId}`}
                           key={business.businessId}
                           className="flex items-center gap-3 py-2 hover:bg-stone-100 transition-colors duration-200 rounded-md"
                           onClick={handleResultClick}

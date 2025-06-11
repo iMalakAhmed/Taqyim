@@ -126,39 +126,46 @@ public class ReviewController : ControllerBase
 
     // GET: /api/review
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<ReviewDTO>>> GetReviews(
-        [FromQuery] int? businessId, 
-        [FromQuery] int? userId,
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 20)
+public async Task<ActionResult<PagedResult<ReviewDTO>>> GetReviews(
+    [FromQuery] int? businessId, 
+    [FromQuery] int? userId,
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 20)
+{
+    var query = _context.Reviews
+        .Include(r => r.User)
+        .Include(r => r.Business)
+        .Include(r => r.Product)
+        .Include(r => r.Comments).ThenInclude(c => c.Commenter)
+        .Include(r => r.Reactions).ThenInclude(re => re.User)
+        .Include(r => r.Tags)
+        .Include(r => r.Media)
+        .AsQueryable();
+
+    if (businessId.HasValue)
+        query = query.Where(r => r.BusinessId == businessId.Value);
+
+    if (userId.HasValue)
+        query = query.Where(r => r.UserId == userId.Value);
+
+    var totalCount = await query.CountAsync();
+
+    var reviews = await query
+        .OrderByDescending(r => r.CreatedAt)
+        .Skip((page - 1) * pageSize)
+        .Take(pageSize)
+        .Select(r => MapReviewToDto(r))
+        .ToListAsync();
+
+    return Ok(new PagedResult<ReviewDTO>
     {
-        var query = _context.Reviews
-            .Include(r => r.User)
-            .Include(r => r.Business)
-            .Include(r => r.Product)
-            .Include(r => r.Comments)
-                .ThenInclude(c => c.Commenter)
-            .Include(r => r.Reactions)
-                .ThenInclude(re => re.User)
-            .Include(r => r.Tags)
-            .Include(r => r.Media)
-            .AsQueryable();
+        TotalCount = totalCount,
+        Page = page,
+        PageSize = pageSize,
+        Items = reviews
+    });
+}
 
-        if (businessId.HasValue)
-            query = query.Where(r => r.BusinessId == businessId.Value);
-
-        if (userId.HasValue)
-            query = query.Where(r => r.UserId == userId.Value);
-
-        var reviews = await query
-            .OrderByDescending(r => r.CreatedAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .Select(r => MapReviewToDto(r))
-            .ToListAsync();
-
-        return Ok(reviews);
-    }
 
     // GET: /api/review/{id}
     [HttpGet("{id}")]

@@ -39,11 +39,11 @@ export const reviewApi = createApi({
         return `?${queryString.toString()}`;
       },
       providesTags: (result) =>
-        result
+        Array.isArray(result)
           ? [
-              ...result.map(({ reviewId }) => ({
+              ...result.map((review) => ({
                 type: "Review" as const,
-                id: reviewId,
+                id: review.reviewId,
               })),
               { type: "Reviews", id: "LIST" },
             ]

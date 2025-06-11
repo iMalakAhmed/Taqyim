@@ -8,17 +8,36 @@ import BusinessCard from "@/app/components/ui/BusinessCard";
 import ProductCard from "@/app/components/ui/ProductCard";
 import ReviewCard from "@/app/components/ui/ReviewCard";
 
-
 type CategoryBusinessesProps = {
   category: string;
 };
 
-export default function CategoryBusinesses({ category }: CategoryBusinessesProps) {
-  const { data: businesses, isLoading: loadingBusinesses, isError: errorBusinesses } = useGetAllBusinessesQuery();
-  const { data: reviews, isLoading: loadingReviews, isError: errorReviews } = useGetReviewsQuery();
+export default function CategoryBusinesses({
+  category,
+}: CategoryBusinessesProps) {
+  const {
+    data: businesses,
+    isLoading: loadingBusinesses,
+    isError: errorBusinesses,
+  } = useGetAllBusinessesQuery();
+  const {
+    data: reviews,
+    isLoading: loadingReviews,
+    isError: errorReviews,
+  } = useGetReviewsQuery();
 
-  if (loadingBusinesses || loadingReviews) return <div><p>Loading</p></div>;
-  if (errorBusinesses || errorReviews) return <div><p>"Failed to load data."</p></div>;
+  if (loadingBusinesses || loadingReviews)
+    return (
+      <div>
+        <p>Loading</p>
+      </div>
+    );
+  if (errorBusinesses || errorReviews)
+    return (
+      <div>
+        <p>"Failed to load data."</p>
+      </div>
+    );
 
   if (!businesses || !reviews) return null;
 
@@ -29,13 +48,15 @@ export default function CategoryBusinesses({ category }: CategoryBusinessesProps
   const filteredBusinesses = businesses.filter(
     (b) =>
       Array.isArray(b.category) &&
-      b.category.some(
-        (cat) => cat.toLowerCase() === normalizedCategory
-      )
+      b.category.some((cat) => cat.toLowerCase() === normalizedCategory)
   );
 
   if (filteredBusinesses.length === 0)
-    return <p className="text-gray-500 italic">No businesses found in this category.</p>;
+    return (
+      <p className="text-gray-500 italic">
+        No businesses found in this category.
+      </p>
+    );
 
   return (
     <div className="space-y-10 md:ml-8">
@@ -46,9 +67,15 @@ export default function CategoryBusinesses({ category }: CategoryBusinessesProps
         );
 
         return (
-          <div key={business.businessId} className="border rounded-xl p-6 shadow">
+          <div
+            key={business.businessId}
+            className="border rounded-xl p-6 shadow"
+          >
             {/* Business clickable card */}
-            <Link href={`/business/${business.businessId}`} className="block hover:underline">
+            <Link
+              href={`/business/${business.businessId}`}
+              className="block hover:underline"
+            >
               <BusinessCard business={business} />
             </Link>
 
@@ -58,7 +85,10 @@ export default function CategoryBusinesses({ category }: CategoryBusinessesProps
                 <h3 className="text-lg font-semibold mb-3">Business Reviews</h3>
                 <div className="space-y-4">
                   {businessReviews.map((review) => (
-                    <ReviewCard key={review.reviewId} reviewId={review.reviewId} />
+                    <ReviewCard
+                      key={review.reviewId}
+                      reviewId={review.reviewId}
+                    />
                   ))}
                 </div>
               </section>
@@ -75,7 +105,10 @@ export default function CategoryBusinesses({ category }: CategoryBusinessesProps
                       (r) => r.product?.productId === product.productId
                     );
                     return (
-                      <div key={product.productId} className="border p-4 rounded shadow">
+                      <div
+                        key={product.productId}
+                        className="border p-4 rounded shadow"
+                      >
                         <ProductCard product={product} />
 
                         {/* Product reviews */}
@@ -83,7 +116,10 @@ export default function CategoryBusinesses({ category }: CategoryBusinessesProps
                           <div className="mt-3 space-y-2">
                             <h4 className="font-semibold">Reviews</h4>
                             {productReviews.map((review) => (
-                              <ReviewCard key={review.reviewId} reviewId={review.reviewId} />
+                              <ReviewCard
+                                key={review.reviewId}
+                                reviewId={review.reviewId}
+                              />
                             ))}
                           </div>
                         )}

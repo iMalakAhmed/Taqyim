@@ -5,6 +5,8 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Taqyim.Api.Data;
 using Taqyim.Api.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -53,48 +55,47 @@ public class SavedReviewsController : ControllerBase
         return Ok();
     }
 
-    [HttpGet("{userId}")]
-public async Task<ActionResult> GetSavedReviews(
-    int userId, 
-    [FromQuery] int page = 1,          // default page 1
-    [FromQuery] int limit = 10)        // default 10 items per page
-{
-    if (page <= 0) page = 1;
-    if (limit <= 0) limit = 10;
-
-    var query = _context.SavedReviews
-        .Where(sr => sr.UserId == userId)
-        .Select(sr => sr.Review)
-        .Include(r => r.Business)
-        .Include(r => r.User)
-        .AsQueryable();
-
-    var totalCount = await query.CountAsync();
-
-    var reviews = await query
-        .Skip((page - 1) * limit)
-        .Take(limit)
-        .ToListAsync();
-
-    return Ok(new
+        [HttpGet("{userId}")]
+    public async Task<ActionResult> GetSavedReviews(
+        int userId, 
+        [FromQuery] int page = 1,          // default page 1
+        [FromQuery] int limit = 10)        // default 10 items per page
     {
-        total = totalCount,
-        page,
-        limit,
-        reviews
-    });
-}
+        if (page <= 0) page = 1;
+        if (limit <= 0) limit = 10;
 
+        var query = _context.SavedReviews
+            .Where(sr => sr.UserId == userId)
+            .Select(sr => sr.Review)
+            .Include(r => r.Business)
+            .Include(r => r.User)
+            .AsQueryable();
+
+        var totalCount = await query.CountAsync();
+
+        var reviews = await query
+            .Skip((page - 1) * limit)
+            .Take(limit)
+            .ToListAsync();
+
+        return Ok(new
+        {
+            total = totalCount,
+            page,
+            limit,
+            reviews
+        });
+    }
+
+[Authorize]
 [HttpDelete("{reviewId}")]
 public async Task<IActionResult> UnsaveReview(int reviewId)
 {
-    // Extract userId from JWT token claims
-    var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "userId");
-    if (userIdClaim == null) return Unauthorized();  // If no userId claim, block request
+    var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+    if (userIdClaim == null) return Unauthorized();
 
     int userId = int.Parse(userIdClaim.Value);
 
-    // Find the saved review entry
     var saved = await _context.SavedReviews
         .FirstOrDefaultAsync(sr => sr.UserId == userId && sr.ReviewId == reviewId);
 
@@ -106,5 +107,6 @@ public async Task<IActionResult> UnsaveReview(int reviewId)
 
     return Ok();
 }
+
 
 }

@@ -19,7 +19,6 @@ import { searchApi } from "./services/searchApi";
 import { analyticsApi } from "./services/analyticsApi";
 import { recommendationApi } from "./services/recommendationApi";
 import { savedReviewApi } from "./services/savedReviewApi";
-import {analyticsReducer} from "./slices/analyticsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -58,10 +57,7 @@ export const store = configureStore({
       searchApi.middleware,
       analyticsApi.middleware,
       recommendationApi.middleware,
-      savedReviewApi.middleware,
-      savedReviewApi.middleware,
-      recommendationApi.middleware,
-      analyticsApi.middleware,
+      savedReviewApi.middleware
     ),
 });
 
