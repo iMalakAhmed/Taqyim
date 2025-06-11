@@ -217,7 +217,6 @@ const EditBusinessModal: React.FC<Props> = ({
         </Button>
 
         <h2 className="text-xl font-semibold mb-2">Edit Business</h2>
-        <HorizontalLine />
 
         <form className="space-y-4 mt-4">
           {/* Business Name */}
