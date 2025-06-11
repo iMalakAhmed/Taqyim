@@ -6,6 +6,7 @@ import {
   BusinessLocationType,
   BusinessLocationCreateType,
   BusinessLocationUpdateType,
+  ProductType,
 } from "./types";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL!;
@@ -134,6 +135,47 @@ export const businessApi = createApi({
       }),
       providesTags: ["Business"],
     }),
+    createProduct: builder.mutation<
+      void,
+      { businessId: number; body: ProductType }
+    >({
+      query: ({ businessId, body }) => ({
+        url: `/${businessId}/products`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (result, error, { businessId }) => [
+        { type: "Business", id: businessId },
+      ],
+    }),
+    getProductsByBusiness: builder.query<ProductType[], number>({
+      query: (businessId) => `/${businessId}/products`,
+    }),
+
+    updateProduct: builder.mutation<
+      void,
+      { businessId: number; productId: number; body: ProductType }
+    >({
+      query: ({ businessId, productId, body }) => ({
+        url: `/${businessId}/products/${productId}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: (result, error, { businessId }) => [{ type: "Business", id: businessId }],
+    }),
+
+
+    deleteProduct: builder.mutation<
+      void,
+      { businessId: number; productId: number }
+    >({
+      query: ({ businessId, productId }) => ({
+        url: `/${businessId}/products/${productId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { businessId }) => [{ type: "Business", id: businessId }],
+    }),
+
   }),
 });
 
@@ -150,4 +192,8 @@ export const {
   useDeleteBusinessMutation,
   useGetAllBusinessesQuery,
   useGetMyBusinessQuery,
+  useCreateProductMutation,
+  useGetProductsByBusinessQuery,
+  useUpdateProductMutation,
+  useDeleteProductMutation,
 } = businessApi;
