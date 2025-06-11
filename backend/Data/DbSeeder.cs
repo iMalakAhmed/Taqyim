@@ -3,15 +3,25 @@ using Taqyim.Api.Data;
 using Taqyim.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
+
 public static class DbSeeder
 {
+        private static string HashPassword(string password)
+    {
+        using var sha256 = System.Security.Cryptography.SHA256.Create();
+        var bytes = System.Text.Encoding.UTF8.GetBytes(password);
+        var hash = sha256.ComputeHash(bytes);
+        return Convert.ToBase64String(hash);
+    }
+
     public static async Task SeedAsync(ApplicationDbContext context)
     {
+
         if (!context.Users.Any())
         {
             var userFaker = new Faker<User>()
                 .RuleFor(u => u.Email, f => f.Internet.Email())
-                .RuleFor(u => u.PasswordHash, f => "hash")
+                .RuleFor(u => u.PasswordHash, f => HashPassword("test1234"))
                 .RuleFor(u => u.UserName, f => f.Internet.UserName())
                 .RuleFor(u => u.CreatedAt, f => f.Date.Past())
                 .RuleFor(u => u.ReputationPoints, f => f.Random.Int(0, 100));
@@ -64,19 +74,35 @@ public static class DbSeeder
             await context.SaveChangesAsync();
         }
 
-        // if (!context.SavedReviews.Any())
-        // {
-        //     var reviewIds = context.Reviews.Select(r => r.ReviewId).ToList();
-        //     var userIds = context.Users.Select(u => u.UserId).ToList();
+                if (!context.SavedReviews.Any())
+        {
+            var reviewIds = context.Reviews.Select(r => r.ReviewId).ToList();
+            var userIds = context.Users.Select(u => u.UserId).ToList();
+            var usedPairs = new HashSet<(int userId, int reviewId)>();
 
-        //     var savedReviewFaker = new Faker<SavedReview>()
-        //         .RuleFor(s => s.UserId, f => f.PickRandom(userIds))
-        //         .RuleFor(s => s.ReviewId, f => f.PickRandom(reviewIds));
+            var savedReviews = new List<SavedReview>();
+            var faker = new Faker();
 
-        //     var savedReviews = savedReviewFaker.Generate(30);
-        //     context.SavedReviews.AddRange(savedReviews);
-        //     await context.SaveChangesAsync();
-        // }
+            while (savedReviews.Count < 30)
+            {
+                var userId = faker.PickRandom(userIds);
+                var reviewId = faker.PickRandom(reviewIds);
+
+                if (usedPairs.Add((userId, reviewId))) // only add if it's a new pair
+                {
+                    savedReviews.Add(new SavedReview
+                    {
+                        UserId = userId,
+                        ReviewId = reviewId,
+                        SavedAt = faker.Date.Recent()
+                    });
+                }
+            }
+
+            context.SavedReviews.AddRange(savedReviews);
+            await context.SaveChangesAsync();
+        }
+
 
         if (!context.Connections.Any())
         {

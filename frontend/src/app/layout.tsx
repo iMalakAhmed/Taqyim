@@ -4,6 +4,7 @@ import { Providers } from "./redux/provider";
 import NavBar from "./components/ui/NavBar";
 import "leaflet/dist/leaflet.css";
 import SideNav from "./components/ui/SideNav";
+import Recommendations from "./components/Recommendations";
 
 export const metadata: Metadata = {
   title: "Taqyim",
@@ -22,6 +23,7 @@ export default function RootLayout({
           <NavBar />
           <SideNav />
           {children}
+          <Recommendations />
         </Providers>
       </body>
     </html>

@@ -27,7 +27,8 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
   const [createReview, { isLoading, error, isSuccess }] =
     useCreateReviewMutation();
   const [deleteMedia] = useDeleteMediaMutation();
-  const { data: businesses = [], isLoading: isLoadingBusinesses } = useGetAllBusinessesQuery();
+  const { data: businesses = [], isLoading: isLoadingBusinesses } =
+    useGetAllBusinessesQuery();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,7 +84,7 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
 
   return (
     <div
-      className="fixed inset-0 flex justify-center items-center z-[9999] bg-black/30 backdrop-invert-25"
+      className="fixed inset-0 flex justify-center items-center bg-background z-[9999]  text-text backdrop-invert-25"
       onClick={onCancel}
     >
       <div
@@ -104,21 +105,25 @@ export default function CreateReview({ onCancel }: CreateReviewProps) {
         <HorizontalLine />
 
         <form onSubmit={handleSubmit} className="space-y-3 text-base mt-3">
-          <div>
+          <div className="bg-background text-text">
             <label htmlFor="businessId" className="block font-medium mb-1">
               Business <span className="text-accent">*</span>
             </label>
             <select
               id="businessId"
               value={businessId}
-              onChange={e => setBusinessId(Number(e.target.value))}
+              onChange={(e) => setBusinessId(Number(e.target.value))}
               className="w-full px-2 py-1 focus:outline-none"
               required
               disabled={isLoadingBusinesses}
             >
               <option value="">Select a business</option>
               {businesses.map((business: any) => (
-                <option key={business.businessId} value={business.businessId}>
+                <option
+                  key={business.businessId}
+                  value={business.businessId}
+                  className="bg-background text-text"
+                >
                   {business.name}
                 </option>
               ))}

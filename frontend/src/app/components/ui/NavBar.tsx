@@ -216,7 +216,7 @@ export default function NavBar() {
 
   return (
     <div
-      className={`top-0 w-full z-[999] bg-background h-24 text-text ${
+      className={`top-0 w-full z-[999] bg-background h-24 text-text shadow ${
         isFixed ? "fixed" : "relative"
       }`}
     >
