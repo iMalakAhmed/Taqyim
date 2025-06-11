@@ -154,6 +154,23 @@ export interface ReviewType {
   media?: MediaType[];
 }
 
+export type SavedReviewDTO = {
+  reviewId: number;
+  userId: number;
+  savedAt: string;
+  review: {
+    reviewId: number;
+    content: string;
+    rating: number;
+    businessId: number;
+    createdAt: string;
+    business: {
+      name: string;
+      businessId: number;
+    };
+  };
+};
+
 export interface CreateReviewType {
   businessId: number;
   productId?: number;

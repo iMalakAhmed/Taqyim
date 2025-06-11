@@ -33,7 +33,12 @@ import CopyToClipboardButton from "./ShareButton";
 import { formatTimestamp } from "./FormatTimeStamp";
 import FollowButton from "./FollowButton";
 import MediaUpload, { getFullMediaUrl } from "../MediaUpload";
-
+import {
+  useSaveReviewMutation,
+  useUnsaveReviewMutation,
+  useGetSavedReviewsQuery,
+} from "@/app/redux/services/savedReviewApi";
+import SavedReviewButton from "./SavedReviewButton"; 
 type ReviewCardProps = {
   reviewId: number;
 };
@@ -57,11 +62,18 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
     refetch: refetchReview,
   } = useGetReviewQuery(reviewId);
 
+  const { data: savedReviews = [] } = useGetSavedReviewsQuery(user?.userId ?? 0, {
+    skip: !user?.userId,
+  });
+
+  const isSaved = savedReviews.some((sr) => sr.reviewId === reviewId);
+  const [saveReview] = useSaveReviewMutation();
+  const [unsaveReview] = useUnsaveReviewMutation();
+
   const dispatch = useDispatch();
   const reactionCount = useSelector(
     (state: RootState) => state.reactionCounter[reviewId] || 0
   );
-
   const commentCount = useSelector(
     (state: RootState) => state.commentCounter[reviewId] || 0
   );
@@ -73,6 +85,8 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
   const [rating, setRating] = useState<number>(review?.rating || 0);
   const [comment, setComment] = useState<string>(review?.comment || "");
   const [media, setMedia] = useState(review?.media || []);
+  const [isSaving, setIsSaving] = useState(false);
+
 
   useEffect(() => {
     if (review) {
@@ -107,7 +121,6 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
           })),
         },
       });
-
       await refetchReview();
       setIsEditing(false);
     } catch (error) {
@@ -140,9 +153,7 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
         <Link
           href={`/profile/${review.user.userId}`}
           className="flex flex-row items-center"
-          onClick={(e) => {
-            stopPropagation(e);
-          }}
+          onClick={stopPropagation}
         >
           <Image
             src={
@@ -240,7 +251,7 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
         <div className="flex flex-row items-center pt-3">
           <Link
             href={`/business/${review.business.businessId}`}
-            onClick={(e) => stopPropagation(e)}
+            onClick={stopPropagation}
             className="font-heading font-bold text-lg hover:underline"
           >
             {review.business.name}
@@ -248,7 +259,7 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
           {review.product && (
             <Link
               href={`/product/${review.product.productId}`}
-              onClick={(e) => stopPropagation(e)}
+              onClick={stopPropagation}
               className="font-heading text-base pl-2 hover:underline"
             >
               - {review.product.name}
@@ -284,9 +295,7 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
             <textarea
               className="w-full h-full border p-2 my-2 text-sm"
               value={comment}
-              onClick={(e) => {
-                stopPropagation(e);
-              }}
+              onClick={stopPropagation}
               onChange={(e) => setComment(e.target.value)}
               rows={3}
             />
@@ -310,10 +319,7 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
                     className="relative z-0 w-32 h-32 rounded overflow-hidden border group"
                     onClick={(e) => {
                       e.stopPropagation();
-                      window.open(
-                        getFullMediaUrl(mediaItem.filePath),
-                        "_blank"
-                      );
+                      window.open(getFullMediaUrl(mediaItem.filePath), "_blank");
                     }}
                   >
                     <Image
@@ -333,21 +339,15 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
             )}
           </>
         )}
-
         <HorizontalLine />
       </div>
 
       <div className="flex flex-row items-center justify-between pb-2">
         <div
           className="flex flex-row items-center gap-x-2"
-          onClick={(e) => {
-            stopPropagation(e);
-          }}
+          onClick={stopPropagation}
         >
-          <ReactionButtons
-            reviewId={reviewId}
-            reactionCount={review.reactions.length}
-          />
+          <ReactionButtons reviewId={reviewId} reactionCount={review.reactions.length} />
 
           <Button
             variant="none"
@@ -366,6 +366,37 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
           >
             <IconShare3 size={20} className="hover:text-secondary" />
           </CopyToClipboardButton>
+
+          <Button
+  variant="none"
+  size="sm"
+  className="hover:text-secondary"
+  disabled={isSaving}
+  onClick={async (e) => {
+    stopPropagation(e);
+    if (isSaving) return; // prevent multiple clicks while saving
+
+    setIsSaving(true);
+    try {
+      if (isSaved) {
+        await unsaveReview({ reviewId, userId: user.userId }).unwrap();
+      } else {
+        await saveReview({ reviewId, userId: user.userId }).unwrap();
+      }
+    } catch (error) {
+      console.error("Save/Unsave failed:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  }}
+>
+  {isSaved ? <IconBookmarkFilled size={20} /> : <IconBookmark size={20} />}
+</Button>
+
+
+
+
+
         </div>
         <div className="flex flex-row items-center font-body text-sm gap-2">
           <p>{reactionCount} reactions</p>

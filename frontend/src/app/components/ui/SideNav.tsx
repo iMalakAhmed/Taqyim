@@ -19,7 +19,7 @@ import {
 import Button from "./Button";
 import CreateReview from "../CreateReview";
 import VerticalLine from "./VerticalLine";
-//import { useGetSavedReviewsQuery } from "@/app/redux/services/savedReviewApi";
+import { useGetSavedReviewsQuery } from "@/app/redux/services/savedReviewApi";
 
 export default function SideNav() {
   const pathname = usePathname();
@@ -27,10 +27,6 @@ export default function SideNav() {
   const [showModal, setShowModal] = useState(false);
 
   const { data: currentUser, isLoading } = useGetCurrentUserQuery();
-
-  /*const { data: savedReviews } = useGetSavedReviewsQuery(currentUser?.userId ?? 0, {
-    skip: !currentUser?.userId,
-  });*/
 
   if (
     isLoading ||
