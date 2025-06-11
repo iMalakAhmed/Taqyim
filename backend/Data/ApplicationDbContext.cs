@@ -119,6 +119,12 @@ namespace Taqyim.Api.Data
                 .HasForeignKey(r => r.BusinessId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Review>()
+                .HasMany(r => r.Media)
+                .WithOne(m => m.Review)
+                .HasForeignKey(m => m.ReviewId)
+                .OnDelete(DeleteBehavior.Cascade); 
+
             modelBuilder.Entity<Comment>(entity =>
             {
                 entity.HasKey(e => e.CommentId);
@@ -254,22 +260,22 @@ namespace Taqyim.Api.Data
                     .OnDelete(DeleteBehavior.Cascade);
             });
             modelBuilder.Entity<SavedReview>(entity =>
-{
-    entity.HasKey(e => e.SavedReviewId);
+            {
+                entity.HasKey(e => e.SavedReviewId);
 
-    entity.HasOne(e => e.User)
-        .WithMany(u => u.SavedReviews)
-        .HasForeignKey(e => e.UserId)
-        .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.SavedReviews)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
-    entity.HasOne(e => e.Review)
-        .WithMany(r => r.SavedByUsers)
-        .HasForeignKey(e => e.ReviewId)
-        .OnDelete(DeleteBehavior.Cascade);
-        modelBuilder.Entity<SavedReview>()
-        .HasIndex(sr => new { sr.UserId, sr.ReviewId })
-        .IsUnique();
-});
+                entity.HasOne(e => e.Review)
+                    .WithMany(r => r.SavedByUsers)
+                    .HasForeignKey(e => e.ReviewId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                    modelBuilder.Entity<SavedReview>()
+                    .HasIndex(sr => new { sr.UserId, sr.ReviewId })
+                    .IsUnique();
+            });
 
         }
     }

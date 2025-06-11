@@ -763,7 +763,8 @@ namespace Taqyim.Api.Migrations
                 {
                     b.HasOne("Taqyim.Api.Models.Review", "Review")
                         .WithMany("Media")
-                        .HasForeignKey("ReviewId");
+                        .HasForeignKey("ReviewId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Taqyim.Api.Models.User", "User")
                         .WithMany("Media")

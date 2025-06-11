@@ -28,9 +28,12 @@ export default function SideNav() {
 
   const { data: currentUser, isLoading } = useGetCurrentUserQuery();
 
-  const { data: savedReviews } = useGetSavedReviewsQuery(currentUser?.userId ?? 0, {
-    skip: !currentUser?.userId,
-  });
+  const { data: savedReviews } = useGetSavedReviewsQuery(
+    currentUser?.userId ?? 0,
+    {
+      skip: !currentUser?.userId,
+    }
+  );
 
   if (
     isLoading ||
@@ -59,7 +62,7 @@ export default function SideNav() {
   return (
     <>
       {/* Desktop Left Sidebar */}
-      <nav className="hidden md:flex fixed top-24 left-0 h-full w-96 bg-background flex-col font-heading text-2xl">
+      <nav className="hidden md:flex fixed top-24 left-0 h-full w-96 bg-background flex-col font-heading text-2xl shadow">
         <VerticalLine className="absolute top-0 right-0 h-full" />
         <ul className="space-y-4 mt-8 ml-20 flex-grow overflow-auto">
           {mainNavItems.map(({ href, label, icon: Icon }) => {

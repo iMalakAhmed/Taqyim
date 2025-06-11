@@ -9,7 +9,7 @@ export default function Feed() {
   if (error) return <p>Failed to load reviews.</p>;
 
   return (
-    <div className="w-screen">
+    <div className="w-screen shadow-lg">
       {isSuccess && reviews?.length === 0 && <p>No reviews found.</p>}
       {isSuccess &&
         reviews?.map((review) => (

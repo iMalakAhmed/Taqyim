@@ -21,6 +21,9 @@ import {
   IconTrashOff,
   IconBookmark,
   IconBookmarkFilled,
+  IconChevronRight,
+  IconChevronLeft,
+  IconX,
 } from "@tabler/icons-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setReactionCount } from "@/app/redux/slices/reactionCounterSlice";
@@ -38,7 +41,7 @@ import {
   useUnsaveReviewMutation,
   useGetSavedReviewsQuery,
 } from "@/app/redux/services/savedReviewApi";
-import SavedReviewButton from "./SavedReviewButton"; 
+import SavedReviewButton from "./SavedReviewButton";
 type ReviewCardProps = {
   reviewId: number;
 };
@@ -62,9 +65,12 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
     refetch: refetchReview,
   } = useGetReviewQuery(reviewId);
 
-  const { data: savedReviews = [] } = useGetSavedReviewsQuery(user?.userId ?? 0, {
-    skip: !user?.userId,
-  });
+  const { data: savedReviews = [] } = useGetSavedReviewsQuery(
+    user?.userId ?? 0,
+    {
+      skip: !user?.userId,
+    }
+  );
 
   const isSaved = savedReviews.some((sr) => sr.reviewId === reviewId);
   const [saveReview] = useSaveReviewMutation();
@@ -86,7 +92,13 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
   const [comment, setComment] = useState<string>(review?.comment || "");
   const [media, setMedia] = useState(review?.media || []);
   const [isSaving, setIsSaving] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
+    null
+  );
+  const [isZoomed, setIsZoomed] = useState(false);
 
+  // Helper function to safely access media
+  const getMediaItems = () => review?.media || [];
 
   useEffect(() => {
     if (review) {
@@ -310,33 +322,143 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
           </>
         ) : (
           <>
-            <p className="text-sm font-body pt-2 pb-3">{review.comment}</p>
-            {review.media && review.media.length > 0 && (
-              <div className="flex flex-wrap gap-2 pb-3">
-                {review.media.map((mediaItem) => (
-                  <div
-                    key={mediaItem.mediaId}
-                    className="relative z-0 w-32 h-32 rounded overflow-hidden border group"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      window.open(getFullMediaUrl(mediaItem.filePath), "_blank");
-                    }}
-                  >
-                    <Image
-                      src={getFullMediaUrl(mediaItem.filePath)}
-                      alt={mediaItem.fileName}
-                      layout="fill"
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
-                      <span className="text-white opacity-0 group-hover:opacity-100">
-                        View
-                      </span>
-                    </div>
-                  </div>
-                ))}
+            {/* 📸 Media Grid */}
+            {getMediaItems().length > 0 && (
+              <div className="pb-3">
+                <div
+                  className={`grid gap-1 ${
+                    getMediaItems().length === 1
+                      ? "grid-cols-1"
+                      : getMediaItems().length === 2
+                      ? "grid-cols-2"
+                      : "grid-cols-2"
+                  }`}
+                >
+                  {getMediaItems()
+                    .slice(0, 4)
+                    .map((mediaItem, index) => (
+                      <div
+                        key={mediaItem.mediaId}
+                        className={`relative overflow-hidden rounded cursor-pointer group h-32 w-full bg-black ${
+                          getMediaItems().length === 3 && index === 2
+                            ? "col-span-2"
+                            : ""
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedImageIndex(index);
+                          setIsZoomed(false);
+                        }}
+                      >
+                        <Image
+                          src={getFullMediaUrl(mediaItem.filePath)}
+                          alt={mediaItem.fileName || "Review media"}
+                          fill
+                          className="object-contain"
+                        />
+
+                        {/* <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
+                          <span className="text-white opacity-0 group-hover:opacity-100">
+                            View
+                          </span>
+                        </div> */}
+
+                        {index === 3 && getMediaItems().length > 4 && (
+                          <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+                            <span className="text-white text-xl font-semibold">
+                              +{getMediaItems().length - 4}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                </div>
               </div>
             )}
+
+            {/* 🖼️ Image Modal */}
+            {selectedImageIndex !== null &&
+              getMediaItems()[selectedImageIndex] && (
+                <div
+                  className="fixed inset-0 bg-opacity-90 z-50 flex items-center justify-center"
+                  onClick={() => {
+                    setSelectedImageIndex(null);
+                    setIsZoomed(false);
+                  }}
+                >
+                  <div
+                    className="relative max-w-[90vw] max-h-[90vh] w-full h-full flex items-center justify-center"
+                    onClick={(e) => e.stopPropagation()} // prevent modal close on image click
+                  >
+                    {/* Close Button */}
+                    <button
+                      onClick={() => {
+                        setSelectedImageIndex(null);
+                        setIsZoomed(false);
+                      }}
+                      className="absolute top-4 right-4 text-text text-2xl z-50"
+                    >
+                      <IconX size={32} />
+                    </button>
+
+                    {/* Previous */}
+                    <button
+                      onClick={() => {
+                        setSelectedImageIndex((prev) =>
+                          prev !== null
+                            ? (prev - 1 + getMediaItems().length) %
+                              getMediaItems().length
+                            : null
+                        );
+                        setIsZoomed(false);
+                      }}
+                      className="absolute left-4 p-2 text-text z-10"
+                    >
+                      <IconChevronLeft size={32} />
+                    </button>
+
+                    {/* Image Container */}
+                    <div
+                      className={`relative w-[80vw] h-[80vh] bg-black cursor-zoom-in`}
+                      onClick={() => setIsZoomed((z) => !z)}
+                    >
+                      <Image
+                        src={getFullMediaUrl(
+                          getMediaItems()[selectedImageIndex].filePath
+                        )}
+                        alt={
+                          getMediaItems()[selectedImageIndex].fileName ||
+                          "Review media"
+                        }
+                        fill
+                        className={`transition-transform duration-300 ${
+                          isZoomed ? "object-cover scale-150" : "object-contain"
+                        }`}
+                      />
+                    </div>
+
+                    {/* Next */}
+                    <button
+                      onClick={() => {
+                        setSelectedImageIndex((prev) =>
+                          prev !== null
+                            ? (prev + 1) % getMediaItems().length
+                            : null
+                        );
+                        setIsZoomed(false);
+                      }}
+                      className="absolute right-4 p-2 text-text z-10"
+                    >
+                      <IconChevronRight size={32} />
+                    </button>
+
+                    {/* Counter */}
+                    <div className="absolute bottom-4 left-0 right-0 text-center text-white">
+                      {selectedImageIndex + 1} / {getMediaItems().length}
+                    </div>
+                  </div>
+                </div>
+              )}
           </>
         )}
         <HorizontalLine />
@@ -347,7 +469,10 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
           className="flex flex-row items-center gap-x-2"
           onClick={stopPropagation}
         >
-          <ReactionButtons reviewId={reviewId} reactionCount={review.reactions.length} />
+          <ReactionButtons
+            reviewId={reviewId}
+            reactionCount={review.reactions.length}
+          />
 
           <Button
             variant="none"

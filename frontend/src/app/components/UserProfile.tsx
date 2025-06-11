@@ -22,8 +22,6 @@ import { removeAuthCookie } from "@/app/actions/auth";
 import CopyToClipboardButton from "@/app/components/ui/ShareButton";
 import FollowButton from "@/app/components/ui/FollowButton";
 import { getFullMediaUrl } from "./MediaUpload";
-import ReviewCard from "@/app/ui/components/ReviewCard";
-
 
 const UserProfile = () => {
   const params = useParams();

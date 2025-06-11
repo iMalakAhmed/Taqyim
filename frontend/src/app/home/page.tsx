@@ -6,7 +6,7 @@ export default function HomePage() {
     <main className="w-full min-h-screen bg-background text-text pt-24 p-96">
       <div className="flex flex-row">
         <Feed />
-        <Recommendations />
+        {/* <Recommendations /> */}
       </div>
     </main>
   );

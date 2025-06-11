@@ -17,25 +17,31 @@ import {
   useGetFollowingQuery,
 } from "@/app/redux/services/connectionApi";
 import { IconEdit, IconShare, IconTrash } from "@tabler/icons-react";
-import MapView from './ui/MapView';
+import MapView from "./ui/MapView";
 import ProductManager from "@/app/components/ui/ProductManager";
-
-
+import HorizontalLine from "./ui/HorizontalLine";
+import { getFullMediaUrl } from "./MediaUpload";
 
 const BusinessProfile = () => {
   const params = useParams();
   const businessId = Number(params?.id);
   const router = useRouter();
 
-  // 🔄 All hooks come first (no conditionals above)
-  const { data: business, isLoading, error, refetch } = useGetBusinessByIdQuery(businessId, {
+  const {
+    data: business,
+    isLoading,
+    error,
+    refetch,
+  } = useGetBusinessByIdQuery(businessId, {
     skip: !businessId || isNaN(businessId),
   });
   const { data: currentUser } = useGetCurrentUserQuery();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteBusiness] = useDeleteBusinessMutation();
-  const { data: followers = [], refetch: refetchFollowers } = useGetFollowersQuery({ id: businessId, type: "Business" });
-  const { data: following = [], refetch: refetchFollowings } = useGetFollowingQuery({ id: businessId, type: "Business" });
+  const { data: followers = [], refetch: refetchFollowers } =
+    useGetFollowersQuery({ id: businessId, type: "Business" });
+  const { data: following = [], refetch: refetchFollowings } =
+    useGetFollowingQuery({ id: businessId, type: "Business" });
 
   const canEdit = useMemo(() => {
     return (
@@ -44,23 +50,15 @@ const BusinessProfile = () => {
       currentUser?.userId === business?.owner?.userId
     );
   }, [currentUser, business]);
-    
 
-  const isFollowing = useMemo(() => {
-    return followers.some(
-      (f) =>
-        f.userId === currentUser?.userId ||
-        f.userId === (currentUser as any)?.businessId
+  if (isLoading)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
     );
-  }, [followers, currentUser]);
-
-  // ✅ Only return after all hooks are declared
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
   if (error || !business) {
-    // Redirect to a 404 page or display an error message if business not found
-    router.replace('/not-found'); // Or a custom not-found page
+    router.replace("/not-found");
     return null;
   }
 
@@ -77,16 +75,21 @@ const BusinessProfile = () => {
     }
   };
 
-
   return (
-    <div className="w-full h-full flex flex-col text-text justify-center py-10 ml-16">
-      <div className="flex flex-row">
-        <div className="w-1/3 p-3">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-background text-text">
+      {/* Business Header Section */}
+      <div className="flex flex-col md:flex-row gap-8 mb-12">
+        {/* Business Logo */}
+        <div className="flex-shrink-0 flex justify-center md:justify-start">
           <img
-            src={business.logo && business.logo.trim() !== "" ? business.logo : "default-profile.jpg"}
+            src={
+              business.logo && business.logo.trim() !== ""
+                ? getFullMediaUrl(business.logo)
+                : "/default-profile.jpg"
+            }
             alt={business.name}
-            className="w-40 h-40 rounded-sm mt-4 ml-1.5"
-            onError={(e) => (e.currentTarget.src = "default-profile.jpg")}
+            className="w-48 h-48  object-cover border border-gray-200 shadow-sm"
+            onError={(e) => (e.currentTarget.src = "/default-profile.jpg")}
           />
         </div>
 
@@ -109,59 +112,56 @@ const BusinessProfile = () => {
                 onToggle={() => refetchFollowers()}
               />
             </div>
-          )}
-        </div>
+          </div>
 
-        {/* ✅ Only show Edit modal if user can edit */}
-        {canEdit && (
-          <EditBusinessModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onSave={() => {
-              setIsModalOpen(false);
-              refetch();
-            }}
-            initialData={business}
-          />
-        )}
+          <div className="flex gap-4 mt-2 text-sm text-gray-600">
+            <p>{followers?.length ?? 0} followers</p>
+            <p>{following?.length ?? 0} following</p>
+          </div>
 
- 
-      </div>
-
-
-      <div className="flex flex-row items-center justify-between mt-3">
-        <div className="flex flex-row">
-          {/* ✅ Only show Edit/Delete if user can edit */}
-          {canEdit && (
-            <>
-              <Button variant="primary" className="ml-2 p-6" onClick={handleDelete}>
-                <IconTrash stroke={2} /> Delete Business
-              </Button>
-            
-            <Button onClick={() => setIsModalOpen(true)} variant="primary" className="mr-3 p-6">
-                <IconEdit stroke={2} /> Edit Business
-              </Button>
-            </>
-          )}
-
-          <CopyToClipboardButton
-            copyText={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${businessId}`}
-            className="ml-2 p-6"
-            variant="primary"
-          >
-            <IconShare stroke={2} /> Share profile
-          </CopyToClipboardButton>
+          <div className="mt-4 space-y-3">
+            <p className="text-base">{business.description}</p>
+            <p className="text-base">
+              <span className="font-medium">Category:</span> {business.category}
+            </p>
+          </div>
         </div>
       </div>
+      <HorizontalLine className="mb-3" />
 
-      <div className="w-full max-w-5xl mt-6 mx-auto px-4 z-0">
-        <h2 className="font-heading font-bold text-xl mb-2">Business Locations</h2>
-        <MapView locations={business.businessLocations} />
-      </div>
+      {/* Locations Section */}
+      <section className="mb-12 z-0">
+        <h2 className="text-2xl font-bold font-heading mb-4">
+          Business Locations
+        </h2>
+        <div className=" overflow-hidden  border shadow-sm">
+          <MapView locations={business.businessLocations} />
+        </div>
+      </section>
+      <HorizontalLine className="mb-3" />
+
+      {/* Product Manager Section */}
       {canEdit && (
-        <div className="mt-6">
-          <ProductManager />
-        </div>
+        <section>
+          <h2 className="text-2xl font-bold font-heading mb-4">Products</h2>
+          <HorizontalLine className="mb-3" />
+          <div className="rounded-lg shadow-sm p-4">
+            <ProductManager />
+          </div>
+        </section>
+      )}
+
+      {/* Edit Business Modal */}
+      {canEdit && (
+        <EditBusinessModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSave={() => {
+            setIsModalOpen(false);
+            refetch();
+          }}
+          initialData={business}
+        />
       )}
     </div>
   );
