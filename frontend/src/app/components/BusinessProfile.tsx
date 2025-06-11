@@ -18,6 +18,9 @@ import {
 } from "@/app/redux/services/connectionApi";
 import { IconEdit, IconShare, IconTrash } from "@tabler/icons-react";
 import MapView from './ui/MapView';
+import ProductManager from "@/app/components/ui/ProductManager";
+
+
 
 const BusinessProfile = () => {
   const params = useParams();
@@ -121,7 +124,10 @@ const BusinessProfile = () => {
             initialData={business}
           />
         )}
+
+ 
       </div>
+
 
       <div className="flex flex-row items-center justify-between mt-3">
         <div className="flex flex-row">
@@ -152,6 +158,11 @@ const BusinessProfile = () => {
         <h2 className="font-heading font-bold text-xl mb-2">Business Locations</h2>
         <MapView locations={business.businessLocations} />
       </div>
+      {canEdit && (
+        <div className="mt-6">
+          <ProductManager />
+        </div>
+      )}
     </div>
   );
 };
