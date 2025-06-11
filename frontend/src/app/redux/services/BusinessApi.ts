@@ -148,6 +148,34 @@ export const businessApi = createApi({
         { type: "Business", id: businessId },
       ],
     }),
+    getProductsByBusiness: builder.query<ProductType[], number>({
+      query: (businessId) => `/${businessId}/products`,
+    }),
+
+    updateProduct: builder.mutation<
+      void,
+      { businessId: number; productId: number; body: ProductType }
+    >({
+      query: ({ businessId, productId, body }) => ({
+        url: `/${businessId}/products/${productId}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: (result, error, { businessId }) => [{ type: "Business", id: businessId }],
+    }),
+
+
+    deleteProduct: builder.mutation<
+      void,
+      { businessId: number; productId: number }
+    >({
+      query: ({ businessId, productId }) => ({
+        url: `/${businessId}/products/${productId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { businessId }) => [{ type: "Business", id: businessId }],
+    }),
+
   }),
 });
 
@@ -165,4 +193,7 @@ export const {
   useGetAllBusinessesQuery,
   useGetMyBusinessQuery,
   useCreateProductMutation,
+  useGetProductsByBusinessQuery,
+  useUpdateProductMutation,
+  useDeleteProductMutation,
 } = businessApi;
