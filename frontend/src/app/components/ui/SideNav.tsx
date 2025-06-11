@@ -12,11 +12,14 @@ import {
   IconHeartHandshake,
   IconHome,
   IconPencilPlus,
-  IconPlaneDeparture,
+  IconShieldCheck,
+  IconShoppingCart,
+  IconDeviceLaptop,
 } from "@tabler/icons-react";
 import Button from "./Button";
 import CreateReview from "../CreateReview";
 import VerticalLine from "./VerticalLine";
+//import { useGetSavedReviewsQuery } from "@/app/redux/services/savedReviewApi";
 
 export default function SideNav() {
   const pathname = usePathname();
@@ -24,6 +27,10 @@ export default function SideNav() {
   const [showModal, setShowModal] = useState(false);
 
   const { data: currentUser, isLoading } = useGetCurrentUserQuery();
+
+  /*const { data: savedReviews } = useGetSavedReviewsQuery(currentUser?.userId ?? 0, {
+    skip: !currentUser?.userId,
+  });*/
 
   if (
     isLoading ||
@@ -40,19 +47,13 @@ export default function SideNav() {
     { href: "/saved", label: "Saved", icon: IconBookmark },
   ];
 
-  const categories = [
-    { href: "/restaurants", label: "Restaurants", icon: IconBurger },
-    {
-      href: "/beauty-health",
-      label: "Beauty & Health",
-      icon: IconHeartHandshake,
-    },
-    { href: "/sports", label: "Sports", icon: IconBallFootball },
-    {
-      href: "/travel-activities",
-      label: "Travel & Activities",
-      icon: IconPlaneDeparture,
-    },
+    const categories = [
+    { href: "/Food-Dining", label: "Food & Dining", icon: IconBurger },
+    { href: "/Health-Wellness", label: "Health & Wellness",icon: IconHeartHandshake},
+    { href: "/Entertainment-Lifestyle", label: "Entertainment & Lifestyle", icon: IconBallFootball },
+    { href: "/Services-Professional", label: "Services & Professional", icon: IconShieldCheck},
+    { href: "/Retail-Shopping", label: "Retail & Shopping", icon: IconShoppingCart},
+    { href: "/Education-Technology", label: "Education & Technology", icon: IconDeviceLaptop},
   ];
 
   return (
@@ -63,6 +64,7 @@ export default function SideNav() {
         <ul className="space-y-4 mt-8 ml-20 flex-grow overflow-auto">
           {mainNavItems.map(({ href, label, icon: Icon }) => {
             const isActive = pathname === href;
+            const isSaved = href === "/saved";
             return (
               <li
                 key={href}
@@ -85,6 +87,11 @@ export default function SideNav() {
                   }`}
                 >
                   {label}
+                  {isSaved && savedReviews && (
+                    <span className="ml-2 text-xs text-primary">
+                      ({savedReviews.length})
+                    </span>
+                  )}
                 </a>
               </li>
             );
