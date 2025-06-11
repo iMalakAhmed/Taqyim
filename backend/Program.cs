@@ -11,6 +11,7 @@ using Taqyim.Api.Data;
 using Taqyim.Api.Services;
 using Taqyim.Api.Controllers;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
@@ -115,6 +116,9 @@ builder.Services.AddAuthentication(x =>
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<SearchService>();
+builder.Services.AddScoped<RecommendationDataService>();
+builder.Services.AddScoped<AnalyticsService>();
+
 
 // Configure database based on environment
 if (builder.Environment.IsProduction())
@@ -183,7 +187,9 @@ if (app.Environment.IsDevelopment())
     using (var scope = app.Services.CreateScope())
     {
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await DbSeeder.SeedAsync(context); // ✅ This seeds fake users, businesses, reviews
     }
 }
+
 
 app.Run();

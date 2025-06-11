@@ -18,7 +18,11 @@ import {
   IconBookmarkFilled,
 } from "@tabler/icons-react";
 import { useDispatch } from "react-redux";
-import { useGetCurrentUserQuery, authApi, useSignOutMutation } from "../../redux/services/authApi";
+import {
+  useGetCurrentUserQuery,
+  authApi,
+  useSignOutMutation,
+} from "../../redux/services/authApi";
 import { useRouter } from "next/navigation";
 import { removeAuthCookie } from "../../actions/auth";
 import Button from "./Button";
@@ -34,7 +38,11 @@ import {
   SearchReviewDTO,
   SearchUserDTO,
 } from "@/app/redux/services/types";
-import { Avatar, AvatarImage, AvatarFallback } from "@/app/components/ui/avatar";
+import {
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
+} from "@/app/components/ui/avatar";
 
 export default function NavBar() {
   const pathname = usePathname();
@@ -245,11 +253,13 @@ export default function NavBar() {
               <IconSearch className="h-5 w-5" />
             </button>
             {showSearchResults && debouncedSearchQuery && (
-              <div className="absolute z-10 w-full mt-2 top-full left-0 bg-stone-50 border-2 border-stone-800 rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] max-h-[80vh] overflow-y-auto overflow-x-hidden newspaper-scroll-bar py-4">
+              <div className="absolute z-10 w-full mt-2 top-full left-0 bg-background border-2 rounded-none shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] max-h-[80vh] overflow-y-auto overflow-x-hidden newspaper-scroll-bar py-4">
                 {/* Search for keyword in reviews option */}
                 {debouncedSearchQuery && (
                   <Link
-                    href={`/search?q=${encodeURIComponent(debouncedSearchQuery)}&filter=reviews`}
+                    href={`/search?q=${encodeURIComponent(
+                      debouncedSearchQuery
+                    )}&filter=reviews`}
                     className="block px-4 py-3 text-lg font-bold font-serif text-blue-600 hover:bg-stone-100 transition-colors duration-200 border-b border-stone-200"
                     onClick={handleResultClick}
                   >
@@ -260,7 +270,9 @@ export default function NavBar() {
                   {/* Only show users and businesses directly in dropdown, reviews are for dedicated page */}
                   {allUsers.length > 0 && (
                     <div>
-                      <h3 className="text-xl font-bold font-serif text-stone-900 mb-2 border-b-2 border-stone-800 pb-1">Users</h3>
+                      <h3 className="text-xl font-bold font-serif text-stone-900 mb-2 border-b-2 border-stone-800 pb-1">
+                        Users
+                      </h3>
                       {allUsers.map((user) => (
                         <Link
                           href={`/profile/${user.userId}`}
@@ -270,11 +282,17 @@ export default function NavBar() {
                         >
                           <Avatar className="h-12 w-12 border-2 border-stone-800 flex-shrink-0">
                             <AvatarImage src={user.profilePic || undefined} />
-                            <AvatarFallback className="font-serif text-stone-800 bg-stone-100">{user.userName[0]}</AvatarFallback>
+                            <AvatarFallback className="font-serif text-stone-800 bg-stone-100">
+                              {user.userName[0]}
+                            </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-bold font-serif text-stone-900">{user.userName}</p>
-                            <p className="text-sm text-stone-600 font-serif">{user.email}</p>
+                            <p className="font-bold font-serif text-stone-900">
+                              {user.userName}
+                            </p>
+                            <p className="text-sm text-stone-600 font-serif">
+                              {user.email}
+                            </p>
                           </div>
                         </Link>
                       ))}
@@ -283,7 +301,9 @@ export default function NavBar() {
 
                   {allBusinesses.length > 0 && (
                     <div>
-                      <h3 className="text-xl font-bold font-serif text-stone-900 mt-4 mb-2 border-b-2 border-stone-800 pb-1">Businesses</h3>
+                      <h3 className="text-xl font-bold font-serif text-stone-900 mt-4 mb-2 border-b-2 border-stone-800 pb-1">
+                        Businesses
+                      </h3>
                       {allBusinesses.map((business) => (
                         <Link
                           href={`/business/${business.businessId}`}
@@ -292,29 +312,51 @@ export default function NavBar() {
                           onClick={handleResultClick}
                         >
                           <Avatar className="h-12 w-12 border-2 border-stone-800 flex-shrink-0">
-                            <AvatarFallback className="font-serif text-stone-800 bg-stone-100">{business.name[0]}</AvatarFallback>
+                            <AvatarFallback className="font-serif text-stone-800 bg-stone-100">
+                              {business.name[0]}
+                            </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="font-bold font-serif text-stone-900">{business.name}</p>
-                            <p className="text-sm text-stone-600 font-serif">{business.category}</p>
+                            <p className="font-bold font-serif text-stone-900">
+                              {business.name}
+                            </p>
+                            <p className="text-sm text-stone-600 font-serif">
+                              {business.category}
+                            </p>
                           </div>
                         </Link>
                       ))}
                     </div>
                   )}
 
-                  {!isLoadingUsers && !isLoadingBusinesses && 
-                   allUsers.length === 0 && allBusinesses.length === 0 && (
-                    <p className="text-center text-stone-500 font-serif py-4">No direct profile or business matches found.</p>
-                  )}
+                  {!isLoadingUsers &&
+                    !isLoadingBusinesses &&
+                    allUsers.length === 0 &&
+                    allBusinesses.length === 0 && (
+                      <p className="text-center text-stone-500 font-serif py-4">
+                        No direct profile or business matches found.
+                      </p>
+                    )}
 
-                  {((usersData && (usersPage * pageSize < usersData.totalCount)) || 
-                   (businessesData && (businessesPage * pageSize < businessesData.totalCount))) && (
+                  {((usersData &&
+                    usersPage * pageSize < usersData.totalCount) ||
+                    (businessesData &&
+                      businessesPage * pageSize <
+                        businessesData.totalCount)) && (
                     <div className="text-center py-4">
                       <button
                         onClick={() => {
-                          if (usersData && (usersPage * pageSize < usersData.totalCount)) setUsersPage((prev) => prev + 1);
-                          if (businessesData && (businessesPage * pageSize < businessesData.totalCount)) setBusinessesPage((prev) => prev + 1);
+                          if (
+                            usersData &&
+                            usersPage * pageSize < usersData.totalCount
+                          )
+                            setUsersPage((prev) => prev + 1);
+                          if (
+                            businessesData &&
+                            businessesPage * pageSize <
+                              businessesData.totalCount
+                          )
+                            setBusinessesPage((prev) => prev + 1);
                         }}
                         className="px-4 py-2 bg-stone-800 text-white font-serif rounded-none hover:bg-stone-700 transition-colors duration-200 border-2 border-stone-800 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                       >
@@ -442,7 +484,7 @@ export default function NavBar() {
                   <IconBellRinging2 size={20} className="mr-2" />
                   Notifications
                 </Link>
-                
+
                 <Link
                   href="/messages"
                   className="flex items-center text-text hover:text-accent py-2"

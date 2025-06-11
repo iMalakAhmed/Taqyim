@@ -4,7 +4,6 @@ import { Providers } from "./redux/provider";
 import NavBar from "./components/ui/NavBar";
 import "leaflet/dist/leaflet.css";
 import SideNav from "./components/ui/SideNav";
-import HorizontalLine from "./components/ui/HorizontalLine";
 
 export const metadata: Metadata = {
   title: "Taqyim",

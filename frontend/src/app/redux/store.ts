@@ -16,6 +16,8 @@ import { commentReactionApi } from "./services/commentReactionApi";
 import replyCounterReducer from "./slices/replyCounterSlice";
 import authReducer from "./slices/authSlice";
 import { searchApi } from "./services/searchApi";
+import { analyticsApi } from "./services/analyticsApi";
+import { recommendationApi } from "./services/recommendationApi";
 import { savedReviewApi } from "./services/savedReviewApi";
 
 export const store = configureStore({
@@ -30,6 +32,8 @@ export const store = configureStore({
     [commentReactionApi.reducerPath]: commentReactionApi.reducer,
     [connectionApi.reducerPath]: connectionApi.reducer,
     [searchApi.reducerPath]: searchApi.reducer,
+    [analyticsApi.reducerPath]: analyticsApi.reducer,
+    [recommendationApi.reducerPath]: recommendationApi.reducer,
     [savedReviewApi.reducerPath]: savedReviewApi.reducer,
     auth: authReducer,
     user: userReducer,
@@ -50,8 +54,7 @@ export const store = configureStore({
       commentApi.middleware,
       commentReactionApi.middleware,
       connectionApi.middleware,
-      searchApi.middleware,
-      savedReviewApi.middleware,
+      searchApi.middleware
     ),
 });
 
