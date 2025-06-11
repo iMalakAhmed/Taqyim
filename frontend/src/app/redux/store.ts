@@ -54,7 +54,8 @@ export const store = configureStore({
       commentApi.middleware,
       commentReactionApi.middleware,
       connectionApi.middleware,
-      searchApi.middleware
+      searchApi.middleware,
+      savedReviewApi.middleware,
     ),
 });
 

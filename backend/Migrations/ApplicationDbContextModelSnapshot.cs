@@ -495,7 +495,6 @@ namespace Taqyim.Api.Migrations
                     b.ToTable("Reviews");
                 });
 
-<<<<<<< HEAD
             modelBuilder.Entity("Taqyim.Api.Models.SavedReview", b =>
                 {
                     b.Property<int>("SavedReviewId")
@@ -523,8 +522,6 @@ namespace Taqyim.Api.Migrations
                     b.ToTable("SavedReviews");
                 });
 
-=======
->>>>>>> cdb39e9395eedc95b1b30eaeb9fa66cc759226a9
             modelBuilder.Entity("Taqyim.Api.Models.Tag", b =>
                 {
                     b.Property<int>("TagId")
