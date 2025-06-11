@@ -80,12 +80,12 @@ export default function CreateBusinessProfilePage() {
 
   const [name, setName] = useState("");
   const categoryOptions = [
-    "Food & Dining",
-    "Retail & Shopping",
-    "Health & Wellness",
-    "Services & Professional",
-    "Entertainment & Lifestyle",
-    "Education & Technology",
+    "Food-Dining",
+    "Retail-Shopping",
+    "Health-Wellness",
+    "Services-Professional",
+    "Entertainment-Lifestyle",
+    "Education-Technology",
     "Other",
   ];
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);

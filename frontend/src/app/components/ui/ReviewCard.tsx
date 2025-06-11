@@ -493,36 +493,35 @@ export default function ReviewCard({ reviewId }: ReviewCardProps) {
           </CopyToClipboardButton>
 
           <Button
-            variant="none"
-            size="sm"
-            className="hover:text-secondary"
-            disabled={isSaving}
-            onClick={async (e) => {
-              stopPropagation(e);
-              setIsSaving(true);
+  variant="none"
+  size="sm"
+  className="hover:text-secondary"
+  disabled={isSaving}
+  onClick={async (e) => {
+    stopPropagation(e);
+    if (isSaving) return; // prevent multiple clicks while saving
 
-              try {
-                if (isSaved) {
-                  await unsaveReview({
-                    reviewId,
-                    userId: user.userId,
-                  }).unwrap();
-                } else {
-                  await saveReview({ reviewId, userId: user.userId }).unwrap();
-                }
-              } catch (err) {
-                console.error("Error toggling saved review:", err);
-              } finally {
-                setIsSaving(false);
-              }
-            }}
-          >
-            {isSaved ? (
-              <IconBookmarkFilled size={20} />
-            ) : (
-              <IconBookmark size={20} />
-            )}
-          </Button>
+    setIsSaving(true);
+    try {
+      if (isSaved) {
+        await unsaveReview({ reviewId, userId: user.userId }).unwrap();
+      } else {
+        await saveReview({ reviewId, userId: user.userId }).unwrap();
+      }
+    } catch (error) {
+      console.error("Save/Unsave failed:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  }}
+>
+  {isSaved ? <IconBookmarkFilled size={20} /> : <IconBookmark size={20} />}
+</Button>
+
+
+
+
+
         </div>
         <div className="flex flex-row items-center font-body text-sm gap-2">
           <p>{reactionCount} reactions</p>

@@ -12,7 +12,9 @@ import {
   IconHeartHandshake,
   IconHome,
   IconPencilPlus,
-  IconPlaneDeparture,
+  IconShieldCheck,
+  IconShoppingCart,
+  IconDeviceLaptop,
 } from "@tabler/icons-react";
 import Button from "./Button";
 import CreateReview from "../CreateReview";
@@ -48,19 +50,13 @@ export default function SideNav() {
     { href: "/saved", label: "Saved", icon: IconBookmark },
   ];
 
-  const categories = [
-    { href: "/restaurants", label: "Restaurants", icon: IconBurger },
-    {
-      href: "/beauty-health",
-      label: "Beauty & Health",
-      icon: IconHeartHandshake,
-    },
-    { href: "/sports", label: "Sports", icon: IconBallFootball },
-    {
-      href: "/travel-activities",
-      label: "Travel & Activities",
-      icon: IconPlaneDeparture,
-    },
+    const categories = [
+    { href: "/Food-Dining", label: "Food-Dining", icon: IconBurger },
+    { href: "/Health-Wellness", label: "Health-Wellness",icon: IconHeartHandshake},
+    { href: "/Entertainment-Lifestyle", label: "Entertainment-Lifestyle", icon: IconBallFootball },
+    { href: "/Services-Professional", label: "Services-Professional", icon: IconShieldCheck},
+    { href: "/Retail-Shopping", label: "Retail-Shopping", icon: IconShoppingCart},
+    { href: "/Education-Technology", label: "Education-Technology", icon: IconDeviceLaptop},
   ];
 
   return (

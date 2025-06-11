@@ -11,6 +11,7 @@ export default function ProfilePage() {
         <div className="max-w-5xl mx-auto px-4">
           <BusinessAnalyticsDashboard />
         </div>
+          <BusinessReviews />
       </div>
     </main>
   );

@@ -93,49 +93,24 @@ const BusinessProfile = () => {
           />
         </div>
 
-        {/* Business Details */}
-        <div className="flex-1">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h1 className="text-3xl font-bold font-heading">{business.name}</h1>
-            <div className="flex items-center gap-2">
-              {!canEdit && currentUser && (
-                <FollowButton
-                  followingId={businessId}
-                  followingType="Business"
-                  onToggle={refetchFollowers}
-                />
-              )}
+        <div className="w-2/3 py-8 px-6 font-body">
+          <h1 className="text-2xl font-heading font-bold">{business.name}</h1>
+          <p className="py-3 text-xl">{business.description}</p>
+          <p className="text-xl">Category: {business.category?.join(" , ")}</p>
 
-              {canEdit && (
-                <>
-                  <Button
-                    onClick={() => setIsModalOpen(true)}
-                    variant="primary"
-                    size="sm"
-                    className="flex items-center gap-1"
-                  >
-                    <IconEdit size={18} stroke={2} />
-                    <span>Edit</span>
-                  </Button>
+          <div className="mt-4 space-y-1">
+            <p><strong>Followers:</strong> {followers.length}</p>
+            <p><strong>Following:</strong> {following.length}</p>
+          </div>
 
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-1"
-                    onClick={handleDelete}
-                  >
-                    <IconTrash size={18} stroke={2} />
-                    <span>Delete</span>
-                  </Button>
-                </>
-              )}
-
-              <CopyToClipboardButton
-                copyText={`${process.env.NEXT_PUBLIC_BASE_URL}/business/${businessId}`}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <IconShare size={18} stroke={2} />
-              </CopyToClipboardButton>
+          {/* ✅ Show Follow only if user is NOT the owner */}
+          {!canEdit && (
+            <div className="mt-4">
+              <FollowButton
+                followingId={businessId}
+                followingType="Business"
+                onToggle={() => refetchFollowers()}
+              />
             </div>
           </div>
 
