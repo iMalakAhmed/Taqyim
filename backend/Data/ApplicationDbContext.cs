@@ -24,7 +24,7 @@ namespace Taqyim.Api.Data
         public DbSet<Badge> Badges { get; set; }
         public DbSet<UserBadge> UserBadges { get; set; }
         public DbSet<Media> Media { get; set; }
-        //public DbSet<SavedReview> SavedReviews { get; set; }
+        public DbSet<SavedReview> SavedReviews { get; set; }
         public DbSet<Product> Products { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -253,20 +253,24 @@ namespace Taqyim.Api.Data
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
-            /*modelBuilder.Entity<SavedReview>(entity =>
-            {
-                entity.HasKey(e => e.SavedReviewId);
+            modelBuilder.Entity<SavedReview>(entity =>
+{
+    entity.HasKey(e => e.SavedReviewId);
 
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.SavedReviews)
-                    .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.Cascade);
+    entity.HasOne(e => e.User)
+        .WithMany(u => u.SavedReviews)
+        .HasForeignKey(e => e.UserId)
+        .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasOne(d => d.Review)
-                    .WithMany(p => p.SavedByUsers)
-                    .HasForeignKey(d => d.ReviewId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });*/
+    entity.HasOne(e => e.Review)
+        .WithMany(r => r.SavedByUsers)
+        .HasForeignKey(e => e.ReviewId)
+        .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<SavedReview>()
+        .HasIndex(sr => new { sr.UserId, sr.ReviewId })
+        .IsUnique();
+});
+
         }
     }
 }
