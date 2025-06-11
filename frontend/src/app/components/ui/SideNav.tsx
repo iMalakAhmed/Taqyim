@@ -28,6 +28,10 @@ export default function SideNav() {
 
   const { data: currentUser, isLoading } = useGetCurrentUserQuery();
 
+  const { data: savedReviews } = useGetSavedReviewsQuery(currentUser?.userId ?? 0, {
+    skip: !currentUser?.userId,
+  });
+
   if (
     isLoading ||
     !currentUser ||
@@ -44,12 +48,12 @@ export default function SideNav() {
   ];
 
     const categories = [
-    { href: "/Food-Dining", label: "Food & Dining", icon: IconBurger },
-    { href: "/Health-Wellness", label: "Health & Wellness",icon: IconHeartHandshake},
-    { href: "/Entertainment-Lifestyle", label: "Entertainment & Lifestyle", icon: IconBallFootball },
-    { href: "/Services-Professional", label: "Services & Professional", icon: IconShieldCheck},
-    { href: "/Retail-Shopping", label: "Retail & Shopping", icon: IconShoppingCart},
-    { href: "/Education-Technology", label: "Education & Technology", icon: IconDeviceLaptop},
+    { href: "/Food-Dining", label: "Food-Dining", icon: IconBurger },
+    { href: "/Health-Wellness", label: "Health-Wellness",icon: IconHeartHandshake},
+    { href: "/Entertainment-Lifestyle", label: "Entertainment-Lifestyle", icon: IconBallFootball },
+    { href: "/Services-Professional", label: "Services-Professional", icon: IconShieldCheck},
+    { href: "/Retail-Shopping", label: "Retail-Shopping", icon: IconShoppingCart},
+    { href: "/Education-Technology", label: "Education-Technology", icon: IconDeviceLaptop},
   ];
 
   return (

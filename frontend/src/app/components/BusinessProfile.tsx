@@ -93,7 +93,7 @@ const BusinessProfile = () => {
         <div className="w-2/3 py-8 px-6 font-body">
           <h1 className="text-2xl font-heading font-bold">{business.name}</h1>
           <p className="py-3 text-xl">{business.description}</p>
-          <p className="text-xl">Category: {business.category}</p>
+          <p className="text-xl">Category: {business.category?.join(" , ")}</p>
 
           <div className="mt-4 space-y-1">
             <p><strong>Followers:</strong> {followers.length}</p>

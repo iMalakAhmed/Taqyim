@@ -22,6 +22,15 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 
+const categoryOptions = [
+  "Food & Dining",
+  "Retail & Shopping",
+  "Health & Wellness",
+  "Services & Professional",
+  "Entertainment & Lifestyle",
+  "Education & Technology",
+  "Other",
+];
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -77,7 +86,15 @@ const EditBusinessModal: React.FC<Props> = ({
   initialData,
 }) => {
   const [name, setName] = useState(initialData.name || "");
-  const [category, setCategory] = useState(initialData.category || "");
+  
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    Array.isArray(initialData.category)
+      ? initialData.category.filter((c): c is string => typeof c === "string")
+      : typeof initialData.category === "string"
+        ? [initialData.category]
+        : []
+  );
+  const [customCategory, setCustomCategory] = useState("");
   const [description, setDescription] = useState(initialData.description || "");
   const [logo, setLogo] = useState(initialData.logo || "");
   const [address, setAddress] = useState("");
@@ -128,14 +145,17 @@ const EditBusinessModal: React.FC<Props> = ({
 
     try {
       const result: any = await updateBusiness({
-        id: initialData.businessId,
-        body: {
-          name,
-          category: typeof category === "string" ? (category ? [category] : []) : category,
-          description,
-          logo,
-        },
-      });
+      id: initialData.businessId,
+      body: {
+        name,
+        category: [
+          ...selectedCategories.filter((c) => c !== "Other"),
+          ...(selectedCategories.includes("Other") && customCategory ? [customCategory] : []),
+        ],
+        description,
+        logo,
+      },
+    });
 
       if (!result || 'error' in result || !result.data) {
         throw new Error("Business update failed");
@@ -184,13 +204,6 @@ const EditBusinessModal: React.FC<Props> = ({
           className="w-full mb-3 p-2 border rounded"
         />
 
-        <input
-          type="text"
-          placeholder="Category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="w-full mb-3 p-2 border rounded"
-        />
 
         <textarea
           placeholder="Description"
@@ -206,6 +219,39 @@ const EditBusinessModal: React.FC<Props> = ({
           onChange={(e) => setLogo(e.target.value)}
           className="w-full mb-4 p-2 border rounded"
         />
+
+        <div className="mb-4">
+        <label className="block font-semibold mb-2">Select Categories</label>
+        <div className="grid grid-cols-2 gap-2">
+          {categoryOptions.map((cat) => (
+            <label key={cat} className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                value={cat}
+                checked={selectedCategories.includes(cat)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSelectedCategories((prev) =>
+                    prev.includes(value)
+                      ? prev.filter((c) => c !== value)
+                      : [...prev, value]
+                  );
+                }}
+              />
+              {cat}
+            </label>
+          ))}
+        </div>
+        {selectedCategories.includes("Other") && (
+          <input
+            className="mt-2 p-2 border rounded w-full"
+            placeholder="Enter custom category"
+            value={customCategory}
+            onChange={(e) => setCustomCategory(e.target.value)}
+          />
+        )}
+      </div>
+
 
         <h3 className="text-lg font-semibold mb-2">Business Locations</h3>
         <input

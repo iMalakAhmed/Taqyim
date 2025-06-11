@@ -27,14 +27,18 @@ export default function CategoryBusinesses({ category }: CategoryBusinessesProps
 
   // Filter businesses by category
   const filteredBusinesses = businesses.filter(
-    (b) => b.category?.toLowerCase() === normalizedCategory
+    (b) =>
+      Array.isArray(b.category) &&
+      b.category.some(
+        (cat) => cat.toLowerCase() === normalizedCategory
+      )
   );
 
   if (filteredBusinesses.length === 0)
     return <p className="text-gray-500 italic">No businesses found in this category.</p>;
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 md:ml-8">
       {filteredBusinesses.map((business) => {
         // Business reviews
         const businessReviews = reviews.filter(
